@@ -1,12 +1,19 @@
 Package: psychlda
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
+Title: Topic Modeling for Psychological Research
+Version: 0.0.0.9000
 Date: 2018-12-12
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than
-      one line)
-License: What license is it under?
-Imports: Rcpp (>= 1.0.0)
-LinkingTo: Rcpp, RcppArmadillo
+Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
+                  role = c("aut", "cre")) 
+Description: Supports text modeling with supervised Latent Dirichlet (sLDA)
+    Allocation using a collapsed Gibbs sampling algorithm. Data generation from
+    the sLDA is also supported.
+License: GPL-3
+Imports: 
+    Rcpp,
+    RcppProgress
+LinkingTo: Rcpp,
+           RcppArmadillo,
+           RcppProgress
+BugReports: https://github.com/ktw5691/psychlda/issues
+RoxygenNote: 6.1.1
