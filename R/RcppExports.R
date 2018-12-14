@@ -17,3 +17,126 @@ rcpparma_bothproducts <- function(x) {
     .Call(`_psychlda_rcpparma_bothproducts`, x)
 }
 
+#' Draw eta from full conditional posterior
+#'
+#' @param zbar A D x K matrix with row d containing the mean number of draws of
+#'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
+#'   1.
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param sigma2 The residual variance.
+#' @param mu0 A K x 1 vector of prior means for the regression coefficients.
+#' @param sigma0 A K x K prior variance-covariance matrix for the regression
+#'   coefficients.
+#' @export
+NULL
+
+#' Draw sigma2 from full conditional posterior
+NULL
+
+#' @param D The number of documents.
+#' @param a0 The prior shape parameter for \eqn{\sigma^2}.
+#' @param b0 The prior scale parameter for \eqn{\sigma^2}.
+#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+#'   sums to 1.
+#' @param y A D x 1 vector of the outcome variable.
+#' @param eta A K x 1 vector of regression coefficients.
+#'
+#' @export
+NULL
+
+#' Estimate beta_k (on log-scale)
+#'
+#' @param k The topic label (i.e., the row of the K x V beta matrix).
+#' @param V The number of terms in the corpus vocabulary.
+#' @param wz_co A V x 1 vector of counts of the draws of each word for topic
+#'   \eqn{k} over all documents.
+#' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
+#'
+#' @export
+NULL
+
+#' Estimate theta_d (on log scale)
+#'
+#' @param z_count A K x 1 vector of counts of topic draw in document \eqn{d}.
+#' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
+#' @param K The number of topics.
+#'
+#' @export
+NULL
+
+#' Count topic-word co-occurences in corpus (ntopic x nvocab) (parallelizable)
+#'
+#' @param D The number of documents in the corpus.
+#' @param K The number of topics.
+#' @param V The number of terms in the corpus vocabulary.
+#' @param doc_topic A D x max(\eqn{N_d}) matrix of topic assignments for
+#'   the corpus.
+#' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
+#'
+#' @export
+NULL
+
+#' Draw zdn from full conditional distribution
+#'
+#' @param yd A the outcome variable for document \eqn{d}.
+#' @param zbar_d A K x 1 vector containing the empirical topic proportions in
+#'   document \eqn{d} (should sum to 1).
+#' @param eta A K x 1 vector of regression coefficients.
+#' @param sigma2 The residual variance.
+#' @param K The number of topics.
+#' @param V The number of terms in the corpus vocabulary.
+#' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
+#'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+#' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
+#'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+#'   counts.
+#' @param nk_n A K x 1 vector of counts of draws of topic
+#'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
+#'   from the counts.
+#'
+#' @export
+NULL
+
+#' Sample from multivariate Gaussian N(\eqn{\mu'}, \eqn{\Sigma})
+#'
+#' @param n The number of samples to draw.
+#' @param mu The mean vector of the distribution (column vector).
+#' @param sigma The variance-covariance matrix of the distribution.
+#' @export
+rmvnorm_cpp <- function(n, mu, sigma) {
+    .Call(`_psychlda_rmvnorm_cpp`, n, mu, sigma)
+}
+
+#' Collapsed Gibbs sampler for the sLDA model
+#'
+#' @param m The number of iterations to run the Gibbs sampler.
+#' @param burn The number of iterations to discard as the burn-in period.
+#' @param y A D x 1 vector of outcomes to be predicted.
+#' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
+#' @param w A D x V matrix of counts for all documents and vocabulary terms.
+#' @param K The number of topics.
+#' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
+#' @param sigma0 A K x K variance-covariance matrix for the prior on the
+#'   regression coefficients.
+#' @param eta_start A K x 1 vector of starting values for the regression
+#'   coefficients.
+#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#'   regression coefficients will be constrained so that they are in descending
+#'   order; if \code{FALSE}, no constraints will be applied.
+#' @param alpha_ The hyper-parameter for the prior on the topic proportions
+#'   (default: 0.1).
+#' @param gamma_ The hyper-parameter for the prior on the topic-specific
+#'   vocabulary probabilities (default: 1.01).
+#' @param a0 The shape parameter for the prior on sigma2 (default: 0.001)
+#' @param b0 The scale parameter for the prior on sigma2 (default: 0.001)
+#' @param verbose Should parameter draws be output during sampling? (default:
+#'   \code{FALSE}).
+#' @param display_progress Should percent progress of sampler be displayed
+#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#' @export
+cgibbs_slda_cpp <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychlda_cgibbs_slda_cpp`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress)
+}
+
