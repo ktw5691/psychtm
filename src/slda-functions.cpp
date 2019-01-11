@@ -44,8 +44,6 @@ arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
 //' @param mu0 A K x 1 vector of prior means for the regression coefficients.
 //' @param sigma0 A K x K prior variance-covariance matrix for the regression
 //'   coefficients.
-//' @export
-// [[Rcpp::export]]
 arma::mat draw_eta_cpp(const arma::mat& zbar, const arma::vec& y,
                        long double sigma2, const arma::vec& mu0,
                        const arma::mat& sigma0) {
@@ -71,7 +69,7 @@ arma::mat draw_eta_cpp(const arma::mat& zbar, const arma::vec& y,
 }
 
 //' Draw sigma2 from full conditional posterior
-
+//'
 //' @param D The number of documents.
 //' @param a0 The prior shape parameter for \eqn{\sigma^2}.
 //' @param b0 The prior scale parameter for \eqn{\sigma^2}.
@@ -81,8 +79,6 @@ arma::mat draw_eta_cpp(const arma::mat& zbar, const arma::vec& y,
 //' @param y A D x 1 vector of the outcome variable.
 //' @param eta A K x 1 vector of regression coefficients.
 //'
-//' @export
-// [[Rcpp::export]]
 long double draw_sigma2_cpp(uint32_t D, float a0, float b0,
                             const arma::mat& zbar, const arma::colvec& y,
                             const arma::colvec& eta) {
@@ -114,8 +110,6 @@ long double draw_sigma2_cpp(uint32_t D, float a0, float b0,
 //'   \eqn{k} over all documents.
 //' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 //'
-//' @export
-// [[Rcpp::export]]
 arma::vec est_betak_cpp(uint16_t k, uint32_t V, const arma::vec& wz_co,
                         float gamma_) {
 
@@ -138,8 +132,6 @@ arma::vec est_betak_cpp(uint16_t k, uint32_t V, const arma::vec& wz_co,
 //' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 //' @param K The number of topics.
 //'
-//' @export
-// [[Rcpp::export]]
 arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
@@ -166,8 +158,6 @@ arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K) {
 //'   the corpus.
 //' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
 //'
-//' @export
-// [[Rcpp::export]]
 arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
                                const arma::mat& doc_topic,
                                const arma::mat& doc_word) {
@@ -219,8 +209,6 @@ arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
 //'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
 //'   from the counts.
 //'
-//' @export
-// [[Rcpp::export]]
 uint16_t draw_zdn_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
                       double sigma2, uint16_t K, uint32_t V,
                       const arma::vec& ndk_n, const arma::vec& nkm_n,
@@ -265,6 +253,8 @@ uint16_t draw_zdn_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
 
 //' Collapsed Gibbs sampler for the sLDA model
 //'
+//' @include slda-class.R
+//'
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -300,7 +290,7 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
                      float a0 = 0.001, float b0 = 0.001,
                      bool verbose = false, bool display_progress = false) {
 
-  S4 slda("SLda"); // Create object slda of class SLda
+  S4 slda("Slda"); // Create object slda of class Slda
 
   const uint32_t D = w.n_rows;
   const uint32_t V = w.n_cols;
@@ -517,6 +507,10 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
     keep_theta.slice(t) = thetam.slice(t + burn);
   }
 
+  slda.slot("ntopics") = K;
+  slda.slot("ndocs") = D;
+  slda.slot("nvocab") = V;
+  slda.slot("nchain") = m - burn;
   slda.slot("eta") = etam.rows(burn, m - 1);
   slda.slot("sigma2") = keep_sigma2;
   slda.slot("beta") = keep_beta;

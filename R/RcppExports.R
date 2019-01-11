@@ -27,12 +27,10 @@ rcpparma_bothproducts <- function(x) {
 #' @param mu0 A K x 1 vector of prior means for the regression coefficients.
 #' @param sigma0 A K x K prior variance-covariance matrix for the regression
 #'   coefficients.
-#' @export
 NULL
 
 #' Draw sigma2 from full conditional posterior
-NULL
-
+#'
 #' @param D The number of documents.
 #' @param a0 The prior shape parameter for \eqn{\sigma^2}.
 #' @param b0 The prior scale parameter for \eqn{\sigma^2}.
@@ -42,7 +40,6 @@ NULL
 #' @param y A D x 1 vector of the outcome variable.
 #' @param eta A K x 1 vector of regression coefficients.
 #'
-#' @export
 NULL
 
 #' Estimate beta_k (on log-scale)
@@ -53,7 +50,6 @@ NULL
 #'   \eqn{k} over all documents.
 #' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 #'
-#' @export
 NULL
 
 #' Estimate theta_d (on log scale)
@@ -62,7 +58,6 @@ NULL
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 #' @param K The number of topics.
 #'
-#' @export
 NULL
 
 #' Count topic-word co-occurences in corpus (ntopic x nvocab) (parallelizable)
@@ -74,7 +69,6 @@ NULL
 #'   the corpus.
 #' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
 #'
-#' @export
 NULL
 
 #' Draw zdn from full conditional distribution
@@ -95,10 +89,9 @@ NULL
 #'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
 #'   from the counts.
 #'
-#' @export
 NULL
 
-#' Sample from multivariate Gaussian N(\eqn{\mu'}, \eqn{\Sigma})
+#' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 #'
 #' @param n The number of samples to draw.
 #' @param mu The mean vector of the distribution (column vector).
@@ -109,6 +102,8 @@ rmvnorm_cpp <- function(n, mu, sigma) {
 }
 
 #' Collapsed Gibbs sampler for the sLDA model
+#'
+#' @include slda-class.R
 #'
 #' @param m The number of iterations to run the Gibbs sampler.
 #' @param burn The number of iterations to discard as the burn-in period.
@@ -138,5 +133,20 @@ rmvnorm_cpp <- function(n, mu, sigma) {
 #' @export
 cgibbs_slda_cpp <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychlda_cgibbs_slda_cpp`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress)
+}
+
+#' Simulate data from the sLDA model
+#'
+#' @param D The number of documents in the corpus.
+#' @param V The number of terms in the corpus vocabulary.
+#' @param N A D x 1 vector of the number of words in each document.
+#' @param K The number of topics.
+#' @param theta A D x K matrix of topic proportions (each row must sum to 1).
+#' @param beta A K x V matrix of word probabilities per topic (each row must
+#'   sum to 1).
+#'
+#' @export
+sim_slda <- function(D, V, N, K, theta, beta, eta, sigma2) {
+    .Call(`_psychlda_sim_slda`, D, V, N, K, theta, beta, eta, sigma2)
 }
 

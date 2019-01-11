@@ -50,41 +50,59 @@ BEGIN_RCPP
 END_RCPP
 }
 // rmvnorm_cpp
-arma::mat rmvnorm_cpp(int n, arma::colvec mu, arma::mat sigma);
+arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu, const arma::mat& sigma);
 RcppExport SEXP _psychlda_rmvnorm_cpp(SEXP nSEXP, SEXP muSEXP, SEXP sigmaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type sigma(sigmaSEXP);
     rcpp_result_gen = Rcpp::wrap(rmvnorm_cpp(n, mu, sigma));
     return rcpp_result_gen;
 END_RCPP
 }
 // cgibbs_slda_cpp
-List cgibbs_slda_cpp(long m, long burn, arma::colvec y, arma::mat docs, arma::mat w, int K, arma::colvec mu0, arma::mat sigma0, arma::colvec eta_start, bool constrain_eta, double alpha_, double gamma_, double a0, double b0, bool verbose, bool display_progress);
+S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y, const arma::mat& docs, const arma::mat& w, uint16_t K, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, bool constrain_eta, float alpha_, float gamma_, float a0, float b0, bool verbose, bool display_progress);
 RcppExport SEXP _psychlda_cgibbs_slda_cpp(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP docsSEXP, SEXP wSEXP, SEXP KSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP constrain_etaSEXP, SEXP alpha_SEXP, SEXP gamma_SEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< long >::type m(mSEXP);
-    Rcpp::traits::input_parameter< long >::type burn(burnSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type y(ySEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type docs(docsSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type w(wSEXP);
-    Rcpp::traits::input_parameter< int >::type K(KSEXP);
-    Rcpp::traits::input_parameter< arma::colvec >::type mu0(mu0SEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type sigma0(sigma0SEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type m(mSEXP);
+    Rcpp::traits::input_parameter< uint16_t >::type burn(burnSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type docs(docsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type w(wSEXP);
+    Rcpp::traits::input_parameter< uint16_t >::type K(KSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type mu0(mu0SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type sigma0(sigma0SEXP);
     Rcpp::traits::input_parameter< arma::colvec >::type eta_start(eta_startSEXP);
     Rcpp::traits::input_parameter< bool >::type constrain_eta(constrain_etaSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha_(alpha_SEXP);
-    Rcpp::traits::input_parameter< double >::type gamma_(gamma_SEXP);
-    Rcpp::traits::input_parameter< double >::type a0(a0SEXP);
-    Rcpp::traits::input_parameter< double >::type b0(b0SEXP);
+    Rcpp::traits::input_parameter< float >::type alpha_(alpha_SEXP);
+    Rcpp::traits::input_parameter< float >::type gamma_(gamma_SEXP);
+    Rcpp::traits::input_parameter< float >::type a0(a0SEXP);
+    Rcpp::traits::input_parameter< float >::type b0(b0SEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
     rcpp_result_gen = Rcpp::wrap(cgibbs_slda_cpp(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sim_slda
+List sim_slda(uint32_t D, uint32_t V, arma::vec N, uint16_t K, arma::mat theta, arma::mat beta, arma::colvec eta, long double sigma2);
+RcppExport SEXP _psychlda_sim_slda(SEXP DSEXP, SEXP VSEXP, SEXP NSEXP, SEXP KSEXP, SEXP thetaSEXP, SEXP betaSEXP, SEXP etaSEXP, SEXP sigma2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< uint32_t >::type D(DSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type V(VSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type N(NSEXP);
+    Rcpp::traits::input_parameter< uint16_t >::type K(KSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type theta(thetaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< arma::colvec >::type eta(etaSEXP);
+    Rcpp::traits::input_parameter< long double >::type sigma2(sigma2SEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_slda(D, V, N, K, theta, beta, eta, sigma2));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -96,6 +114,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_psychlda_rcpparma_bothproducts", (DL_FUNC) &_psychlda_rcpparma_bothproducts, 1},
     {"_psychlda_rmvnorm_cpp", (DL_FUNC) &_psychlda_rmvnorm_cpp, 3},
     {"_psychlda_cgibbs_slda_cpp", (DL_FUNC) &_psychlda_cgibbs_slda_cpp, 16},
+    {"_psychlda_sim_slda", (DL_FUNC) &_psychlda_sim_slda, 8},
     {NULL, NULL, 0}
 };
 

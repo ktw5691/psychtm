@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{rmvnorm_cpp}
 \alias{rmvnorm_cpp}
-\title{Sample from multivariate Gaussian N(\eqn{\mu'}, \eqn{\Sigma})}
+\title{Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})}
 \usage{
 rmvnorm_cpp(n, mu, sigma)
 }
@@ -14,5 +14,5 @@ rmvnorm_cpp(n, mu, sigma)
 \item{sigma}{The variance-covariance matrix of the distribution.}
 }
 \description{
-Sample from multivariate Gaussian N(\eqn{\mu'}, \eqn{\Sigma})
+Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 }

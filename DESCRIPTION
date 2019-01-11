@@ -11,9 +11,17 @@ Description: Supports text modeling with supervised Latent Dirichlet (sLDA)
 License: GPL-3
 Imports: 
     Rcpp,
-    RcppProgress
+    RcppProgress,
+    tibble
 LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress
 BugReports: https://github.com/ktw5691/psychlda/issues
 RoxygenNote: 6.1.1
+SystemRequirements: C++11
+Collate: 
+    'slda-class.R'
+    'RcppExports.R'
+    'onUnload.R'
+    'slda-generic-functions.R'
+    'slda-results.R'
