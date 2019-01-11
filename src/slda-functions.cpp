@@ -7,18 +7,29 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
 
-//' Sample from multivariate Gaussian N(\eqn{\mu'}, \eqn{\Sigma})
+// Function to handle errors
+void error(std::string s) {
+  throw std::runtime_error(s);
+}
+
+//' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 //'
 //' @param n The number of samples to draw.
 //' @param mu The mean vector of the distribution (column vector).
 //' @param sigma The variance-covariance matrix of the distribution.
 //' @export
 // [[Rcpp::export]]
-arma::mat rmvnorm_cpp(int n, arma::colvec mu, arma::mat sigma) {
-  int ncols = sigma.n_cols;
+arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
+                      const arma::mat& sigma) {
+
+  // TODO: Check for positive-definite sigma
+  if ((mu.size() != sigma.n_rows) || (mu.size() != sigma.n_cols)) {
+    Rcerr <<
+      "sigma must be a square matrix and mu must be a column vector with length equal to the number of rows and columns in sigma\n";
+  }
+  const uint16_t ncols = sigma.n_cols;
   arma::mat y = arma::randn(n, ncols);
-  // TODO: Check for symmetric and positive-definite sigma
-  // TODO: Check that dimensions of sigma match length of mu
+
   return arma::repmat(mu, 1, n).t() + y * arma::chol(sigma);
 }
 
@@ -33,11 +44,20 @@ arma::mat rmvnorm_cpp(int n, arma::colvec mu, arma::mat sigma) {
 //' @param sigma0 A K x K prior variance-covariance matrix for the regression
 //'   coefficients.
 //' @export
-arma::mat draw_eta_cpp(arma::mat zbar, arma::vec y, double sigma2,
-                       arma::vec mu0, arma::mat sigma0) {
+// [[Rcpp::export]]
+arma::mat draw_eta_cpp(const arma::mat& zbar, const arma::vec& y,
+                       long double sigma2, const arma::vec& mu0,
+                       const arma::mat& sigma0) {
 
-  const int D = zbar.n_rows;
-  const int K = zbar.n_cols;
+  const uint32_t D = zbar.n_rows;
+  const uint16_t K = zbar.n_cols;
+  if (K < 2) error("number of topics must be at least 2");
+  if ((zbar.n_rows != D) || (zbar.n_cols != K))
+    error("zbar must be a D x K matrix");
+  if (y.size() != D) error("y must be of length D");
+  if (mu0.size() != K) error("mu0 must be of length K");
+  if ((sigma0.n_rows != K) || (sigma0.n_cols != K))
+    error("sigma0 must be a K x K matrix");
 
   arma::mat ztz(K, K);
   ztz = zbar.t() * zbar;
@@ -61,10 +81,18 @@ arma::mat draw_eta_cpp(arma::mat zbar, arma::vec y, double sigma2,
 //' @param eta A K x 1 vector of regression coefficients.
 //'
 //' @export
-double draw_sigma2_cpp(int D, double a0, double b0, arma::mat zbar,
-                       arma::colvec y, arma::colvec eta) {
+// [[Rcpp::export]]
+long double draw_sigma2_cpp(uint32_t D, float a0, float b0,
+                            const arma::mat& zbar, const arma::colvec& y,
+                            const arma::colvec& eta) {
 
-  double a = 0.5 * (D + a0);
+  long double a = 0.5 * (static_cast<float>(D) + a0);
+
+  if ((a0 < 0.0) || (b0 < 0.0)) error("a0 and b0 must be positive");
+
+  if ((zbar.n_rows != D) || (zbar.n_cols != eta.size()))
+    error("zbar must be a D x K matrix and eta must be a K x 1 vector");
+  if (y.size() != D) error("y must be of length D");
 
   arma::colvec resid(D);
   resid = y - zbar * eta;
@@ -72,8 +100,8 @@ double draw_sigma2_cpp(int D, double a0, double b0, arma::mat zbar,
   b_update = resid.t() * resid;
 
   // Parameterization is 1 / rate
-  double b = 1.0 / (0.5 * (b0 + b_update(0, 0)));
-  double sigma2inv = R::rgamma(a, b);
+  long double b = 1.0 / (0.5 * (b0 + b_update(0, 0)));
+  long double sigma2inv = R::rgamma(a, b);
   return 1.0 / sigma2inv;
 }
 
@@ -86,11 +114,18 @@ double draw_sigma2_cpp(int D, double a0, double b0, arma::mat zbar,
 //' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 //'
 //' @export
-arma::vec est_betak_cpp(int k, long V, arma::vec wz_co, double gamma_) {
+// [[Rcpp::export]]
+arma::vec est_betak_cpp(uint16_t k, uint32_t V, const arma::vec& wz_co,
+                        float gamma_) {
+
+  // Warning: Overflow caused by probabilities near 0 handled by setting
+  //   probability for the problematic word to 0.0;
+  if (gamma_ < 0.0) error("gamma_ must be positive");
+  if (V < 2) error("vocabulary size V must be at least 2");
+  if (wz_co.size() != V) error("wz_co must be of length V");
 
   arma::vec betak = exp(log(wz_co + gamma_) - log(sum(wz_co) + V * gamma_));
-  for (long v = 0; v < V; v++) {
-    // Overflow occured if probability too small
+  for (uint32_t v = 0; v < V; v++) {
     if ((betak[v] > 1.0) | (isnan(betak[v]))) betak[v] = 0.0;
   }
   return betak;
@@ -103,8 +138,22 @@ arma::vec est_betak_cpp(int k, long V, arma::vec wz_co, double gamma_) {
 //' @param K The number of topics.
 //'
 //' @export
-arma::vec est_thetad_cpp(arma::vec z_count, double alpha_, int K) {
-  return exp(log(z_count + alpha_) - log(sum(z_count) + K * alpha_));
+// [[Rcpp::export]]
+arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K) {
+
+  // Warning: Overflow caused by probabilities near 0 handled by setting
+  //   probability for the problematic topic to 0.0;
+  if (alpha_ < 0.0) error("alpha_ must be positive");
+  if (K < 2) error("number of topics must be at least 2");
+  if (z_count.size() != K) error("z_count must be of length K");
+
+  arma::vec thetad = exp(log(z_count + alpha_) - log(sum(z_count) +
+    static_cast<float>(K) * alpha_));
+  for (uint32_t k = 0; k < K; k++) {
+    if ((thetad[k] > 1.0) | (isnan(thetad[k]))) thetad[k] = 0.0;
+  }
+
+  return thetad;
 }
 
 //' Count topic-word co-occurences in corpus (ntopic x nvocab) (parallelizable)
@@ -117,19 +166,31 @@ arma::vec est_thetad_cpp(arma::vec z_count, double alpha_, int K) {
 //' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
 //'
 //' @export
-arma::mat count_topic_word_cpp(
-    int D, int K, int32_t V, arma::mat doc_topic, arma::mat doc_word) {
+// [[Rcpp::export]]
+arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
+                               const arma::mat& doc_topic,
+                               const arma::mat& doc_word) {
 
+  if (K < 2) error("number of topics must be at least 2");
+  if (V < 2) error("size of vocabulary V must be at least 2");
+  if (doc_topic.n_rows != D) error("doc_topic must be a matrix with D rows");
+  if (doc_word.n_rows != D) error("doc_word must be a matrix with D rows");
+  if (doc_topic.n_cols != doc_word.n_cols)
+    error("doc_topic and doc_word must have the same number of columns");
+
+  const IntegerVector topics_index = seq_len(K);
+  const IntegerVector docs_index = seq_len(D) - 1;
   // Matrix to store number of topic/word co-occurences
   arma::mat topic_word_freq = arma::zeros(K, V);
   // Loop through documents
-  for (int32_t doc = 0; doc < D; doc++) {
+  // for (uint32_t doc = 0; doc < D; doc++) {
+  for (uint32_t doc : docs_index) {
     // Loop through words in document
-    for (int32_t pos = 0; pos < doc_word.n_cols; pos++) {
+    for (uint32_t pos = 0; pos < doc_word.n_cols; pos++) {
       // Loop through topics
-      for (int topic = 1; topic <= K; topic++) {
+      for (uint16_t topic = 1; topic <= K; topic++) {
         // Loop through vocabulary
-        for (long v = 1; v <= V; v++) {
+        for (uint32_t v = 1; v <= V; v++) {
           topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
             (doc_word(doc, pos) == v));
         }
@@ -158,32 +219,43 @@ arma::mat count_topic_word_cpp(
 //'   from the counts.
 //'
 //' @export
-int draw_zdn_cpp(double yd, arma::vec zbar_d, arma::vec eta,
-                 double sigma2, int K, long V, arma::vec ndk_n,
-                 arma::vec nkm_n, arma::vec nk_n,
-                 double alpha_, double gamma_) {
+// [[Rcpp::export]]
+uint16_t draw_zdn_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
+                      double sigma2, uint16_t K, uint32_t V,
+                      const arma::vec& ndk_n, const arma::vec& nkm_n,
+                      const arma::vec& nk_n, float alpha_, float gamma_) {
+
+  // Warning: Overflow caused by probabilities near 0 handled by setting
+  //   probability for the problematic topic to 1 / K;
+  //   this tends to occur if sigma^2 draw near 0
+
+  if (K < 2) error("number of topics must be at least 2");
+  if (V < 2) error("size of vocabulary V must be at least 2");
+  if (zbar_d.size() != K) error("zbar_d must be a vector of length K");
+  if (eta.size() != K) error("eta must be a vector of length K");
+  if (sigma2 < 0.0) error("sigma2 must be positive");
+  if (ndk_n.size() != K) error("ndk_n must be a vector of length K");
+  if (nkm_n.size() != K) error("nkm_n must be a vector of length K");
+  if (nk_n.size() != K) error("nk_n must be a vector of length K");
+  if (alpha_ < 0.0) error("alpha_ must be positive");
+  if (gamma_ < 0.0) error("gamma_ must be positive");
 
   arma::vec log_num =
     log(ndk_n + alpha_) +
     log(nkm_n + gamma_) -
-    log(nk_n + V * gamma_) +
+    log(nk_n + static_cast<float>(V) * gamma_) +
     R::dnorm(yd, sum(zbar_d.t() * eta), sqrt(sigma2), true);
 
-  double denom = sum(exp(log_num));
+  long double denom = sum(exp(log_num));
   arma::vec pmf = exp(log_num - log(denom));
 
-  // Possible to compute probabilities of 0 --> set pmf to {1/K, 1/K, ..., 1/K}
-  //   Current state is poor, probabilities for all topics all near 0
-  //   Tends to occur if sigma^2 draw near 0
   bool good_pmf = true;
-  for (int k = 0; k < K; k++) {
-    if (std::isnan(pmf(k)) || std::isinf(pmf(k))) {
-      good_pmf = false;
-    }
+  for (uint16_t k = 0; k < K; k++) {
+    if (std::isnan(pmf(k)) || std::isinf(pmf(k))) good_pmf = false;
   }
 
   if (!good_pmf) {
-    for (int k = 0; k < K; k++) pmf(k) = 1.0 / K;
+    for (uint16_t k = 0; k < K; k++) pmf(k) = 1.0 / static_cast<float>(K);
   }
   IntegerVector topics = seq_len(K);
   IntegerVector zdn = RcppArmadillo::sample(topics, 1, true, pmf);
@@ -219,20 +291,23 @@ int draw_zdn_cpp(double yd, arma::vec zbar_d, arma::vec eta,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-List cgibbs_slda_cpp(long m, long burn, arma::colvec y, arma::mat docs,
-                     arma::mat w, int K, arma::colvec mu0, arma::mat sigma0,
+List cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
+                     const arma::mat& docs, const arma::mat& w, uint16_t K,
+                     const arma::colvec& mu0, const arma::mat& sigma0,
                      arma::colvec eta_start, bool constrain_eta = false,
-                     double alpha_ = 0.1, double gamma_ = 1.01,
-                     double a0 = 0.001, double b0 = 0.001,
+                     float alpha_ = 0.1, float gamma_ = 1.01,
+                     float a0 = 0.001, float b0 = 0.001,
                      bool verbose = false, bool display_progress = false) {
 
-  const long D = w.n_rows;
-  const long V = w.n_cols;
+  const uint32_t D = w.n_rows;
+  const uint32_t V = w.n_cols;
   NumericVector N(D);
   const IntegerVector topics_index = seq_len(K);
+  const IntegerVector docs_index   = seq_len(D) - 1;
+  const IntegerVector vocab_index  = seq_len(V);
 
-  for (long d = 0; d < D; d++) N(d) = sum(docs.row(d) > 0);
-  const long maxNd = max(N);
+  for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
+  const uint32_t maxNd = max(N);
   arma::mat etam(m, K);
   NumericVector sigma2m(m);
 
@@ -247,55 +322,39 @@ List cgibbs_slda_cpp(long m, long burn, arma::colvec y, arma::mat docs,
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
-  for (int k = 0; k < K; k++) init_topic_probs(k) = 1.0 / K;
-  for (long d = 0; d < D; d++) {
-    for (long n = 0; n < N(d); n++) {
-      zdocs(d, n) = RcppArmadillo::sample(topics_index, 1, true, init_topic_probs)(0);
-    }
-  }
-
-  // Count topic draws in each document
-  for (long d = 0; d < D; d++) {
-    for (int k = 0; k < K; k++) {
-      ndk(d, k, 0) = sum(zdocs.row(d) == (k + 1));
-    }
-  }
-
-  // Compute topic empirical proportions
   arma::mat zbar = arma::zeros(D, K);
-  for (long d = 0; d < D; d++) {
-    for (int k = 0; k < K; k++) {
-      zbar(d, k) = ndk(d, k, 0) / N(d);
+  for (uint16_t k = 0; k < K; k++)
+    init_topic_probs(k) = 1.0 / static_cast<float>(K);
+  for (uint32_t d : docs_index) {
+    for (uint32_t n = 0; n < N(d); n++) {
+      zdocs(d, n) = RcppArmadillo::sample(
+        topics_index, 1, true, init_topic_probs)(0);
+    }
+    for (uint16_t k = 0; k < K; k++) {
+      // Count topic draws in each document
+      ndk(d, k, 0) = sum(zdocs.row(d) == k);
+      // Compute topic empirical proportions
+      zbar(d, k) = static_cast<double>(ndk(d, k, 0)) / static_cast<double>(N(d));
     }
   }
 
   // Counts of topic-word co-occurences in corpus (K x V)
-  arma::mat nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
+  arma::mat nkm = arma::zeros(K, V);
+  try {
+    nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
+  } catch(std::exception& e) {
+    Rcerr << "Runtime error: " << e.what() <<
+      " while computing topic-word co-occurrences\n";
+  }
   NumericVector nk(K);
-  for (int k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
 
   // Initialize sigma^2
   sigma2m(0) = var(y);
 
   if (constrain_eta) {
     // Constrain starting values of eta s.t. components are in descending order
-    bool eta_order = false;
-    int iter = 0;
-    arma::vec etac(K);
-    const int max_iter = 1000;
-    while (!eta_order & (iter < max_iter)) {
-      iter += iter;
-      etac = eta_start;
-      for (int k = 1; k < K; k++) {
-        // Force eta components to be in descending order (first is largest)
-        //   to resolve label switching of topics
-        eta_order = etac(k - 1) >= etac(k);
-        if (!eta_order) {
-          eta_start(k - 1) = etac(k);
-          eta_start(k) = etac(k - 1);
-        }
-      }
-    }
+    std::sort(eta_start.begin(), eta_start.end(), std::greater<int>());
   }
   etam.row(0) = eta_start.t();
 
@@ -305,97 +364,134 @@ List cgibbs_slda_cpp(long m, long burn, arma::colvec y, arma::mat docs,
   }
 
   // Estimate theta
-  for (long d = 0; d < D; d++) {
-    thetam.slice(0).row(d) = est_thetad_cpp(ndk.slice(0).row(d).t(), alpha_, K).t();
+  for (uint32_t d : docs_index) {
+    try {
+      thetam.slice(0).row(d) = est_thetad_cpp(
+        ndk.slice(0).row(d).t(), alpha_, K).t();
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() <<
+        " when estimating theta vector for document " << d << "\n";
+    }
   }
 
   // Estimate beta
-  for (int k = 0; k < K; k++) {
-    betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_ = gamma_).t();
+  for (uint16_t k = 0; k < K; k++) {
+    try {
+      betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
+                  gamma_ = gamma_).t();
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+        "of beta matrix\n";
+    }
+
   }
 
   Progress p(m, display_progress);
-  for (long i = 1; i < m; i++) {
+  for (uint32_t i = 1; i < m; i++) {
 
     // Draw z
-    for (long d = 0; d < D; d++) {
-      for (long n = 0; n < N(d); n++) {
-        long word = docs(d, n);
-        int topic = zdocs(d, n);
+    for (uint32_t d : docs_index) {
+      for (uint32_t n = 0; n < N(d); n++) {
+        uint32_t word = docs(d, n);
+        uint16_t topic = zdocs(d, n);
         // Exclude word n from topic counts in doc d
         arma::vec ndk_n = ndk.slice(i - 1).row(d).t();
-        ndk_n(topic - 1) = ndk_n(topic - 1) - 1;
+        ndk_n(topic - 1)--;
         if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
         ndk.slice(i).row(d) = ndk_n.t();
         // Exclude word n from topic counts in corpus
         arma::vec nk_n = nk;
-        nk_n(topic - 1) = nk_n(topic - 1) - 1;
+        nk_n(topic - 1)--;
         if (nk_n(topic - 1) < 0) nk_n(topic - 1) = 0;
         nk = nk_n;
         // Exclude word n from topic-word counts
         arma::mat nkm_n = nkm;
-        nkm_n(topic - 1, word - 1) = nkm_n(topic - 1, word - 1) - 1;
-        if (nkm_n(topic - 1, word - 1) < 0) nkm_n(topic - 1, word - 1) = 0; // Fix possible negative counts
+        nkm_n(topic - 1, word - 1)--;
+        // Fix possible negative counts
+        if (nkm_n(topic - 1, word - 1) < 0) nkm_n(topic - 1, word - 1) = 0;
         nkm_n = nkm_n.col(word - 1).t();
         nkm.col(word - 1) = nkm_n.t();
 
-        topic = draw_zdn_cpp(y(d), zbar.row(d).t(), etam.row(i - 1).t(), sigma2m(i - 1),
-                             K, V, ndk_n, nkm_n.t(), nk_n, alpha_, gamma_);
+        try {
+          topic = draw_zdn_cpp(y(d), zbar.row(d).t(), etam.row(i - 1).t(),
+                               sigma2m(i - 1), K, V, ndk_n, nkm_n.t(), nk_n,
+                               alpha_, gamma_);
+        } catch(std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() <<
+            " occurred while drawing topic for word " << n << " in document " <<
+            d << "\n";
+        }
         zdocs(d, n) = topic;
         // Update topic count in doc d
-        ndk(d, topic - 1, i) = ndk(d, topic - 1, i) + 1;
+        ndk(d, topic - 1, i)++;
         // Update topic count in corpus
-        nk(topic - 1) = nk(topic - 1) + 1;
+        nk(topic - 1)++;
         // Update topic-word counts in corpus
-        nkm(topic - 1, word - 1) = nkm(topic - 1, word - 1) + 1;
+        nkm(topic - 1, word - 1)++;
       }
     }
 
-    for (long d = 0; d < D; d++) {
-      for (int k = 0; k < K; k++) {
+    for (uint32_t d: docs_index) {
+      for (uint16_t k = 0; k < K; k++) {
         ndk(d, k, i) = sum(zdocs.row(d) == (k + 1));
+        zbar(d, k) = static_cast<double>(ndk(d, k, i)) /
+          static_cast<double>(N(d));
+        // Estimate beta
+        try {
+          betam.slice(i).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
+                                                gamma_).t();
+        } catch(std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+            "of beta matrix\n";
+        }
+      }
+      // Estimate theta
+      try {
+        thetam.slice(i).row(d) = est_thetad_cpp(
+          ndk.slice(i).row(d).t(), alpha_, K).t();
+      } catch(std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() <<
+          " when estimating theta vector for document " << d << "\n";
       }
     }
-
-    for (long d = 0; d < D; d++) {
-      for (int k = 0; k < K; k++) {
-        zbar(d, k) = ndk(d, k, i) / N(d);
-      }
-    }
-
-    // Estimate theta
-    for (long d = 0; d < D; d++) thetam.slice(i).row(d) = est_thetad_cpp(
-      ndk.slice(i).row(d).t(), alpha_, K).t();
-
-    // Estimate beta
-    for (int k = 0; k < K; k++) betam.slice(i).row(k) = est_betak_cpp(
-      k, V, nkm.row(k).t(), gamma_).t();
 
     // Draw eta
     if (constrain_eta) {
       bool eta_order = false;
-      int iter = 0;
-      const int max_iter = 1000;
+      uint16_t iter = 0;
+      constexpr uint16_t max_iter = 1000;
       arma::vec etac(K);
       while (!eta_order & (iter < max_iter)) {
-        iter = iter + 1;
-        etac = draw_eta_cpp(zbar, y, sigma2m(i - 1), mu0, sigma0).t();
-        for (int k = 1; k < K; k++) {
+        iter++;
+        try {
+          etac = draw_eta_cpp(zbar, y, sigma2m(i - 1), mu0, sigma0).t();
+        } catch (std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() <<
+            " while drawing eta vector\n";
+        }
+        for (uint16_t k = 1; k < K; k++) {
           // Force eta components to be in descending order (first is largest)
           //   to resolve label switching of topics
           eta_order = etac(k - 1) >= etac(k);
-          if (!eta_order) {
-            break;
-          }
+          if (!eta_order) break;
         }
       }
       etam.row(i) = etac.t();
     } else {
-      etam.row(i) = draw_eta_cpp(zbar, y, sigma2m(i - 1), mu0, sigma0);
+      try {
+        etam.row(i) = draw_eta_cpp(zbar, y, sigma2m(i - 1), mu0, sigma0);
+      } catch (std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() <<
+          " while drawing eta vector\n";
+      }
     }
 
     // Draw sigma2
-    sigma2m(i) = draw_sigma2_cpp(D, a0, b0, zbar, y, etam.row(i).t());
+    try {
+      sigma2m(i) = draw_sigma2_cpp(D, a0, b0, zbar, y, etam.row(i).t());
+    } catch (std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() << " while drawing sigma2\n";
+    }
 
     if (i % 100 == 0) {
       if (verbose) {
@@ -412,7 +508,7 @@ List cgibbs_slda_cpp(long m, long burn, arma::colvec y, arma::mat docs,
   NumericVector keep_sigma2(m - burn);
   arma::cube keep_beta(K, V, m - burn);
   arma::cube keep_theta(D, K, m - burn);
-  for (long t = 0; t < m - burn; t ++) {
+  for (uint32_t t = 0; t < m - burn; t ++) {
     keep_sigma2(t) = sigma2m(t + burn);
     keep_beta.slice(t) = betam.slice(t + burn);
     keep_theta.slice(t) = thetam.slice(t + burn);
@@ -428,4 +524,99 @@ List cgibbs_slda_cpp(long m, long burn, arma::colvec y, arma::mat docs,
                       Rcpp::Named("a0")        = a0,
                       Rcpp::Named("b0")        = b0,
                       Rcpp::Named("eta_start") = eta_start);
+}
+
+//' Simulate data from the sLDA model
+//'
+//' @param D The number of documents in the corpus.
+//' @param V The number of terms in the corpus vocabulary.
+//' @param N A D x 1 vector of the number of words in each document.
+//' @param K The number of topics.
+//' @param theta A D x K matrix of topic proportions (each row must sum to 1).
+//' @param beta A K x V matrix of word probabilities per topic (each row must
+//'   sum to 1).
+//'
+//' @export
+// [[Rcpp::export]]
+List sim_slda(uint32_t D, uint32_t V, arma::vec N, uint16_t K, arma::mat theta,
+              arma::mat beta, arma::colvec eta, long double sigma2) {
+
+  uint32_t maxN = max(N);
+  arma::mat docs   = arma::zeros(D, maxN);
+  arma::mat topics = arma::zeros(D, maxN);
+  const IntegerVector topic_vec  = seq_len(K);
+  const IntegerVector docs_index = seq_len(D) - 1;
+  Rcout << "topic_vec" << topic_vec << std::endl;
+  const IntegerVector vocab_vec = seq_len(V);
+  arma::vec thetad = arma::zeros(K);
+  uint32_t doc_len;
+  arma::mat w = arma::zeros(D, V);
+  arma::mat zbar = arma::zeros(D, K);
+  arma::vec betan = arma::zeros(V);
+
+  for (uint32_t d : docs_index) {
+    doc_len = N(d);
+    arma::vec topic(maxN);
+    topic.fill(0);
+    arma::vec words(maxN);
+    words.fill(0);
+    thetad = theta.row(d).t();
+    Rcout << thetad << std::endl;
+    IntegerVector topic_temp;
+    IntegerVector word_temp;
+
+    for (uint32_t n = 0; n < doc_len; n++) {
+      betan = beta.row(topic(n)).t();
+      topic_temp = RcppArmadillo::sample(topic_vec, 1, true, thetad);
+      topic(n) = topic_temp(0);
+      word_temp = RcppArmadillo::sample(vocab_vec, 1, true, betan);
+      words(n) = word_temp(0);
+    }
+    docs.row(d) = words.t();
+    topics.row(d) = topic.t();
+    Rcout << topics.row(d) << std::endl;
+  }
+
+  for (uint32_t d : docs_index) {
+    doc_len = N(d);
+    for (uint32_t v = 0; v < V; v++) {
+      for (uint32_t n = 0; n < N(d); n++) {
+        if (docs(d, n) == (v + 1)) w(d, v)++;
+        for (uint16_t k = 0; k < K; k++) {
+          if (topics(d, n) == (k + 1)) zbar(d, k)++;
+        }
+      }
+    }
+    zbar.row(d) = zbar.row(d) / doc_len; // Normalize
+    Rcout << zbar.row(d) << std::endl;
+  }
+
+  // for (uint32_t d : docs_index) {
+  //   doc_len = N(d);
+  //   // for (uint16_t k = 0; k < K; k++) {
+  //   for (uint16_t k : topic_vec) {
+  //     for (uint32_t n = 0; n < doc_len; n++) {
+  //       if (topics(d, n) == (k + 1)) zbar(d, k)++;
+  //     }
+  //   }
+  //   zbar.row(d) = zbar.row(d) / doc_len; // Normalize
+  //   Rcout << zbar.row(d) << std::endl;
+  // }
+
+  arma::colvec y(D);
+  y = rmvnorm_cpp(1, zbar * eta, sigma2 * arma::eye(D, D)).t();
+
+  return List::create(Rcpp::Named("y")            = y,
+                      Rcpp::Named("docs")         = docs,
+                      Rcpp::Named("dtm")          = w,
+                      Rcpp::Named("num_docs")     = D,
+                      Rcpp::Named("num_topics")   = K,
+                      Rcpp::Named("doc_lengths")  = N,
+                      Rcpp::Named("vocab_length") = V,
+                      Rcpp::Named("topics")       = topics,
+                      Rcpp::Named("zbar")         = zbar,
+                      Rcpp::Named("eta")          = eta,
+                      Rcpp::Named("sigma2")       = sigma2,
+                      Rcpp::Named("beta")         = beta,
+                      Rcpp::Named("theta")        = theta);
 }
