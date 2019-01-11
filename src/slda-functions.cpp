@@ -6,6 +6,7 @@
 using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
+// [[Rcpp::plugins(cpp11)]]
 
 // Function to handle errors
 void error(std::string s) {
@@ -291,13 +292,15 @@ uint16_t draw_zdn_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-List cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
+S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
                      const arma::mat& docs, const arma::mat& w, uint16_t K,
                      const arma::colvec& mu0, const arma::mat& sigma0,
                      arma::colvec eta_start, bool constrain_eta = false,
                      float alpha_ = 0.1, float gamma_ = 1.01,
                      float a0 = 0.001, float b0 = 0.001,
                      bool verbose = false, bool display_progress = false) {
+
+  S4 slda("SLda"); // Create object slda of class SLda
 
   const uint32_t D = w.n_rows;
   const uint32_t V = w.n_cols;
@@ -513,17 +516,20 @@ List cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
     keep_beta.slice(t) = betam.slice(t + burn);
     keep_theta.slice(t) = thetam.slice(t + burn);
   }
-  return List::create(Rcpp::Named("eta")       = etam.rows(burn, m - 1),
-                      Rcpp::Named("sigma2")    = keep_sigma2,
-                      Rcpp::Named("beta")      = keep_beta,
-                      Rcpp::Named("theta")     = keep_theta,
-                      Rcpp::Named("mu0")       = mu0,
-                      Rcpp::Named("sigma0")    = sigma0,
-                      Rcpp::Named("alpha")     = alpha_,
-                      Rcpp::Named("gamma")     = gamma_,
-                      Rcpp::Named("a0")        = a0,
-                      Rcpp::Named("b0")        = b0,
-                      Rcpp::Named("eta_start") = eta_start);
+
+  slda.slot("eta") = etam.rows(burn, m - 1);
+  slda.slot("sigma2") = keep_sigma2;
+  slda.slot("beta") = keep_beta;
+  slda.slot("theta") = keep_theta;
+  slda.slot("mu0") = mu0;
+  slda.slot("sigma0") = sigma0;
+  slda.slot("alpha") = alpha_;
+  slda.slot("gamma") = gamma_;
+  slda.slot("a0") = a0;
+  slda.slot("b0") = b0;
+  slda.slot("eta_start") = eta_start;
+
+  return slda;
 }
 
 //' Simulate data from the sLDA model
