@@ -27,6 +27,8 @@ Slda <- setClass("Slda",
                gamma     = "numeric",
                a0        = "numeric",
                b0        = "numeric",
+               loglike   = "numeric",
+               logpost   = "numeric",
                eta_start = "matrix"))
 
 setMethod("initialize", "Slda",
@@ -36,6 +38,8 @@ setMethod("initialize", "Slda",
             .Object@gamma <- gamma
             .Object@a0 = a0
             .Object@b0 = b0
+            .Object@loglike = NaN
+            .Object@logpost = NaN
             .Object
           }
 )

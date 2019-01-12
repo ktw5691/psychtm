@@ -303,6 +303,8 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
   const uint32_t maxNd = max(N);
   arma::mat etam(m, K);
   NumericVector sigma2m(m);
+  NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
+  NumericVector logpost(m); // Store log-posterior (up to an additive constant)
 
   // D x K x m array
   arma::cube thetam = arma::zeros(D, K, m);
@@ -378,6 +380,43 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
 
   }
+
+  // Add likelihood of y
+  arma::mat temp_prod(1, 1);
+  temp_prod = (y - zbar * etam.row(0).t()).t() * (y - zbar * etam.row(0).t());
+  loglike(0) = (-0.5 / sigma2m(0) * temp_prod(0, 0));
+  // Add likelihood of documents
+  for (uint32_t d : docs_index) {
+    for (uint32_t n = 0; n < N(d); n++) {
+      uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
+      uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
+      // Not right?
+      loglike(0) += log(thetam(d, zdn, 0));  // f(z_{dn} | theta_d)
+      loglike(0) += log(betam(zdn, wdn, 0)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+    }
+  }
+  logpost(0) = loglike(0);
+  // Add prior on eta
+  temp_prod = (etam.row(0).t() - mu0).t() * sigma0.i() * (etam.row(0).t() - mu0);
+  logpost(0) += (-0.5 * temp_prod(0, 0));
+  // Add prior on sigma2
+  logpost(0) += ((-0.5 * a0 - 1.0) * log(sigma2m(0)) - 0.5 * b0 / sigma2m(0));
+  // Add prior on beta matrix
+  double temp_betapost = 0;
+  for (uint16_t k = 0; k < K; k++) {
+    for (uint32_t v = 0; v < V; v++) {
+      temp_betapost += log(betam(k, v, 0));
+    }
+  }
+  logpost(0) += ((gamma_ - 1.0) * temp_betapost);
+  // Add prior on theta matrix
+  double temp_thetapost = 0;
+  for (uint32_t d : docs_index) {
+    for (uint16_t k = 0; k < K; k++) {
+      temp_thetapost = log(thetam(d, k, 0));
+    }
+  }
+  logpost(0) += ((alpha_ - 1) * temp_thetapost);
 
   Progress p(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
@@ -486,6 +525,43 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
       Rcerr << "Runtime Error: " << e.what() << " while drawing sigma2\n";
     }
 
+    // Add likelihood of y
+    arma::mat temp_prod(1, 1);
+    temp_prod = (y - zbar * etam.row(i).t()).t() * (y - zbar * etam.row(i).t());
+    loglike(i) = (-0.5 / sigma2m(i) * temp_prod(0, 0));
+    // Add likelihood of documents
+    for (uint32_t d : docs_index) {
+      for (uint32_t n = 0; n < N(d); n++) {
+        uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
+        uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
+        loglike(i) += log(thetam(d, zdn, i));  // f(z_{dn} | theta_d)
+        loglike(i) += log(betam(zdn, wdn, i)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+      }
+    }
+    logpost(i) = loglike(i);
+    // Add prior on eta
+    temp_prod = (etam.row(i).t() - mu0).t() * sigma0.i() *
+      (etam.row(i).t() - mu0);
+    logpost(i) += (-0.5 * temp_prod(0, 0));
+    // Add prior on sigma2
+    logpost(i) += ((-0.5 * a0 - 1.0) * log(sigma2m(i)) - 0.5 * b0 / sigma2m(i));
+    // Add prior on beta matrix
+    double temp_betapost = 0;
+    for (uint16_t k = 0; k < K; k++) {
+      for (uint32_t v = 0; v < V; v++) {
+        temp_betapost += log(betam(k, v, i));
+      }
+    }
+    logpost(i) += ((gamma_ - 1.0) * temp_betapost);
+    // Add prior on theta matrix
+    double temp_thetapost = 0;
+    for (uint32_t d : docs_index) {
+      for (uint16_t k = 0; k < K; k++) {
+        temp_thetapost = log(thetam(d, k, i));
+      }
+    }
+    logpost(i) += ((alpha_ - 1) * temp_thetapost);
+
     if (i % 100 == 0) {
       if (verbose) {
         Rcout << i << "eta: " << etam.row(i) << "~~~~ sigma2: " << sigma2m(i) <<
@@ -499,10 +575,14 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
   }
   const IntegerVector keep = seq(burn, m - 1);
   NumericVector keep_sigma2(m - burn);
+  NumericVector keep_loglike(m - burn);
+  NumericVector keep_logpost(m - burn);
   arma::cube keep_beta(K, V, m - burn);
   arma::cube keep_theta(D, K, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_sigma2(t) = sigma2m(t + burn);
+    keep_loglike(t) = loglike(t + burn);
+    keep_logpost(t) = logpost(t + burn);
     keep_beta.slice(t) = betam.slice(t + burn);
     keep_theta.slice(t) = thetam.slice(t + burn);
   }
@@ -522,6 +602,8 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("a0") = a0;
   slda.slot("b0") = b0;
   slda.slot("eta_start") = eta_start;
+  slda.slot("loglike") = keep_loglike;
+  slda.slot("logpost") = keep_logpost;
 
   return slda;
 }
