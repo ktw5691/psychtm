@@ -190,7 +190,7 @@ arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
   return topic_word_freq;
 }
 
-//' Draw zdn from full conditional distribution
+//' Draw zdn from full conditional distribution for sLDA
 //'
 //' @param yd A the outcome variable for document \eqn{d}.
 //' @param zbar_d A K x 1 vector containing the empirical topic proportions in
@@ -208,7 +208,7 @@ arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
 //'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
 //'   from the counts.
 //'
-uint16_t draw_zdn_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
+uint16_t draw_zdn_slda_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
                       double sigma2, uint16_t K, uint32_t V,
                       const arma::vec& ndk_n, const arma::vec& nkm_n,
                       const arma::vec& nk_n, float alpha_, float gamma_) {
@@ -233,6 +233,55 @@ uint16_t draw_zdn_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
     log(nkm_n + gamma_) -
     log(nk_n + static_cast<float>(V) * gamma_) +
     R::dnorm(yd, sum(zbar_d.t() * eta), sqrt(sigma2), true);
+
+  long double denom = sum(exp(log_num));
+  arma::vec pmf = exp(log_num - log(denom));
+
+  bool good_pmf = true;
+  for (uint16_t k = 0; k < K; k++) {
+    if (std::isnan(pmf(k)) || std::isinf(pmf(k))) good_pmf = false;
+  }
+
+  if (!good_pmf) {
+    for (uint16_t k = 0; k < K; k++) pmf(k) = 1.0 / static_cast<float>(K);
+  }
+  IntegerVector topics = seq_len(K);
+  IntegerVector zdn = RcppArmadillo::sample(topics, 1, true, pmf);
+  return zdn(0);
+}
+
+//' Draw zdn from full conditional distribution for LDA
+//'
+//' @param K The number of topics.
+//' @param V The number of terms in the corpus vocabulary.
+//' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
+//'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+//' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
+//'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+//'   counts.
+//' @param nk_n A K x 1 vector of counts of draws of topic
+//'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
+//'   from the counts.
+//'
+uint16_t draw_zdn_lda_cpp(uint16_t K, uint32_t V,
+                      const arma::vec& ndk_n, const arma::vec& nkm_n,
+                      const arma::vec& nk_n, float alpha_, float gamma_) {
+
+  // Warning: Overflow caused by probabilities near 0 handled by setting
+  //   probability for the problematic topic to 1 / K
+
+  if (K < 2) error("number of topics must be at least 2");
+  if (V < 2) error("size of vocabulary V must be at least 2");
+  if (ndk_n.size() != K) error("ndk_n must be a vector of length K");
+  if (nkm_n.size() != K) error("nkm_n must be a vector of length K");
+  if (nk_n.size() != K) error("nk_n must be a vector of length K");
+  if (alpha_ < 0.0) error("alpha_ must be positive");
+  if (gamma_ < 0.0) error("gamma_ must be positive");
+
+  arma::vec log_num =
+    log(ndk_n + alpha_) +
+    log(nkm_n + gamma_) -
+    log(nk_n + static_cast<float>(V) * gamma_);
 
   long double denom = sum(exp(log_num));
   arma::vec pmf = exp(log_num - log(denom));
@@ -281,13 +330,13 @@ uint16_t draw_zdn_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
-                     const arma::mat& docs, const arma::mat& w, uint16_t K,
-                     const arma::colvec& mu0, const arma::mat& sigma0,
-                     arma::colvec eta_start, bool constrain_eta = false,
-                     float alpha_ = 0.1, float gamma_ = 1.01,
-                     float a0 = 0.001, float b0 = 0.001,
-                     bool verbose = false, bool display_progress = false) {
+S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
+              const arma::mat& docs, const arma::mat& w, uint16_t K,
+              const arma::colvec& mu0, const arma::mat& sigma0,
+              arma::colvec eta_start, bool constrain_eta = false,
+              float alpha_ = 0.1, float gamma_ = 1.01,
+              float a0 = 0.001, float b0 = 0.001,
+              bool verbose = false, bool display_progress = false) {
 
   S4 slda("Slda"); // Create object slda of class Slda
 
@@ -447,7 +496,7 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
         nkm.col(word - 1) = nkm_n.t();
 
         try {
-          topic = draw_zdn_cpp(y(d), zbar.row(d).t(), etam.row(i - 1).t(),
+          topic = draw_zdn_slda_cpp(y(d), zbar.row(d).t(), etam.row(i - 1).t(),
                                sigma2m(i - 1), K, V, ndk_n, nkm_n.t(), nk_n,
                                alpha_, gamma_);
         } catch(std::exception& e) {
@@ -610,6 +659,253 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("logpost") = keep_logpost;
 
   return slda;
+}
+
+//' Collapsed Gibbs sampler for the LDA model
+//'
+//' @include slda-class.R
+//'
+//' @param m The number of iterations to run the Gibbs sampler.
+//' @param burn The number of iterations to discard as the burn-in period.
+//' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
+//' @param w A D x V matrix of counts for all documents and vocabulary terms.
+//' @param K The number of topics.
+//' @param alpha_ The hyper-parameter for the prior on the topic proportions
+//'   (default: 0.1).
+//' @param gamma_ The hyper-parameter for the prior on the topic-specific
+//'   vocabulary probabilities (default: 1.01).
+//' @param display_progress Should percent progress of sampler be displayed
+//'   (default: \code{FALSE}).
+//' @export
+// [[Rcpp::export]]
+S4 gibbs_lda(uint32_t m, uint16_t burn,
+             const arma::mat& docs, const arma::mat& w, uint16_t K,
+             float alpha_ = 0.1, float gamma_ = 1.01,
+             bool display_progress = false) {
+
+  S4 lda("Lda"); // Create object slda of class Lda
+
+  const uint32_t D = w.n_rows;
+  const uint32_t V = w.n_cols;
+  NumericVector N(D);
+  const IntegerVector topics_index = seq_len(K);
+  const IntegerVector docs_index   = seq_len(D) - 1;
+  const IntegerVector vocab_index  = seq_len(V);
+
+  for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
+  const uint32_t maxNd = max(N);
+  arma::mat etam(m, K);
+  NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
+  NumericVector logpost(m); // Store log-posterior (up to an additive constant)
+
+  // D x K x m array
+  arma::cube thetam = arma::zeros(D, K, m);
+  // K x V x m array
+  arma::cube betam = arma::zeros(K, V, m);
+  // D x K x m array to store topic draw counts
+  arma::cube ndk = arma::zeros(D, K, m);
+  // Topic draws for all words and docs
+  arma::mat zdocs = arma::zeros(D, maxNd);
+
+  // Randomly assign topics
+  NumericVector init_topic_probs(K);
+  for (uint16_t k = 0; k < K; k++)
+    init_topic_probs(k) = 1.0 / static_cast<float>(K);
+  for (uint32_t d : docs_index) {
+    for (uint32_t n = 0; n < N(d); n++) {
+      zdocs(d, n) = RcppArmadillo::sample(
+        topics_index, 1, true, init_topic_probs)(0);
+    }
+    for (uint16_t k = 0; k < K; k++) {
+      // Count topic draws in each document
+      ndk(d, k, 0) = sum(zdocs.row(d) == k);
+    }
+  }
+
+  // Counts of topic-word co-occurences in corpus (K x V)
+  arma::mat nkm = arma::zeros(K, V);
+  try {
+    nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
+  } catch(std::exception& e) {
+    Rcerr << "Runtime error: " << e.what() <<
+      " while computing topic-word co-occurrences\n";
+  }
+  NumericVector nk(K);
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
+
+  // Estimate theta
+  for (uint32_t d : docs_index) {
+    try {
+      thetam.slice(0).row(d) = est_thetad_cpp(
+        ndk.slice(0).row(d).t(), alpha_, K).t();
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() <<
+        " when estimating theta vector for document " << d << "\n";
+    }
+  }
+
+  // Estimate beta
+  for (uint16_t k = 0; k < K; k++) {
+    try {
+      betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
+                  gamma_ = gamma_).t();
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+        "of beta matrix\n";
+    }
+  }
+
+  loglike(0) = 0;
+  // Add likelihood of documents
+  for (uint32_t d : docs_index) {
+    for (uint32_t n = 0; n < N(d); n++) {
+      uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
+      uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
+      // Not right?
+      loglike(0) += log(thetam(d, zdn, 0));  // f(z_{dn} | theta_d)
+      loglike(0) += log(betam(zdn, wdn, 0)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+    }
+  }
+  logpost(0) = loglike(0);
+  // Add prior on beta matrix
+  double temp_betapost = 0;
+  for (uint16_t k = 0; k < K; k++) {
+    for (uint32_t v = 0; v < V; v++) {
+      temp_betapost += log(betam(k, v, 0));
+    }
+  }
+  logpost(0) += ((gamma_ - 1.0) * temp_betapost);
+  // Add prior on theta matrix
+  double temp_thetapost = 0;
+  for (uint32_t d : docs_index) {
+    for (uint16_t k = 0; k < K; k++) {
+      temp_thetapost = log(thetam(d, k, 0));
+    }
+  }
+  logpost(0) += ((alpha_ - 1) * temp_thetapost);
+
+  Progress p(m, display_progress);
+  for (uint32_t i = 1; i < m; i++) {
+
+    // Draw z
+    for (uint32_t d : docs_index) {
+      for (uint32_t n = 0; n < N(d); n++) {
+        uint32_t word = docs(d, n);
+        uint16_t topic = zdocs(d, n);
+        // Exclude word n from topic counts in doc d
+        arma::vec ndk_n = ndk.slice(i - 1).row(d).t();
+        ndk_n(topic - 1)--;
+        if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
+        ndk.slice(i).row(d) = ndk_n.t();
+        // Exclude word n from topic counts in corpus
+        arma::vec nk_n = nk;
+        nk_n(topic - 1)--;
+        if (nk_n(topic - 1) < 0) nk_n(topic - 1) = 0;
+        nk = nk_n;
+        // Exclude word n from topic-word counts
+        arma::mat nkm_n = nkm;
+        nkm_n(topic - 1, word - 1)--;
+        // Fix possible negative counts
+        if (nkm_n(topic - 1, word - 1) < 0) nkm_n(topic - 1, word - 1) = 0;
+        nkm_n = nkm_n.col(word - 1).t();
+        nkm.col(word - 1) = nkm_n.t();
+
+        try {
+          topic = draw_zdn_lda_cpp(K, V, ndk_n, nkm_n.t(), nk_n, alpha_, gamma_);
+        } catch(std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() <<
+            " occurred while drawing topic for word " << n << " in document " <<
+              d << "\n";
+        }
+        zdocs(d, n) = topic;
+        // Update topic count in doc d
+        ndk(d, topic - 1, i)++;
+        // Update topic count in corpus
+        nk(topic - 1)++;
+        // Update topic-word counts in corpus
+        nkm(topic - 1, word - 1)++;
+      }
+    }
+
+    for (uint32_t d: docs_index) {
+      for (uint16_t k = 0; k < K; k++) {
+        ndk(d, k, i) = sum(zdocs.row(d) == (k + 1));
+        // Estimate beta
+        try {
+          betam.slice(i).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
+                      gamma_).t();
+        } catch(std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+            "of beta matrix\n";
+        }
+      }
+      // Estimate theta
+      try {
+        thetam.slice(i).row(d) = est_thetad_cpp(
+          ndk.slice(i).row(d).t(), alpha_, K).t();
+      } catch(std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() <<
+          " when estimating theta vector for document " << d << "\n";
+      }
+    }
+
+    loglike(i) = 0.0;
+    // Add likelihood of documents
+    for (uint32_t d : docs_index) {
+      for (uint32_t n = 0; n < N(d); n++) {
+        uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
+        uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
+        loglike(i) += log(thetam(d, zdn, i));  // f(z_{dn} | theta_d)
+        loglike(i) += log(betam(zdn, wdn, i)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+      }
+    }
+    logpost(i) = loglike(i);
+    // Add prior on beta matrix
+    double temp_betapost = 0;
+    for (uint16_t k = 0; k < K; k++) {
+      for (uint32_t v = 0; v < V; v++) {
+        temp_betapost += log(betam(k, v, i));
+      }
+    }
+    logpost(i) += ((gamma_ - 1.0) * temp_betapost);
+    // Add prior on theta matrix
+    double temp_thetapost = 0;
+    for (uint32_t d : docs_index) {
+      for (uint16_t k = 0; k < K; k++) {
+        temp_thetapost = log(thetam(d, k, i));
+      }
+    }
+    logpost(i) += ((alpha_ - 1) * temp_thetapost);
+
+    if (display_progress) {
+      p.increment();
+    }
+    Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
+  }
+  const IntegerVector keep = seq(burn, m - 1);
+  NumericVector keep_loglike(m - burn);
+  NumericVector keep_logpost(m - burn);
+  arma::cube keep_beta(K, V, m - burn);
+  arma::cube keep_theta(D, K, m - burn);
+  for (uint32_t t = 0; t < m - burn; t ++) {
+    keep_loglike(t) = loglike(t + burn);
+    keep_logpost(t) = logpost(t + burn);
+    keep_beta.slice(t) = betam.slice(t + burn);
+    keep_theta.slice(t) = thetam.slice(t + burn);
+  }
+
+  lda.slot("ntopics") = K;
+  lda.slot("ndocs") = D;
+  lda.slot("nvocab") = V;
+  lda.slot("nchain") = m - burn;
+  lda.slot("beta") = keep_beta;
+  lda.slot("theta") = keep_theta;
+  lda.slot("alpha") = alpha_;
+  lda.slot("gamma") = gamma_;
+  lda.slot("loglike") = keep_loglike;
+  lda.slot("logpost") = keep_logpost;
+
+  return lda;
 }
 
 //' Simulate data from the sLDA model

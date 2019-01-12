@@ -1,3 +1,22 @@
+#' An S4 class to represent a LDA model.
+#'
+#' @slot beta A K x V x M numeric array of draws of topic-word probabilities
+#' @slot theta A D x K x M numeric array of draws of document-topic
+#' probabilities
+#' @slot alpha A numeric prior hyperparameter for theta
+#' @slot gamma A numeric prior hyperparameter for beta
+Lda <- setClass("Lda",
+                 slots = list(ntopics   = "numeric",
+                              ndocs     = "numeric",
+                              nvocab    = "numeric",
+                              nchain    = "numeric",
+                              beta      = "array",
+                              theta     = "array",
+                              alpha     = "numeric",
+                              gamma     = "numeric",
+                              loglike   = "numeric",
+                              logpost   = "numeric"))
+
 #' An S4 class to represent a sLDA model.
 #'
 #' @slot eta A M x K numeric matrix of draws of topic regression coefficients
@@ -30,6 +49,19 @@ Slda <- setClass("Slda",
                loglike   = "numeric",
                logpost   = "numeric",
                eta_start = "matrix"))
+
+setMethod("initialize", "Lda",
+          function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {
+            .Object <- callNextMethod(.Object)
+            .Object@alpha <- alpha
+            .Object@gamma <- gamma
+            .Object@a0 = a0
+            .Object@b0 = b0
+            .Object@loglike = NaN
+            .Object@logpost = NaN
+            .Object
+          }
+)
 
 setMethod("initialize", "Slda",
           function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {
