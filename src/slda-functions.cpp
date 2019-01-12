@@ -93,11 +93,10 @@ long double draw_sigma2_cpp(uint32_t D, float a0, float b0,
 
   arma::colvec resid(D);
   resid = y - zbar * eta;
-  arma::mat b_update(1, 1);
-  b_update = resid.t() * resid;
+  double b_update = arma::as_scalar(resid.t() * resid);
 
   // Parameterization is 1 / rate
-  long double b = 1.0 / (0.5 * (b0 + b_update(0, 0)));
+  long double b = 1.0 / (0.5 * (b0 + b_update));
   long double sigma2inv = R::rgamma(a, b);
   return 1.0 / sigma2inv;
 }
@@ -382,9 +381,10 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
   }
 
   // Add likelihood of y
-  arma::mat temp_prod(1, 1);
-  temp_prod = (y - zbar * etam.row(0).t()).t() * (y - zbar * etam.row(0).t());
-  loglike(0) = (-0.5 / sigma2m(0) * temp_prod(0, 0));
+  double temp_prod = arma::as_scalar(
+    (y - zbar * etam.row(0).t()).t() * (y - zbar * etam.row(0).t())
+  );
+  loglike(0) = -0.5 / sigma2m(0) * temp_prod;
   // Add likelihood of documents
   for (uint32_t d : docs_index) {
     for (uint32_t n = 0; n < N(d); n++) {
@@ -397,8 +397,10 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
   }
   logpost(0) = loglike(0);
   // Add prior on eta
-  temp_prod = (etam.row(0).t() - mu0).t() * sigma0.i() * (etam.row(0).t() - mu0);
-  logpost(0) += (-0.5 * temp_prod(0, 0));
+  temp_prod = arma::as_scalar(
+    (etam.row(0).t() - mu0).t() * sigma0.i() * (etam.row(0).t() - mu0)
+  );
+  logpost(0) += (-0.5 * temp_prod);
   // Add prior on sigma2
   logpost(0) += ((-0.5 * a0 - 1.0) * log(sigma2m(0)) - 0.5 * b0 / sigma2m(0));
   // Add prior on beta matrix
@@ -526,9 +528,10 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
 
     // Add likelihood of y
-    arma::mat temp_prod(1, 1);
-    temp_prod = (y - zbar * etam.row(i).t()).t() * (y - zbar * etam.row(i).t());
-    loglike(i) = (-0.5 / sigma2m(i) * temp_prod(0, 0));
+    double temp_prod = arma::as_scalar(
+      (y - zbar * etam.row(i).t()).t() * (y - zbar * etam.row(i).t())
+    );
+    loglike(i) = -0.5 / sigma2m(i) * temp_prod;
     // Add likelihood of documents
     for (uint32_t d : docs_index) {
       for (uint32_t n = 0; n < N(d); n++) {
@@ -540,9 +543,10 @@ S4 cgibbs_slda_cpp(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     logpost(i) = loglike(i);
     // Add prior on eta
-    temp_prod = (etam.row(i).t() - mu0).t() * sigma0.i() *
-      (etam.row(i).t() - mu0);
-    logpost(i) += (-0.5 * temp_prod(0, 0));
+    temp_prod = arma::as_scalar(
+      (etam.row(i).t() - mu0).t() * sigma0.i() * (etam.row(i).t() - mu0)
+    );
+    logpost(i) += (-0.5 * temp_prod);
     // Add prior on sigma2
     logpost(i) += ((-0.5 * a0 - 1.0) * log(sigma2m(i)) - 0.5 * b0 / sigma2m(i));
     // Add prior on beta matrix
