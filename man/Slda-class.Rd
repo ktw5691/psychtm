@@ -15,23 +15,35 @@ An S4 class to represent a sLDA model.
 
 \item{\code{sigma2}}{A M x 1 numeric vector of draws of residual variance}
 
-\item{\code{beta}}{A K x V x M numeric array of draws of topic-word probabilities}
-
-\item{\code{theta}}{A D x K x M numeric array of draws of document-topic
-probabilities}
-
 \item{\code{mu0}}{A K x 1 numeric matrix of prior means for eta}
 
 \item{\code{sigma0}}{A K x K numeric prior covariance matrix for eta}
-
-\item{\code{alpha}}{A numeric prior hyperparameter for theta}
-
-\item{\code{gamma}}{A numeric prior hyperparameter for beta}
 
 \item{\code{a0}}{A numeric prior shape hyperparameter for sigma2}
 
 \item{\code{b0}}{A numeric prior rate hyperparameter for sigma2}
 
 \item{\code{eta_start}}{A K x 1 numeric matrix of starting values for eta}
+
+\item{\code{ntopics}}{The number of topics for the LDA model (default: 2).}
+
+\item{\code{ndocs}}{The number of documents in the corpus.}
+
+\item{\code{nvocab}}{The number of terms in the corpus vocabulary.}
+
+\item{\code{nchain}}{The number of iterations of the Gibbs sampler.}
+
+\item{\code{beta}}{A K x V x M numeric array of draws of topic-word probabilities.}
+
+\item{\code{theta}}{A D x K x M numeric array of draws of document-topic
+probabilities.}
+
+\item{\code{alpha}}{A numeric prior hyperparameter for theta.}
+
+\item{\code{gamma}}{A numeric prior hyperparameter for beta.}
+
+\item{\code{loglike}}{The log-likelihood (up to an additive constant).}
+
+\item{\code{logpost}}{The log-posterior (up to an additive constant).}
 }}
 

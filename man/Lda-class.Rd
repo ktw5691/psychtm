@@ -11,13 +11,25 @@ An S4 class to represent a LDA model.
 \section{Slots}{
 
 \describe{
-\item{\code{beta}}{A K x V x M numeric array of draws of topic-word probabilities}
+\item{\code{ntopics}}{The number of topics for the LDA model (default: 2).}
+
+\item{\code{ndocs}}{The number of documents in the corpus.}
+
+\item{\code{nvocab}}{The number of terms in the corpus vocabulary.}
+
+\item{\code{nchain}}{The number of iterations of the Gibbs sampler.}
+
+\item{\code{beta}}{A K x V x M numeric array of draws of topic-word probabilities.}
 
 \item{\code{theta}}{A D x K x M numeric array of draws of document-topic
-probabilities}
+probabilities.}
 
-\item{\code{alpha}}{A numeric prior hyperparameter for theta}
+\item{\code{alpha}}{A numeric prior hyperparameter for theta.}
 
-\item{\code{gamma}}{A numeric prior hyperparameter for beta}
+\item{\code{gamma}}{A numeric prior hyperparameter for beta.}
+
+\item{\code{loglike}}{The log-likelihood (up to an additive constant).}
+
+\item{\code{logpost}}{The log-posterior (up to an additive constant).}
 }}
 
