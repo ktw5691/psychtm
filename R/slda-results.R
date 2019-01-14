@@ -110,3 +110,23 @@ setMethod("get_topwords",
             return(topic_topwords)
           }
 )
+
+#' Return empirical topic proportions
+#'
+#' Compute empirical topic proportions (zbar) from @topics in an Lda object
+#' @export
+setMethod("get_zbar",
+          c(mcmc_fit = "Lda"),
+          function(mcmc_fit, burn, thin) {
+
+            m <- mcmc_fit@nchain
+            keep_index <- seq(burn + 1, m, thin)
+            beta_keep <- mcmc_fit@beta[, , keep_index]
+
+            # Exclude 0 ("missing value" in C++ code for unused word positions)
+            zbarm = apply(mcmc_fit@topics, 3, function(x) table(x, exclude = 0))
+            zbarm = apply(zbarm, 2, function(x) x / sum(x))
+
+            return(zbarm)
+          }
+)

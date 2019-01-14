@@ -4,6 +4,8 @@
 #' @slot ndocs The number of documents in the corpus.
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @slot nchain The number of iterations of the Gibbs sampler.
+#' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
+#' unused word index (i.e., the document did not have a word at that index).
 #' @slot beta A K x V x M numeric array of draws of topic-word probabilities.
 #' @slot theta A D x K x M numeric array of draws of document-topic
 #' probabilities.
@@ -16,6 +18,7 @@ Lda <- setClass("Lda",
                               ndocs     = "numeric",
                               nvocab    = "numeric",
                               nchain    = "numeric",
+                              topics    = "numeric",
                               beta      = "array",
                               theta     = "array",
                               alpha     = "numeric",
@@ -37,6 +40,8 @@ Lda <- setClass("Lda",
 #' @slot ndocs The number of documents in the corpus.
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @slot nchain The number of iterations of the Gibbs sampler.
+#' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
+#' unused word index (i.e., the document did not have a word at that index).
 #' @slot beta A K x V x M numeric array of draws of topic-word probabilities.
 #' @slot theta A D x K x M numeric array of draws of document-topic
 #' probabilities.

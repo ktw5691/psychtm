@@ -33,6 +33,9 @@ An S4 class to represent a sLDA model.
 
 \item{\code{nchain}}{The number of iterations of the Gibbs sampler.}
 
+\item{\code{topics}}{A D x max(N_d) x M numeric array of topic draws. 0 indicates an
+unused word index (i.e., the document did not have a word at that index).}
+
 \item{\code{beta}}{A K x V x M numeric array of draws of topic-word probabilities.}
 
 \item{\code{theta}}{A D x K x M numeric array of draws of document-topic

@@ -81,3 +81,22 @@ setGeneric("get_topwords",
              standardGeneric("get_topwords")
            }
 )
+
+setGeneric("get_zbar",
+           function(mcmc_fit, burn = 0, thin = 1) {
+
+             if (!isClass(mcmc_fit, "SLda"))
+               stop("mcmc_fit must be an SLda object.")
+             if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
+
+             if ((burn %% 1) != 0) stop("burn must be an integer.")
+             if (burn < 0) stop("burn must be non-negative.")
+             if ((thin %% 1) != 0) stop("thin must be an integer.")
+             if (thin < 1) stop("thin must be positive.")
+             m <-  mcmc_fit@nchain
+             if (burn >= m) stop("burn cannot exceed length of chain.")
+             if (thin >= (m - burn)) stop("thin cannot exceed length of chain less burn.")
+
+             standardgeneric("get_zbar")
+           }
+)

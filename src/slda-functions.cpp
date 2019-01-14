@@ -208,10 +208,11 @@ arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
 //'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
 //'   from the counts.
 //'
-uint16_t draw_zdn_slda_cpp(double yd, const arma::vec& zbar_d, const arma::vec& eta,
-                      double sigma2, uint16_t K, uint32_t V,
-                      const arma::vec& ndk_n, const arma::vec& nkm_n,
-                      const arma::vec& nk_n, float alpha_, float gamma_) {
+uint16_t draw_zdn_slda_cpp(double yd, const arma::vec& zbar_d,
+                           const arma::vec& eta, double sigma2, uint16_t K,
+                           uint32_t V, const arma::vec& ndk_n,
+                           const arma::vec& nkm_n, const arma::vec& nk_n,
+                           float alpha_, float gamma_) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K;
@@ -264,8 +265,8 @@ uint16_t draw_zdn_slda_cpp(double yd, const arma::vec& zbar_d, const arma::vec& 
 //'   from the counts.
 //'
 uint16_t draw_zdn_lda_cpp(uint16_t K, uint32_t V,
-                      const arma::vec& ndk_n, const arma::vec& nkm_n,
-                      const arma::vec& nk_n, float alpha_, float gamma_) {
+                          const arma::vec& ndk_n, const arma::vec& nkm_n,
+                          const arma::vec& nk_n, float alpha_, float gamma_) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K
@@ -362,6 +363,8 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   arma::cube ndk = arma::zeros(D, K, m);
   // Topic draws for all words and docs
   arma::mat zdocs = arma::zeros(D, maxNd);
+  // D x max(N_d) x m array to store topic draws
+  arma::cube topicsm = arma::zeros(D, maxNd, m);
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
@@ -372,6 +375,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
     for (uint32_t n = 0; n < N(d); n++) {
       zdocs(d, n) = RcppArmadillo::sample(
         topics_index, 1, true, init_topic_probs)(0);
+      topicsm(d, n, 0) = zdocs(d, n);
     }
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
@@ -505,6 +509,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
             d << "\n";
         }
         zdocs(d, n) = topic;
+        topicsm(d, n, i) = topic;
         // Update topic count in doc d
         ndk(d, topic - 1, i)++;
         // Update topic count in corpus
@@ -632,12 +637,14 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   NumericVector keep_logpost(m - burn);
   arma::cube keep_beta(K, V, m - burn);
   arma::cube keep_theta(D, K, m - burn);
+  arma::cube keep_topics(D, maxNd, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_sigma2(t) = sigma2m(t + burn);
     keep_loglike(t) = loglike(t + burn);
     keep_logpost(t) = logpost(t + burn);
     keep_beta.slice(t) = betam.slice(t + burn);
     keep_theta.slice(t) = thetam.slice(t + burn);
+    keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
   slda.slot("ntopics") = K;
@@ -646,6 +653,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("nchain") = m - burn;
   slda.slot("eta") = etam.rows(burn, m - 1);
   slda.slot("sigma2") = keep_sigma2;
+  slda.slot("topics") = keep_topics;
   slda.slot("beta") = keep_beta;
   slda.slot("theta") = keep_theta;
   slda.slot("mu0") = mu0;
@@ -706,6 +714,8 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   arma::cube ndk = arma::zeros(D, K, m);
   // Topic draws for all words and docs
   arma::mat zdocs = arma::zeros(D, maxNd);
+  // D x max(N_d) x m array to store topic draws
+  arma::cube topicsm = arma::zeros(D, maxNd, m);
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
@@ -715,6 +725,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
     for (uint32_t n = 0; n < N(d); n++) {
       zdocs(d, n) = RcppArmadillo::sample(
         topics_index, 1, true, init_topic_probs)(0);
+      topicsm(d, n, 0) = zdocs(d, n);
     }
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
@@ -818,6 +829,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
               d << "\n";
         }
         zdocs(d, n) = topic;
+        topicsm(d, n, i) = topic;
         // Update topic count in doc d
         ndk(d, topic - 1, i)++;
         // Update topic count in corpus
@@ -887,17 +899,20 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   NumericVector keep_logpost(m - burn);
   arma::cube keep_beta(K, V, m - burn);
   arma::cube keep_theta(D, K, m - burn);
+  arma::cube keep_topics(D, maxNd, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_loglike(t) = loglike(t + burn);
     keep_logpost(t) = logpost(t + burn);
     keep_beta.slice(t) = betam.slice(t + burn);
     keep_theta.slice(t) = thetam.slice(t + burn);
+    keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
   lda.slot("ntopics") = K;
   lda.slot("ndocs") = D;
   lda.slot("nvocab") = V;
   lda.slot("nchain") = m - burn;
+  lda.slot("topics") = keep_topics;
   lda.slot("beta") = keep_beta;
   lda.slot("theta") = keep_theta;
   lda.slot("alpha") = alpha_;
