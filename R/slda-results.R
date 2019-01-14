@@ -4,7 +4,7 @@ NULL
 #' Return most probable words for topic
 #' @export
 setMethod("get_toptopics",
-          c(mcmc_fit = "Slda", n_topics = "numeric"),
+          c(mcmc_fit = "Lda", n_topics = "numeric"),
           function(mcmc_fit, n_topics, burn, thin, stat) {
 
             m <- mcmc_fit@nchain
@@ -42,7 +42,7 @@ setMethod("get_toptopics",
 #' Return most probable words for document
 #' @export
 setMethod("get_topwords",
-          c(mcmc_fit = "Slda", n_words = "numeric", vocab = "character"),
+          c(mcmc_fit = "Lda", n_words = "numeric", vocab = "character"),
           function(mcmc_fit, n_words, vocab, burn, thin, stat) {
 
             m <- mcmc_fit@nchain
@@ -78,7 +78,7 @@ setMethod("get_topwords",
 #' Return most probable words for document
 #' @export
 setMethod("get_topwords",
-          c(mcmc_fit = "Slda", n_words = "numeric", vocab = "numeric"),
+          c(mcmc_fit = "Lda", n_words = "numeric", vocab = "numeric"),
           function(mcmc_fit, n_words, vocab, burn, thin, stat) {
 
             m <- mcmc_fit@nchain

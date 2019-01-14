@@ -32,31 +32,20 @@ Lda <- setClass("Lda",
 #' @slot b0 A numeric prior rate hyperparameter for sigma2
 #' @slot eta_start A K x 1 numeric matrix of starting values for eta
 Slda <- setClass("Slda",
-  slots = list(ntopics   = "numeric",
-               ndocs     = "numeric",
-               nvocab    = "numeric",
-               nchain    = "numeric",
-               eta       = "matrix",
+  slots = list(eta       = "matrix",
                sigma2    = "matrix",
-               beta      = "array",
-               theta     = "array",
                mu0       = "matrix",
                sigma0    = "matrix",
-               alpha     = "numeric",
-               gamma     = "numeric",
                a0        = "numeric",
                b0        = "numeric",
-               loglike   = "numeric",
-               logpost   = "numeric",
-               eta_start = "matrix"))
+               eta_start = "matrix"),
+  contains = "Lda")
 
 setMethod("initialize", "Lda",
           function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {
             .Object <- callNextMethod(.Object)
             .Object@alpha <- alpha
             .Object@gamma <- gamma
-            .Object@a0 = a0
-            .Object@b0 = b0
             .Object@loglike = NaN
             .Object@logpost = NaN
             .Object
@@ -66,12 +55,8 @@ setMethod("initialize", "Lda",
 setMethod("initialize", "Slda",
           function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {
             .Object <- callNextMethod(.Object)
-            .Object@alpha <- alpha
-            .Object@gamma <- gamma
             .Object@a0 = a0
             .Object@b0 = b0
-            .Object@loglike = NaN
-            .Object@logpost = NaN
             .Object
           }
 )
