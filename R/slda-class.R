@@ -28,7 +28,6 @@ Lda <- setClass("Lda",
 
 #' An S4 class to represent a sLDA model.
 #'
-#' @inheritParams Lda
 #' @slot eta A M x K numeric matrix of draws of topic regression coefficients
 #' @slot sigma2 A M x 1 numeric vector of draws of residual variance
 #' @slot mu0 A K x 1 numeric matrix of prior means for eta
@@ -61,6 +60,27 @@ Slda <- setClass("Slda",
 
 setMethod("initialize", "Lda",
           function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {
+            .Object <- callNextMethod(.Object)
+            .Object@ntopics <- 2
+            .Object@alpha <- alpha
+            .Object@gamma <- gamma
+            .Object@loglike = NaN
+            .Object@logpost = NaN
+            .Object
+          }
+)
+
+setMethod("initialize", "Slda",
+          function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {
+            .Object <- callNextMethod(.Object)
+            .Object@a0 = a0
+            .Object@b0 = b0
+            .Object
+          }
+)
+
+setMethod("initialize", "Lda",
+          function(.Object, alpha = 0.1, gamma = 1.01) {
             .Object <- callNextMethod(.Object)
             .Object@ntopics <- 2
             .Object@alpha <- alpha

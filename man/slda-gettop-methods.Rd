@@ -11,7 +11,7 @@ get_topwords(mcmc_fit, n_words, vocab, burn = 0, thin = 1,
   stat = "mean")
 }
 \arguments{
-\item{mcmc_fit}{An SLda object.}
+\item{mcmc_fit}{An Lda object.}
 
 \item{n_topics}{The number of topics to retrieve.}
 
@@ -25,7 +25,7 @@ get_topwords(mcmc_fit, n_words, vocab, burn = 0, thin = 1,
 
 \item{vocab}{A character vector containing the vocabulary.}
 
-\item{mcmc_fit}{An SLda object.}
+\item{mcmc_fit}{An Lda object.}
 
 \item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
 

@@ -113,7 +113,8 @@ setMethod("get_topwords",
 
 #' Return empirical topic proportions
 #'
-#' Compute empirical topic proportions (zbar) from @topics in an Lda object
+#' Compute empirical topic proportions (zbar) from \code{@topics} in an Lda
+#' object
 #' @export
 setMethod("get_zbar",
           c(mcmc_fit = "Lda"),

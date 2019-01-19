@@ -2,7 +2,7 @@
 #'
 #' Description of get_toptopics here.
 #'
-#' @param mcmc_fit An SLda object.
+#' @param mcmc_fit An Lda object.
 #' @param burn The number of draws to discard as a burn-in period. Default: 0.
 #' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
 #' @param n_topics The number of topics to retrieve.
@@ -16,8 +16,8 @@ setGeneric("get_toptopics",
            function(mcmc_fit, n_topics, burn = 0, thin = 1, stat = "mean") {
 
              if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
-             if (!isClass(mcmc_fit, "SLda"))
-               stop("mcmc_fit must be an SLda object.")
+             if (!isClass(mcmc_fit, "Lda"))
+               stop("mcmc_fit must be an Lda object.")
              if ((n_topics %% 1) != 0) stop("n_topics must be an integer.")
              if (n_topics < 1) stop("n_topics must be an integer greater than 0.")
              K_ <- mcmc_fit@ntopics
@@ -43,7 +43,7 @@ setGeneric("get_toptopics",
 #'
 #' Description of get_topwords here.
 #'
-#' @param mcmc_fit An SLda object.
+#' @param mcmc_fit An Lda object.
 #' @param burn The number of draws to discard as a burn-in period. Default: 0.
 #' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
 #' @param n_words The number of words to retrieve.
@@ -58,8 +58,8 @@ setGeneric("get_topwords",
            function(mcmc_fit, n_words, vocab, burn = 0, thin = 1,
                     stat = "mean") {
 
-             if (!isClass(mcmc_fit, "SLda"))
-               stop("mcmc_fit must be an SLda object.")
+             if (!isClass(mcmc_fit, "Lda"))
+               stop("mcmc_fit must be an Lda object.")
              if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
              if ((n_words %% 1) != 0) stop("n_words must be an integer.")
              if (n_words < 1) stop("n_words must be an integer greater than 0.")
@@ -82,11 +82,20 @@ setGeneric("get_topwords",
            }
 )
 
+#' Generic function to retrieve the empirical topic proportions
+#'
+#' Compute empirical topic proportions (zbar) from \code{@topics} in an Lda
+#' object
+#'
+#' @param mcmc_fit An Lda object.
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+
 setGeneric("get_zbar",
            function(mcmc_fit, burn = 0, thin = 1) {
 
-             if (!isClass(mcmc_fit, "SLda"))
-               stop("mcmc_fit must be an SLda object.")
+             if (!isClass(mcmc_fit, "Lda"))
+               stop("mcmc_fit must be an Lda object.")
              if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
 
              if ((burn %% 1) != 0) stop("burn must be an integer.")

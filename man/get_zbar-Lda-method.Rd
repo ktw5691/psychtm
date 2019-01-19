@@ -8,5 +8,6 @@
 \S4method{get_zbar}{Lda}(mcmc_fit, burn = 0, thin = 1)
 }
 \description{
-Compute empirical topic proportions (zbar) from @topics in an Lda object
+Compute empirical topic proportions (zbar) from \code{@topics} in an Lda
+object
 }
