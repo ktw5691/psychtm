@@ -82,7 +82,10 @@ Sldalogit <- setClass("Sldalogit",
                               mu0         = "matrix",
                               sigma0      = "matrix",
                               eta_start   = "matrix",
-                              proposal_sd = "numeric"),
+                              proposal_sd = "matrix",
+                              p_eff       = "numeric",
+                              waic        = "numeric",
+                              se_waic     = "numeric"),
                  contains = "Lda")
 
 setMethod("initialize", "Lda",

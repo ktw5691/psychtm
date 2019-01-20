@@ -288,6 +288,37 @@ gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha
     .Call(`_psychlda_gibbs_sldax`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha_, gamma_, a0, b0, verbose, display_progress)
 }
 
+#' Posterior predictive log-likelihood for sLDA logistic
+#'
+#' @param x A D x (p + 1) matrix of additional predictors including a column of
+#'   1's for the intercept.
+#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+#'   sums to 1.
+#' @param eta A (p + K) x 1 vector of regression coefficients.
+#' @export
+post_pred_sldax_logit <- function(x, zbar, eta) {
+    .Call(`_psychlda_post_pred_sldax_logit`, x, zbar, eta)
+}
+
+#' Effective number of parameters for WAIC in sLDA logistic from y_d
+#'
+#' @param loglike_pred A m x 1 matrix of log-predictive likelihoods.
+#' @export
+pwaic_d <- function(loglike_pred) {
+    .Call(`_psychlda_pwaic_d`, loglike_pred)
+}
+
+#' WAIC in sLDA logistic for observation y_d
+#'
+#' @param loglike_pred A m x 1 matrix of log-predictive likelihoods for y_d.
+#' @param p_eff The contributions to the effective number of parameters from
+#'   obs y_d.
+#' @export
+waic_d <- function(loglike_pred, p_effd) {
+    .Call(`_psychlda_waic_d`, loglike_pred, p_effd)
+}
+
 #' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
 #'
 #' @include slda-class.R

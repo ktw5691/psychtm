@@ -148,7 +148,7 @@ double eta_logpost_logit(const arma::mat& zbar, const arma::vec& y,
 
   // Omit last topic mean due to colinearity with intercept col in x
   arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
-  arma::mat muhat(D, K + p);
+  arma::colvec muhat(D);
   muhat = xzb * eta;
 
   // Compute log-likelihood of y
@@ -569,7 +569,7 @@ uint16_t draw_zdn_sldax_logit(double yd, const arma::vec& xd,
 
   // Omit last topic mean; colinearity with intercept "1" in xd
   arma::colvec xzb_d = join_cols(xd, zbar_d.subvec(0, K - 2));
-  double muhat(K + p);
+  double muhat;
   muhat = arma::as_scalar(xzb_d.t() * eta);
 
   // Compute log-likelihood of y_d
@@ -1361,6 +1361,85 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   return slda;
 }
 
+//' Posterior predictive log-likelihood for sLDA logistic
+//'
+//' @param x A D x (p + 1) matrix of additional predictors including a column of
+//'   1's for the intercept.
+//' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+//'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+//'   sums to 1.
+//' @param eta A (p + K) x 1 vector of regression coefficients.
+//' @export
+// [[Rcpp::export]]
+arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
+                             const arma::colvec& eta) {
+
+  const uint16_t D = x.n_rows;
+  const uint16_t K = zbar.n_cols;
+  // Omit last topic mean due to colinearity with intercept in x
+  arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+  arma::colvec y_pred = arma::zeros(D); // Store set of D predictions
+  arma::colvec loglike_pred = arma::zeros(D);
+  arma::colvec mu_hat(D);
+  mu_hat = xzb * eta;
+  for (uint16_t d = 0; d < D; d++) {
+    double phat = arma::as_scalar(invlogit(mu_hat(d)));
+    uint16_t yhat;
+    yhat = Rcpp::rbinom(1, 1, phat)(0);
+    y_pred(d) = yhat;
+    loglike_pred(d) += (yhat * log(phat) +
+      (1.0 - yhat * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d)))))));
+  }
+
+  return loglike_pred;
+}
+
+//' Effective number of parameters for WAIC in sLDA logistic from y_d
+//'
+//' @param loglike_pred A m x 1 matrix of log-predictive likelihoods.
+//' @export
+// [[Rcpp::export]]
+double pwaic_d(const arma::colvec& loglike_pred) {
+
+  const uint32_t m = loglike_pred.size();
+  double mcmc_meany = 0.0;
+  double mcmc_vary = 0.0;
+  for (uint32_t i = 0; i < m; i++) {
+    mcmc_meany += loglike_pred(i);
+  }
+  mcmc_meany /= static_cast<float>(m);
+  for (uint32_t i = 0; i < m; i++) {
+    mcmc_vary += ((loglike_pred(i) - mcmc_meany) *
+      (loglike_pred(i) - mcmc_meany));
+  }
+  mcmc_vary /= static_cast<float>(m - 1);
+
+  return mcmc_vary;
+}
+
+//' WAIC in sLDA logistic for observation y_d
+//'
+//' @param loglike_pred A m x 1 matrix of log-predictive likelihoods for y_d.
+//' @param p_eff The contributions to the effective number of parameters from
+//'   obs y_d.
+//' @export
+// [[Rcpp::export]]
+double waic_d(const arma::colvec& loglike_pred, const double& p_effd) {
+
+  const uint32_t m = loglike_pred.n_rows;
+  double likey = 0.0;
+  double likeyd = 0;
+
+  for (uint32_t i = 0; i < m; i++) {
+    likeyd += exp(loglike_pred(i));
+  }
+  likeyd /= static_cast<float>(m); // Mean post. pred. likelihood for y_d
+  double lppd = log(likeyd); // Log of mean post. pred. density for y_d
+
+  // Contribution to WAIC (on deviance scale, i.e., -2ll) for y_d
+  return (-2.0 * (lppd - p_effd)); // See Gelman, Hwang, Vehtari (2014, p. 1003)
+}
+
 //' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
 //'
 //' @include slda-class.R
@@ -1490,7 +1569,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Add likelihood of y
   // Omit last topic mean (colinearity with intercept)
   arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
-  arma::mat muhat(D, K + p);
+  arma::colvec muhat(D);
   muhat = xzb * etam.row(0).t();
 
   // Compute log-likelihood of y
@@ -1540,6 +1619,10 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // int b = 0;
   // int T = 100; // Number of draws for each of B adjustments
   // int t = 0;
+
+  // Compute WAIC (on deviance scale)
+  arma::mat ll_pred(m, D);
+  ll_pred.row(0) = post_pred_sldax_logit(x, zbar, etam.row(0).t()).t();
 
   Rcout << "Starting MCMC iterations\n";
 
@@ -1627,7 +1710,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     // Add likelihood of y
     // Omit last topic mean (colinear with intercept)
     arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
-    arma::mat muhat(D, K + p);
+    arma::colvec muhat(D);
     muhat = xzb * etam.row(i).t();
     loglike(i) = 0.0;
     for (uint32_t d = 0; d < D; d++) {
@@ -1666,10 +1749,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     logpost(i) += ((alpha_ - 1) * temp_thetapost);
 
-    // Tuning period: the first 25% of the burning period.
-    // evaluation frequency: every 50 draws (collectively)
-    //NumericVector popt(1);
-    //popt(0) = 0.234;
+    ll_pred.row(i) = post_pred_sldax_logit(x, zbar, etam.row(i).t()).t();
+
     arma::vec acc_rate(K + p);
     for (uint16_t j = 0; j < K + p; j++) {
       acc_rate(j) = static_cast<float>(accept(j)) / static_cast<float>(attempt(j));
@@ -1688,36 +1769,38 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
     }
 
-    // t++;
-    // if (b < B) {
-    //   if (t == T) {
-    //     b++;
-    //     for (uint16_t j = 0; j < (K + p); j++) {
-    //       //double temp_var = var(etam.rows(0, T - 1).col(j));
-    //       double temp_var = 0.0;
-    //       double mean_var = arma::sum(etam.rows(0, i)(j));
-    //       for (uint16_t tt = 0; tt < i; tt++) {
-    //         temp_var += ((etam(tt, j) - mean_var) * (etam(tt, j) - mean_var));
-    //       }
-    //       temp_var = temp_var / static_cast<float>(i);
-    //       proposal_sd(j) = sqrt(2.4 * 2.4 * temp_var / static_cast<float>(K + p));
-    //     }
-    //     t = 0;
-    //     attempt = arma::zeros(K + p);
-    //     accept = arma::zeros(K + p);
-    //   }
-    // }
-    // if (b == B) {
-    //   i = 0;
-    //   b = B + 1;
-    // }
+    double peff_sum = 0.0;
+    double waic_sum = 0.0;
+    arma::colvec waic = arma::zeros(D);
+    arma::colvec peff = arma::zeros(D);
+    double mean_waic_d = 0.0;
+    double se_waic = 0.0;
 
     if (i % 25 == 0) {
       if (verbose) {
+        // Compute WAIC and p_eff
+        for (uint16_t d = 0; d < D; d++) {
+          peff(d) = pwaic_d(ll_pred.submat(0, d, i - 1, d));
+          peff_sum += peff(d);
+          waic(d) = waic_d(ll_pred.submat(0, d, i - 1, d), peff(d));
+          waic_sum += waic(d);
+        }
+        double mean_waic = waic_sum / static_cast<float>(i);
+
+        // Compute SE(WAIC)
+        for (uint16_t d = 0; d < D; d++) {
+          se_waic += ((waic(d) - mean_waic) * (waic(d) - mean_waic));
+        }
+        se_waic /= static_cast<float>(D - 1);
+        se_waic *= static_cast<float>(D);
+        se_waic = sqrt(se_waic);
+
         Rcout << i << "eta: " << etam.row(i) <<
           "~~~~ zbar2: " << zbar.row(1) <<
           "accept rate: " << acc_rate.t() << "\n" <<
-          "~~~~ prop_sd: " << proposal_sd.t() << "\n";
+          "~~~~ prop_sd: " << proposal_sd.t() << "\n" <<
+          "p_eff: " << peff_sum << " waic: " << waic_sum <<
+          " se_waic: " << se_waic << "\n";
       }
     }
     if (display_progress) {
@@ -1725,6 +1808,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
   }
+
   const IntegerVector keep = seq(burn, m - 1);
   NumericVector keep_loglike(m - burn);
   NumericVector keep_logpost(m - burn);
@@ -1738,6 +1822,32 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     keep_theta.slice(t) = thetam.slice(t + burn);
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
+
+  //double peff = pwaic_d(ll_pred.rows(m - burn, m - 1));
+  //double waic = waic_d(ll_pred.rows(m - burn, m - 1), peff);
+
+  double peff_sum = 0.0;
+  double waic_sum = 0.0;
+  arma::colvec waic = arma::zeros(D);
+  arma::colvec peff = arma::zeros(D);
+
+  // Compute WAIC and p_eff
+  for (uint16_t d = 0; d < D; d++) {
+    peff(d) = pwaic_d(ll_pred.submat(m - burn, d, m - 1, d));
+    peff_sum += peff(d);
+    waic(d) = waic_d(ll_pred.submat(m - burn, d, m - 1, d), peff(d));
+    waic_sum += waic(d);
+  }
+  double mean_waic = waic_sum / static_cast<float>(m - burn);
+
+  // Compute SE(WAIC)
+  double se_waic = 0.0;
+  for (uint16_t d = 0; d < D; d++) {
+    se_waic += ((waic(d) - mean_waic) * (waic(d) - mean_waic));
+  }
+  se_waic /= static_cast<float>(D - 1);
+  se_waic *= static_cast<float>(D);
+  se_waic = sqrt(se_waic);
 
   slda.slot("ntopics") = K;
   slda.slot("ndocs") = D;
@@ -1755,6 +1865,9 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("proposal_sd") = proposal_sd;
   slda.slot("loglike") = keep_loglike;
   slda.slot("logpost") = keep_logpost;
+  slda.slot("p_eff") = peff_sum;
+  slda.slot("waic") = waic_sum;
+  slda.slot("se_waic") = se_waic;
 
   return slda;
 }

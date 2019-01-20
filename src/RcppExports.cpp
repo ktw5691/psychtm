@@ -87,6 +87,42 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// post_pred_sldax_logit
+arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar, const arma::colvec& eta);
+RcppExport SEXP _psychlda_post_pred_sldax_logit(SEXP xSEXP, SEXP zbarSEXP, SEXP etaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type zbar(zbarSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type eta(etaSEXP);
+    rcpp_result_gen = Rcpp::wrap(post_pred_sldax_logit(x, zbar, eta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pwaic_d
+double pwaic_d(const arma::colvec& loglike_pred);
+RcppExport SEXP _psychlda_pwaic_d(SEXP loglike_predSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type loglike_pred(loglike_predSEXP);
+    rcpp_result_gen = Rcpp::wrap(pwaic_d(loglike_pred));
+    return rcpp_result_gen;
+END_RCPP
+}
+// waic_d
+double waic_d(const arma::colvec& loglike_pred, const double& p_effd);
+RcppExport SEXP _psychlda_waic_d(SEXP loglike_predSEXP, SEXP p_effdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type loglike_pred(loglike_predSEXP);
+    Rcpp::traits::input_parameter< const double& >::type p_effd(p_effdSEXP);
+    rcpp_result_gen = Rcpp::wrap(waic_d(loglike_pred, p_effd));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gibbs_sldax_logit
 S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y, const arma::mat& x, const arma::mat& docs, const arma::mat& w, uint16_t K, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, arma::vec proposal_sd, float alpha_, float gamma_, bool verbose, bool display_progress);
 RcppExport SEXP _psychlda_gibbs_sldax_logit(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP xSEXP, SEXP docsSEXP, SEXP wSEXP, SEXP KSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP proposal_sdSEXP, SEXP alpha_SEXP, SEXP gamma_SEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
@@ -154,6 +190,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_psychlda_eta_logpost_logit", (DL_FUNC) &_psychlda_eta_logpost_logit, 6},
     {"_psychlda_gibbs_slda", (DL_FUNC) &_psychlda_gibbs_slda, 16},
     {"_psychlda_gibbs_sldax", (DL_FUNC) &_psychlda_gibbs_sldax, 16},
+    {"_psychlda_post_pred_sldax_logit", (DL_FUNC) &_psychlda_post_pred_sldax_logit, 3},
+    {"_psychlda_pwaic_d", (DL_FUNC) &_psychlda_pwaic_d, 1},
+    {"_psychlda_waic_d", (DL_FUNC) &_psychlda_waic_d, 2},
     {"_psychlda_gibbs_sldax_logit", (DL_FUNC) &_psychlda_gibbs_sldax_logit, 15},
     {"_psychlda_gibbs_lda", (DL_FUNC) &_psychlda_gibbs_lda, 8},
     {"_psychlda_sim_slda", (DL_FUNC) &_psychlda_sim_slda, 8},
