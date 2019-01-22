@@ -138,7 +138,8 @@ double eta_logpost_logit(const arma::mat& zbar, const arma::vec& y,
 
   const uint32_t D = zbar.n_rows;
   const uint16_t K = zbar.n_cols;
-  const uint16_t p = x.n_cols - 1; // x contains an intercept column of 1s
+  //const uint16_t p = x.n_cols - 1; // x contains an intercept column of 1s
+  const uint16_t p = x.n_cols; // x does not have an intercept column
   if (K < 2) error("number of topics must be at least 2.");
   if (x.n_rows != D) error("x must have D rows.");
   if (y.size() != D) error("y must be of length D.");
@@ -147,7 +148,8 @@ double eta_logpost_logit(const arma::mat& zbar, const arma::vec& y,
     error("sigma0 must be a (K + p) x (K + p) matrix.");
 
   // Omit last topic mean due to colinearity with intercept col in x
-  arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+  //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+  arma::mat xzb = join_rows(x, zbar); // x has no intercept column
   arma::colvec muhat(D);
   muhat = xzb * eta;
 
@@ -192,7 +194,8 @@ arma::mat draw_eta_sldax_logit(const arma::mat& zbar, const arma::colvec& y,
 
   const uint32_t D = zbar.n_rows;
   const uint16_t K = zbar.n_cols;
-  const uint16_t p = x.n_cols - 1; // x contains a column for intercept of 1s
+  //const uint16_t p = x.n_cols - 1; // x contains a column for intercept of 1s
+  const uint16_t p = x.n_cols; // x does not have a column for intercept
   if (K < 2) error("number of topics must be at least 2.");
   if (x.n_rows != D) error("x must have D rows.");
   if (y.size() != D) error("y must be of length D.");
@@ -206,20 +209,6 @@ arma::mat draw_eta_sldax_logit(const arma::mat& zbar, const arma::colvec& y,
   arma::vec eta(K + p);
   eta = eta_prev;
   double cur_logpost = eta_logpost_logit(zbar, y, x, eta_prev, mu0, sigma0);
-
-  // arma::mat ss(K + p, K + p) = arma::zeros(K + p, K + p);
-  // arma::mat w(D, K + p) = join_rows(x, zbar);
-  // arma::mat v(D, D) = arma::zeros(D, D);
-  // arma::colvec muhat(D);
-  // arma::colvec muhat_less(D);
-  // muhat = invlogit((w * eta_prev));
-  // muhat_less = 1.0 - muhat;
-  // for (uint16_t d = 0; d < D; d++) {
-  //   v(d, d) = muhat(d) * muhat_less(d);
-  // }
-  // ss = (w.t() * v * w()).i();
-  // cand_eta = rmvnorm_cpp(1, eta_prev, proposal_sd(0) * ss);
-  // attempt++;
 
   for (uint16_t j = 0; j < K + p; j++) {
     cand_eta(j) = rnorm(1, eta_prev(j), proposal_sd(j))(0);
@@ -283,8 +272,7 @@ long double draw_sigma2_slda(uint32_t D, float a0, float b0,
 //'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 //'   sums to 1.
 //' @param y A D x 1 vector of the outcome variable.
-//' @param x A D x (p + 1) matrix of additional predictors including a column of
-//'   1's for the intercept.
+//' @param x A D x p matrix of additional predictors.
 //' @param eta A K x 1 vector of regression coefficients.
 //'
 long double draw_sigma2_sldax(uint32_t D, float a0, float b0,
@@ -464,8 +452,7 @@ uint16_t draw_zdn_slda(double yd, const arma::vec& zbar_d,
 //' Draw zdn from full conditional distribution for sLDA-X
 //'
 //' @param yd A the outcome variable for document \eqn{d}.
-//' @param x A D x (p + 1) matrix of additional predictors including a column of
-//'   1's for the intercept.
+//' @param x A D x p matrix of additional predictors.
 //' @param zbar_d A K x 1 vector containing the empirical topic proportions in
 //'   document \eqn{d} (should sum to 1).
 //' @param eta A K x 1 vector of regression coefficients.
@@ -529,8 +516,7 @@ uint16_t draw_zdn_sldax(double yd, const arma::vec& xd,
 //' Draw zdn from full conditional distribution for sLDA-X with binary outcome
 //'
 //' @param yd A the outcome variable for document \eqn{d}.
-//' @param x A D x (p + 1) matrix of additional predictors including a column of
-//'   1's for the intercept.
+//' @param x A D x p matrix of additional predictors.
 //' @param zbar_d A K x 1 vector containing the empirical topic proportions in
 //'   document \eqn{d} (should sum to 1).
 //' @param eta A K x 1 vector of regression coefficients.
@@ -554,7 +540,6 @@ uint16_t draw_zdn_sldax_logit(double yd, const arma::vec& xd,
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K;
-  //   this tends to occur if sigma^2 draw near 0
 
   const uint16_t p = xd.size() - 1; // xd contains a 1 for the intercept
 
@@ -568,7 +553,8 @@ uint16_t draw_zdn_sldax_logit(double yd, const arma::vec& xd,
   if (gamma_ < 0.0) error("gamma_ must be positive");
 
   // Omit last topic mean; colinearity with intercept "1" in xd
-  arma::colvec xzb_d = join_cols(xd, zbar_d.subvec(0, K - 2));
+  //arma::colvec xzb_d = join_cols(xd, zbar_d.subvec(0, K - 2));
+  arma::colvec xzb_d = join_cols(xd, zbar_d);
   double muhat;
   muhat = arma::as_scalar(xzb_d.t() * eta);
 
@@ -1023,8 +1009,8 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
 //' @param y A D x 1 vector of outcomes to be predicted.
-//' @param x A D x (p + 1) matrix of additional predictors including a column of
-//'   1's for the intercept.
+//' @param x A D x p matrix of additional predictors (no column of 1's for the
+//'   intercept).
 //' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
 //' @param w A D x V matrix of counts for all documents and vocabulary terms.
 //' @param K The number of topics.
@@ -1363,8 +1349,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
 
 //' Posterior predictive log-likelihood for sLDA logistic
 //'
-//' @param x A D x (p + 1) matrix of additional predictors including a column of
-//'   1's for the intercept.
+//' @param x A D x p matrix of additional predictors.
 //' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
 //'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 //'   sums to 1.
@@ -1377,7 +1362,8 @@ arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
   const uint16_t D = x.n_rows;
   const uint16_t K = zbar.n_cols;
   // Omit last topic mean due to colinearity with intercept in x
-  arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+  //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+  arma::mat xzb = join_rows(x, zbar);
   arma::colvec y_pred = arma::zeros(D); // Store set of D predictions
   arma::colvec loglike_pred = arma::zeros(D);
   arma::colvec mu_hat(D);
@@ -1447,8 +1433,8 @@ double waic_d(const arma::colvec& loglike_pred, const double& p_effd) {
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
 //' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
-//' @param x A D x (p + 1) matrix of additional predictors including a column of
-//'   1's for the intercept.
+//' @param x A D x p matrix of additional predictors (no column of 1s for
+//'   intercept).
 //' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
 //' @param w A D x V matrix of counts for all documents and vocabulary terms.
 //' @param K The number of topics.
@@ -1457,8 +1443,8 @@ double waic_d(const arma::colvec& loglike_pred, const double& p_effd) {
 //'   prior on the regression coefficients. The first p + 1 columns/rows
 //'   correspond to predictors in X, while the last K columns/rows correspond to
 //'   the K topic means.
-//' @param eta_start A (K + p + 1) x 1 vector of starting values for the
-//'   regression coefficients. The first p + 1 elements correspond to predictors
+//' @param eta_start A (K + p) x 1 vector of starting values for the
+//'   regression coefficients. The first p elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
 //'   (default: 0.1).
@@ -1485,7 +1471,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   const uint32_t D = w.n_rows;
   const uint32_t V = w.n_cols;
-  const uint16_t p = x.n_cols - 1; // p + 1 cols in x (includes intercept column)
+  //const uint16_t p = x.n_cols - 1; // p + 1 cols in x (includes intercept column)
+  const uint16_t p = x.n_cols;
   NumericVector N(D);
   const IntegerVector topics_index = seq_len(K);
   const IntegerVector docs_index   = seq_len(D) - 1;
@@ -1568,7 +1555,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Add likelihood of y
   // Omit last topic mean (colinearity with intercept)
-  arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+  //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+  arma::mat xzb = join_rows(x, zbar);
   arma::colvec muhat(D);
   muhat = xzb * etam.row(0).t();
 
@@ -1709,7 +1697,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     // Add likelihood of y
     // Omit last topic mean (colinear with intercept)
-    arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+    //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
+    arma::mat xzb = join_rows(x, zbar);
     arma::colvec muhat(D);
     muhat = xzb * etam.row(i).t();
     loglike(i) = 0.0;
@@ -1776,7 +1765,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     double mean_waic_d = 0.0;
     double se_waic = 0.0;
 
-    if (i % 25 == 0) {
+    if (i % 100 == 0) {
       if (verbose) {
         // Compute WAIC and p_eff
         for (uint16_t d = 0; d < D; d++) {
@@ -1822,9 +1811,6 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     keep_theta.slice(t) = thetam.slice(t + burn);
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
-
-  //double peff = pwaic_d(ll_pred.rows(m - burn, m - 1));
-  //double waic = waic_d(ll_pred.rows(m - burn, m - 1), peff);
 
   double peff_sum = 0.0;
   double waic_sum = 0.0;
