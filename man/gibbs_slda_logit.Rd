@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{gibbs_slda_logit}
 \alias{gibbs_slda_logit}
-\title{Collapsed Gibbs sampler for the sLDA-X model with a binary outcome}
+\title{Collapsed Gibbs sampler for the sLDA model with a binary outcome}
 \usage{
 gibbs_slda_logit(m, burn, y, docs, w, K, mu0, sigma0, eta_start,
   proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE,
@@ -46,5 +46,5 @@ vocabulary probabilities (default: 1.01).}
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
 \description{
-Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
+Collapsed Gibbs sampler for the sLDA model with a binary outcome
 }

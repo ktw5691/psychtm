@@ -383,7 +383,7 @@ waic_d <- function(loglike_pred, p_effd) {
     .Call(`_psychlda_waic_d`, loglike_pred, p_effd)
 }
 
-#' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
+#' Collapsed Gibbs sampler for the sLDA model with a binary outcome
 #'
 #' @include slda-class.R
 #'
