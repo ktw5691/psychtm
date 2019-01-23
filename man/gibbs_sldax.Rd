@@ -15,8 +15,8 @@ gibbs_sldax(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start,
 
 \item{y}{A D x 1 vector of outcomes to be predicted.}
 
-\item{x}{A D x (p + 1) matrix of additional predictors including a column of
-1's for the intercept.}
+\item{x}{A D x p matrix of additional predictors (no column of 1's for the
+intercept).}
 
 \item{docs}{A D x max(\eqn{N_d}) matrix of word indices for all documents.}
 

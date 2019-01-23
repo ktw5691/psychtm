@@ -7,8 +7,7 @@
 post_pred_sldax_logit(x, zbar, eta)
 }
 \arguments{
-\item{x}{A D x (p + 1) matrix of additional predictors including a column of
-1's for the intercept.}
+\item{x}{A D x p matrix of additional predictors.}
 
 \item{zbar}{A D x K matrix with row \eqn{d} containing the mean number of
 draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row

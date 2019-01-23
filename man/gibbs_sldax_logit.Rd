@@ -15,8 +15,8 @@ gibbs_sldax_logit(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start,
 
 \item{y}{A D x 1 vector of binary outcomes (0/1) to be predicted.}
 
-\item{x}{A D x (p + 1) matrix of additional predictors including a column of
-1's for the intercept.}
+\item{x}{A D x p matrix of additional predictors (no column of 1s for
+intercept).}
 
 \item{docs}{A D x max(\eqn{N_d}) matrix of word indices for all documents.}
 
@@ -31,8 +31,8 @@ prior on the regression coefficients. The first p + 1 columns/rows
 correspond to predictors in X, while the last K columns/rows correspond to
 the K topic means.}
 
-\item{eta_start}{A (K + p + 1) x 1 vector of starting values for the
-regression coefficients. The first p + 1 elements correspond to predictors
+\item{eta_start}{A (K + p) x 1 vector of starting values for the
+regression coefficients. The first p elements correspond to predictors
 in X, while the last K elements correspond to the K topic means.}
 
 \item{proposal_sd}{The proposal standard deviation for drawing the
