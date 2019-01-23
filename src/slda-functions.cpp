@@ -1426,6 +1426,43 @@ double waic_d(const arma::colvec& loglike_pred, const double& p_effd) {
   return (-2.0 * (lppd - p_effd)); // See Gelman, Hwang, Vehtari (2014, p. 1003)
 }
 
+//' WAIC for full vector y
+//'
+NumericVector waic(uint16_t D, uint32_t iter, const arma::mat& ll_pred) {
+
+  NumericVector full_waic_se(3);
+
+  double peff_sum = 0.0;
+  double waic_sum = 0.0;
+  arma::colvec waic = arma::zeros(D);
+  arma::colvec peff = arma::zeros(D);
+  double mean_waic_d = 0.0;
+  double se_waic = 0.0;
+
+  // Compute WAIC and p_eff
+  for (uint16_t d = 0; d < D; d++) {
+    peff(d) = pwaic_d(ll_pred.submat(0, d, iter - 1, d));
+    peff_sum += peff(d);
+    waic(d) = waic_d(ll_pred.submat(0, d, iter - 1, d), peff(d));
+    waic_sum += waic(d);
+  }
+  double mean_waic = waic_sum / static_cast<float>(iter);
+
+  // Compute SE(WAIC)
+  for (uint16_t d = 0; d < D; d++) {
+    se_waic += ((waic(d) - mean_waic) * (waic(d) - mean_waic));
+  }
+  se_waic /= static_cast<float>(D - 1);
+  se_waic *= static_cast<float>(D);
+  se_waic = sqrt(se_waic);
+
+  full_waic_se(0) = waic_sum;
+  full_waic_se(1) = se_waic;
+  full_waic_se(2) = peff_sum;
+
+  return full_waic_se;
+}
+
 //' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
 //'
 //' @include slda-class.R
@@ -1758,38 +1795,19 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
     }
 
-    double peff_sum = 0.0;
-    double waic_sum = 0.0;
-    arma::colvec waic = arma::zeros(D);
-    arma::colvec peff = arma::zeros(D);
-    double mean_waic_d = 0.0;
-    double se_waic = 0.0;
-
-    if (i % 100 == 0) {
+    if (i % 500 == 0) {
       if (verbose) {
-        // Compute WAIC and p_eff
-        for (uint16_t d = 0; d < D; d++) {
-          peff(d) = pwaic_d(ll_pred.submat(0, d, i - 1, d));
-          peff_sum += peff(d);
-          waic(d) = waic_d(ll_pred.submat(0, d, i - 1, d), peff(d));
-          waic_sum += waic(d);
-        }
-        double mean_waic = waic_sum / static_cast<float>(i);
-
-        // Compute SE(WAIC)
-        for (uint16_t d = 0; d < D; d++) {
-          se_waic += ((waic(d) - mean_waic) * (waic(d) - mean_waic));
-        }
-        se_waic /= static_cast<float>(D - 1);
-        se_waic *= static_cast<float>(D);
-        se_waic = sqrt(se_waic);
+        NumericVector waic_and_se(3);
+        waic_and_se = waic(D, i, ll_pred);
 
         Rcout << i << "eta: " << etam.row(i) <<
           "~~~~ zbar2: " << zbar.row(1) <<
           "accept rate: " << acc_rate.t() << "\n" <<
           "~~~~ prop_sd: " << proposal_sd.t() << "\n" <<
-          "p_eff: " << peff_sum << " waic: " << waic_sum <<
-          " se_waic: " << se_waic << "\n";
+          // "p_eff: " << peff_sum << " waic: " << waic_sum <<
+          // " se_waic: " << se_waic << "\n";
+          "p_eff: " << waic_and_se(2) << " waic: " << waic_and_se(0) <<
+          " se_waic: " << waic_and_se(1) << "\n";
       }
     }
     if (display_progress) {
@@ -1812,28 +1830,9 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
-  double peff_sum = 0.0;
-  double waic_sum = 0.0;
-  arma::colvec waic = arma::zeros(D);
-  arma::colvec peff = arma::zeros(D);
-
   // Compute WAIC and p_eff
-  for (uint16_t d = 0; d < D; d++) {
-    peff(d) = pwaic_d(ll_pred.submat(m - burn, d, m - 1, d));
-    peff_sum += peff(d);
-    waic(d) = waic_d(ll_pred.submat(m - burn, d, m - 1, d), peff(d));
-    waic_sum += waic(d);
-  }
-  double mean_waic = waic_sum / static_cast<float>(m - burn);
-
-  // Compute SE(WAIC)
-  double se_waic = 0.0;
-  for (uint16_t d = 0; d < D; d++) {
-    se_waic += ((waic(d) - mean_waic) * (waic(d) - mean_waic));
-  }
-  se_waic /= static_cast<float>(D - 1);
-  se_waic *= static_cast<float>(D);
-  se_waic = sqrt(se_waic);
+  NumericVector waic_and_se(3);
+  waic_and_se = waic(D, m, ll_pred.submat(burn, 0, m - 1, D - 1));
 
   slda.slot("ntopics") = K;
   slda.slot("ndocs") = D;
@@ -1851,9 +1850,9 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("proposal_sd") = proposal_sd;
   slda.slot("loglike") = keep_loglike;
   slda.slot("logpost") = keep_logpost;
-  slda.slot("p_eff") = peff_sum;
-  slda.slot("waic") = waic_sum;
-  slda.slot("se_waic") = se_waic;
+  slda.slot("p_eff") = waic_and_se(2);
+  slda.slot("waic") = waic_and_se(0);
+  slda.slot("se_waic") = waic_and_se(1);
 
   return slda;
 }
