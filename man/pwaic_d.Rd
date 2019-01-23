@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{pwaic_d}
 \alias{pwaic_d}
-\title{Effective number of parameters for WAIC in sLDA logistic from y_d}
+\title{Effective number of parameters for WAIC}
 \usage{
 pwaic_d(loglike_pred)
 }
@@ -10,5 +10,5 @@ pwaic_d(loglike_pred)
 \item{loglike_pred}{A m x 1 matrix of log-predictive likelihoods.}
 }
 \description{
-Effective number of parameters for WAIC in sLDA logistic from y_d
+Effective number of parameters for WAIC
 }

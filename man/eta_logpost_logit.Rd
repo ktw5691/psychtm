@@ -2,9 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{eta_logpost_logit}
 \alias{eta_logpost_logit}
-\title{Compute full conditional log-posterior of eta for logistic sLDA-X}
+\title{Compute full conditional log-posterior of eta for logistic sLDA}
 \usage{
-eta_logpost_logit(zbar, y, x, eta, mu0, sigma0)
+eta_logpost_logit(zbar, y, eta, mu0, sigma0)
 }
 \arguments{
 \item{zbar}{A D x K matrix with row d containing the mean number of draws of
@@ -13,15 +13,11 @@ topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
 
 \item{y}{A D x 1 vector of the outcome variable for each document.}
 
-\item{x}{A D x (p + 1) matrix of additional predictors including a column of
-1's for the intercept.}
+\item{mu0}{A K x 1 vector of prior means for the regression coefficients.}
 
-\item{mu0}{A (K + p + 1) x 1 vector of prior means for the regression
+\item{sigma0}{A K x K prior variance-covariance matrix for the regression
 coefficients.}
-
-\item{sigma0}{A (K + p + 1) x (K + p + 1) prior variance-covariance matrix
-for the regression coefficients.}
 }
 \description{
-Compute full conditional log-posterior of eta for logistic sLDA-X
+Compute full conditional log-posterior of eta for logistic sLDA
 }

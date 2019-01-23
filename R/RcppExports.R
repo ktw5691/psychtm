@@ -36,6 +36,23 @@ NULL
 #' @param x A double
 NULL
 
+#' Draw eta from full conditional posterior for logistic sLDA using
+#'   Metropolis-Hastings (MH) algorithm
+#'
+#' @param zbar A D x K matrix with row d containing the mean number of draws of
+#'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
+#'   1.
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param eta_prev A p x 1 vector of the previous draw of the regression
+#'   coefficients.
+#' @param mu0 A K x 1 vector of prior means for the regression coefficients.
+#' @param sigma0 A K x K prior variance-covariance matrix for the regression
+#'   coefficients.
+#' @param proposal_sd The proposal distribution standard deviations.
+#' @param attempt The number of current attempted draws of eta by MH.
+#' @param accept The number of accepted draws of eta by MH.
+NULL
+
 #' Draw eta from full conditional posterior for logistic sLDA-X using
 #'   Metropolis-Hastings (MH) algorithm
 #'
@@ -43,15 +60,15 @@ NULL
 #'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
 #'   1.
 #' @param y A D x 1 vector of the outcome variable for each document.
-#' @param x A D x (p + 1) matrix of additional predictors including a column of
-#'   1's for the intercept.
-#' @param eta_prev A (K + p + 1) x 1 vector of the previous draw of the
+#' @param x A D x p matrix of additional predictors including a column of 1s
+#'   for the intercept.
+#' @param eta_prev A (K + p) x 1 vector of the previous draw of the
 #'   regression coefficients.
-#' @param mu0 A (K + p + 1) x 1 vector of prior means for the regression
+#' @param mu0 A (K + p) x 1 vector of prior means for the regression
 #'   coefficients.
-#' @param sigma0 A (K + p + 1) x (K + p + 1) prior variance-covariance matrix
-#'   for the regression coefficients.
-#' @param proposal_sd The proposal distribution standard deviation.
+#' @param sigma0 A (K + p) x (K + p) prior variance-covariance matrix for the
+#'   regression coefficients.
+#' @param proposal_sd The proposal distribution standard deviations.
 #' @param attempt The number of current attempted draws of eta by MH.
 #' @param accept The nnumber of accepted draws of eta by MH.
 NULL
@@ -153,13 +170,32 @@ NULL
 #'
 NULL
 
+#' Draw zdn from full conditional distribution for sLDA with binary outcome
+#'
+#' @param yd A the outcome variable for document \eqn{d}.
+#' @param zbar_d A K x 1 vector containing the empirical topic proportions in
+#'   document \eqn{d} (should sum to 1).
+#' @param eta A K x 1 vector of regression coefficients.
+#' @param K The number of topics.
+#' @param V The number of terms in the corpus vocabulary.
+#' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
+#'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+#' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
+#'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+#'   counts.
+#' @param nk_n A K x 1 vector of counts of draws of topic
+#'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
+#'   from the counts.
+#'
+NULL
+
 #' Draw zdn from full conditional distribution for sLDA-X with binary outcome
 #'
 #' @param yd A the outcome variable for document \eqn{d}.
 #' @param x A D x p matrix of additional predictors.
 #' @param zbar_d A K x 1 vector containing the empirical topic proportions in
 #'   document \eqn{d} (should sum to 1).
-#' @param eta A K x 1 vector of regression coefficients.
+#' @param eta A (p + K) x 1 vector of regression coefficients.
 #' @param K The number of topics.
 #' @param V The number of terms in the corpus vocabulary.
 #' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
@@ -188,6 +224,13 @@ NULL
 #'
 NULL
 
+#' Compute WAIC for all outcomes.
+#'
+#' @param D The number of documents.
+#' @param iter The current iteration of the chain.
+#' @param ll_pred loglike_pred A m x D matrix of log-predictive likelihoods.
+NULL
+
 #' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 #'
 #' @param n The number of samples to draw.
@@ -198,21 +241,35 @@ rmvnorm_cpp <- function(n, mu, sigma) {
     .Call(`_psychlda_rmvnorm_cpp`, n, mu, sigma)
 }
 
+#' Compute full conditional log-posterior of eta for logistic sLDA
+#'
+#' @param zbar A D x K matrix with row d containing the mean number of draws of
+#'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
+#'   1.
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param mu0 A K x 1 vector of prior means for the regression coefficients.
+#' @param sigma0 A K x K prior variance-covariance matrix for the regression
+#'   coefficients.
+#' @export
+eta_logpost_logit <- function(zbar, y, eta, mu0, sigma0) {
+    .Call(`_psychlda_eta_logpost_logit`, zbar, y, eta, mu0, sigma0)
+}
+
 #' Compute full conditional log-posterior of eta for logistic sLDA-X
 #'
 #' @param zbar A D x K matrix with row d containing the mean number of draws of
 #'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
 #'   1.
 #' @param y A D x 1 vector of the outcome variable for each document.
-#' @param x A D x (p + 1) matrix of additional predictors including a column of
+#' @param x A D x p matrix of additional predictors including a column of
 #'   1's for the intercept.
-#' @param mu0 A (K + p + 1) x 1 vector of prior means for the regression
+#' @param mu0 A (K + p) x 1 vector of prior means for the regression
 #'   coefficients.
-#' @param sigma0 A (K + p + 1) x (K + p + 1) prior variance-covariance matrix
+#' @param sigma0 A (K + p) x (K + p) prior variance-covariance matrix
 #'   for the regression coefficients.
 #' @export
-eta_logpost_logit <- function(zbar, y, x, eta, mu0, sigma0) {
-    .Call(`_psychlda_eta_logpost_logit`, zbar, y, x, eta, mu0, sigma0)
+eta_logpost_logitx <- function(zbar, y, x, eta, mu0, sigma0) {
+    .Call(`_psychlda_eta_logpost_logitx`, zbar, y, x, eta, mu0, sigma0)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model
@@ -287,6 +344,17 @@ gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha
 
 #' Posterior predictive log-likelihood for sLDA logistic
 #'
+#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+#'   sums to 1.
+#' @param eta A K x 1 vector of regression coefficients.
+#' @export
+post_pred_slda_logit <- function(zbar, eta) {
+    .Call(`_psychlda_post_pred_slda_logit`, zbar, eta)
+}
+
+#' Posterior predictive log-likelihood for sLDA-X logistic
+#'
 #' @param x A D x p matrix of additional predictors.
 #' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
 #'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
@@ -297,7 +365,7 @@ post_pred_sldax_logit <- function(x, zbar, eta) {
     .Call(`_psychlda_post_pred_sldax_logit`, x, zbar, eta)
 }
 
-#' Effective number of parameters for WAIC in sLDA logistic from y_d
+#' Effective number of parameters for WAIC
 #'
 #' @param loglike_pred A m x 1 matrix of log-predictive likelihoods.
 #' @export
@@ -313,6 +381,37 @@ pwaic_d <- function(loglike_pred) {
 #' @export
 waic_d <- function(loglike_pred, p_effd) {
     .Call(`_psychlda_waic_d`, loglike_pred, p_effd)
+}
+
+#' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
+#'
+#' @include slda-class.R
+#'
+#' @param m The number of iterations to run the Gibbs sampler.
+#' @param burn The number of iterations to discard as the burn-in period.
+#' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
+#' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
+#' @param w A D x V matrix of counts for all documents and vocabulary terms.
+#' @param K The number of topics.
+#' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
+#' @param sigma0 A K x K variance-covariance matrix for the prior on the
+#'   regression coefficients.
+#' @param eta_start A K x 1 vector of starting values for the regression
+#'   coefficients.
+#' @param alpha_ The hyper-parameter for the prior on the topic proportions
+#'   (default: 0.1).
+#' @param gamma_ The hyper-parameter for the prior on the topic-specific
+#'   vocabulary probabilities (default: 1.01).
+#' @param proposal_sd A vector of proposal standard deviations for drawing the
+#'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+#' @param verbose Should parameter draws be output during sampling? (default:
+#'   \code{FALSE}).
+#' @param display_progress Should percent progress of sampler be displayed
+#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#' @export
+gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychlda_gibbs_slda_logit`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
