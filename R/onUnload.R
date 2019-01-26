@@ -1,3 +1,3 @@
 .onUnload <- function(libpath) {
-  library.dynam.unload("psychlda", libpath)
+  library.dynam.unload("psychtm", libpath)
 }

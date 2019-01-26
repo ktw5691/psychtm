@@ -15,7 +15,7 @@ Imports:
 LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress
-BugReports: https://github.com/ktw5691/psychlda/issues
+BugReports: https://github.com/ktw5691/psychtm/issues
 RoxygenNote: 6.1.1
 SystemRequirements: C++11
 Collate: 
