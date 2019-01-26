@@ -238,7 +238,7 @@ NULL
 #' @param sigma The variance-covariance matrix of the distribution.
 #' @export
 rmvnorm_cpp <- function(n, mu, sigma) {
-    .Call(`_psychlda_rmvnorm_cpp`, n, mu, sigma)
+    .Call(`_psychtm_rmvnorm_cpp`, n, mu, sigma)
 }
 
 #' Compute full conditional log-posterior of eta for logistic sLDA
@@ -252,7 +252,7 @@ rmvnorm_cpp <- function(n, mu, sigma) {
 #'   coefficients.
 #' @export
 eta_logpost_logit <- function(zbar, y, eta, mu0, sigma0) {
-    .Call(`_psychlda_eta_logpost_logit`, zbar, y, eta, mu0, sigma0)
+    .Call(`_psychtm_eta_logpost_logit`, zbar, y, eta, mu0, sigma0)
 }
 
 #' Compute full conditional log-posterior of eta for logistic sLDA-X
@@ -269,7 +269,7 @@ eta_logpost_logit <- function(zbar, y, eta, mu0, sigma0) {
 #'   for the regression coefficients.
 #' @export
 eta_logpost_logitx <- function(zbar, y, x, eta, mu0, sigma0) {
-    .Call(`_psychlda_eta_logpost_logitx`, zbar, y, x, eta, mu0, sigma0)
+    .Call(`_psychtm_eta_logpost_logitx`, zbar, y, x, eta, mu0, sigma0)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model
@@ -303,7 +303,7 @@ eta_logpost_logitx <- function(zbar, y, x, eta, mu0, sigma0) {
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
 gibbs_slda <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychlda_gibbs_slda`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress)
+    .Call(`_psychtm_gibbs_slda`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the sLDA-X model
@@ -339,7 +339,7 @@ gibbs_slda <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
 gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychlda_gibbs_sldax`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha_, gamma_, a0, b0, verbose, display_progress)
+    .Call(`_psychtm_gibbs_sldax`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha_, gamma_, a0, b0, verbose, display_progress)
 }
 
 #' Posterior predictive log-likelihood for sLDA logistic
@@ -350,7 +350,7 @@ gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha
 #' @param eta A K x 1 vector of regression coefficients.
 #' @export
 post_pred_slda_logit <- function(zbar, eta) {
-    .Call(`_psychlda_post_pred_slda_logit`, zbar, eta)
+    .Call(`_psychtm_post_pred_slda_logit`, zbar, eta)
 }
 
 #' Posterior predictive log-likelihood for sLDA-X logistic
@@ -362,7 +362,7 @@ post_pred_slda_logit <- function(zbar, eta) {
 #' @param eta A (p + K) x 1 vector of regression coefficients.
 #' @export
 post_pred_sldax_logit <- function(x, zbar, eta) {
-    .Call(`_psychlda_post_pred_sldax_logit`, x, zbar, eta)
+    .Call(`_psychtm_post_pred_sldax_logit`, x, zbar, eta)
 }
 
 #' Effective number of parameters for WAIC
@@ -370,7 +370,7 @@ post_pred_sldax_logit <- function(x, zbar, eta) {
 #' @param loglike_pred A m x 1 matrix of log-predictive likelihoods.
 #' @export
 pwaic_d <- function(loglike_pred) {
-    .Call(`_psychlda_pwaic_d`, loglike_pred)
+    .Call(`_psychtm_pwaic_d`, loglike_pred)
 }
 
 #' WAIC in sLDA logistic for observation y_d
@@ -380,7 +380,7 @@ pwaic_d <- function(loglike_pred) {
 #'   obs y_d.
 #' @export
 waic_d <- function(loglike_pred, p_effd) {
-    .Call(`_psychlda_waic_d`, loglike_pred, p_effd)
+    .Call(`_psychtm_waic_d`, loglike_pred, p_effd)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model with a binary outcome
@@ -411,7 +411,7 @@ waic_d <- function(loglike_pred, p_effd) {
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
 gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychlda_gibbs_slda_logit`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
+    .Call(`_psychtm_gibbs_slda_logit`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
@@ -447,7 +447,7 @@ gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, pro
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
 gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychlda_gibbs_sldax_logit`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
+    .Call(`_psychtm_gibbs_sldax_logit`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the LDA model
@@ -467,7 +467,7 @@ gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start,
 #'   (default: \code{FALSE}).
 #' @export
 gibbs_lda <- function(m, burn, docs, w, K, alpha_ = 0.1, gamma_ = 1.01, display_progress = FALSE) {
-    .Call(`_psychlda_gibbs_lda`, m, burn, docs, w, K, alpha_, gamma_, display_progress)
+    .Call(`_psychtm_gibbs_lda`, m, burn, docs, w, K, alpha_, gamma_, display_progress)
 }
 
 #' Simulate data from the sLDA model
@@ -482,6 +482,6 @@ gibbs_lda <- function(m, burn, docs, w, K, alpha_ = 0.1, gamma_ = 1.01, display_
 #'
 #' @export
 sim_slda <- function(D, V, N, K, theta, beta, eta, sigma2) {
-    .Call(`_psychlda_sim_slda`, D, V, N, K, theta, beta, eta, sigma2)
+    .Call(`_psychtm_sim_slda`, D, V, N, K, theta, beta, eta, sigma2)
 }
 
