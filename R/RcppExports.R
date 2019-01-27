@@ -28,12 +28,76 @@ NULL
 #'   for the regression coefficients.
 NULL
 
+#' Draw eta from full conditional posterior for multiple linear regression
+#'
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param x A D x (p + 1) matrix of additional predictors including a column of
+#'   1's for the intercept.
+#' @param sigma2 The residual variance.
+#' @param mu0 A (p + 1) x 1 vector of prior means for the regression
+#'   coefficients.
+#' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix
+#'   for the regression coefficients.
+NULL
+
 #' Compute logit
 #' @param x A double
 NULL
 
 #' Compute inverse logit
 #' @param x A double
+NULL
+
+#' Compute full conditional log-posterior of eta for logistic sLDA
+#'
+#' @param zbar A D x K matrix with row d containing the mean number of draws of
+#'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
+#'   1.
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param eta A K x 1 vector of regression coefficients
+#' @param mu0 A K x 1 vector of prior means for the regression coefficients.
+#' @param sigma0 A K x K prior variance-covariance matrix for the regression
+#'   coefficients.
+NULL
+
+#' Compute full conditional log-posterior of eta for logistic sLDA-X
+#'
+#' @param zbar A D x K matrix with row d containing the mean number of draws of
+#'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
+#'   1.
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param x A D x p matrix of additional predictors including a column of
+#'   1's for the intercept.
+#' @param eta A (K + p) x 1 vector of regression coefficients
+#' @param mu0 A (K + p) x 1 vector of prior means for the regression
+#'   coefficients.
+#' @param sigma0 A (K + p) x (K + p) prior variance-covariance matrix
+#'   for the regression coefficients.
+NULL
+
+#' Compute full conditional log-posterior of eta for multiple linear regression
+#'
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param x A D x (p + 1) matrix of additional predictors including a column of
+#'   1's for the intercept.
+#' @param eta A (p + 1) x 1 vector of regression coefficients
+#' @param sigma2 The residual variance.
+#' @param mu0 A (p + 1) x 1 vector of prior means for the regression
+#'   coefficients.
+#' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix
+#'   for the regression coefficients.
+NULL
+
+#' Compute full conditional log-posterior of eta for logistic regression
+#'
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param x A D x (p + 1) matrix of additional predictors including a column of
+#'   1's for the intercept.
+#' @param eta A (p + 1) x 1 vector of regression coefficients
+#' @param mu0 A (p + 1) x 1 vector of prior means for the regression
+#'   coefficients.
+#' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix
+#'   for the regression coefficients.
 NULL
 
 #' Draw eta from full conditional posterior for logistic sLDA using
@@ -115,6 +179,16 @@ NULL
 #' @param x A D x p matrix of additional predictors.
 #' @param eta A K x 1 vector of regression coefficients.
 #'
+NULL
+
+#' Draw sigma2 from full conditional posterior for multiple linear regression
+#'
+#' @param D The number of documents.
+#' @param a0 The prior shape parameter for \eqn{\sigma^2}.
+#' @param b0 The prior scale parameter for \eqn{\sigma^2}.
+#' @param y A D x 1 vector of the outcome variable.
+#' @param x A D x (p + 1) matrix of predictors (including an intercept column).
+#' @param eta A (p + 1) x 1 vector of regression coefficients.
 NULL
 
 #' Estimate beta_k (on log-scale)
@@ -241,11 +315,70 @@ NULL
 #'
 NULL
 
+#' Posterior predictive likelihood for multiple linear regression
+#'
+#' @param x A D x (p + 1) matrix of additional predictors.
+#' @param eta A (p + 1) x 1 vector of regression coefficients.
+#' @param sigma2 The residual variance.
+NULL
+
+#' Posterior predictive likelihood for sLDA-X
+#'
+#' @param zbar_d A K x 1 vector containing the empirical topic proportions in
+#'   document \eqn{d} (should sum to 1).
+#' @param x A D x p matrix of additional predictors.
+#' @param eta A (K + p) x 1 vector of regression coefficients.
+#' @param sigma2 The residual variance.
+NULL
+
+#' Posterior predictive likelihood for sLDA
+#'
+#' @param zbar_d A K x 1 vector containing the empirical topic proportions in
+#'   document \eqn{d} (should sum to 1).
+#' @param eta A K x 1 vector of regression coefficients.
+#' @param sigma2 The residual variance.
+NULL
+
+#' Contribution to effective number of parameters for WAIC from observation y_d
+#'
+#' @param like_pred A m x 1 vector of predictive likelihoods.
+NULL
+
+#' WAIC for binomial likelihood for observation y_d
+#'
+#' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
+#' @param p_eff The contribution to the effective number of parameters from
+#'   obs y_d.
+NULL
+
 #' Compute WAIC for all outcomes.
 #'
 #' @param D The number of documents.
 #' @param iter The current iteration of the chain.
-#' @param l_pred loglike_pred A m x D matrix of predictive likelihoods.
+#' @param l_pred A m x D matrix of predictive likelihoods.
+NULL
+
+#' Posterior predictive likelihood for sLDA logistic
+#'
+#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+#'   sums to 1.
+#' @param eta A K x 1 vector of regression coefficients.
+NULL
+
+#' Posterior predictive likelihood for sLDA-X logistic
+#'
+#' @param x A D x p matrix of additional predictors.
+#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+#'   sums to 1.
+#' @param eta A (p + K) x 1 vector of regression coefficients.
+NULL
+
+#' Posterior predictive likelihood for logistic regression
+#'
+#' @param x A D x (p + 1) matrix of additional predictors.
+#' @param eta A (p + 1) x 1 vector of regression coefficients.
 NULL
 
 #' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
@@ -256,54 +389,6 @@ NULL
 #' @export
 rmvnorm_cpp <- function(n, mu, sigma) {
     .Call(`_psychtm_rmvnorm_cpp`, n, mu, sigma)
-}
-
-#' Compute full conditional log-posterior of eta for logistic sLDA
-#'
-#' @param zbar A D x K matrix with row d containing the mean number of draws of
-#'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
-#'   1.
-#' @param y A D x 1 vector of the outcome variable for each document.
-#' @param eta A K x 1 vector of regression coefficients
-#' @param mu0 A K x 1 vector of prior means for the regression coefficients.
-#' @param sigma0 A K x K prior variance-covariance matrix for the regression
-#'   coefficients.
-#' @export
-eta_logpost_logit <- function(zbar, y, eta, mu0, sigma0) {
-    .Call(`_psychtm_eta_logpost_logit`, zbar, y, eta, mu0, sigma0)
-}
-
-#' Compute full conditional log-posterior of eta for logistic sLDA-X
-#'
-#' @param zbar A D x K matrix with row d containing the mean number of draws of
-#'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
-#'   1.
-#' @param y A D x 1 vector of the outcome variable for each document.
-#' @param x A D x p matrix of additional predictors including a column of
-#'   1's for the intercept.
-#' @param eta A (K + p) x 1 vector of regression coefficients
-#' @param mu0 A (K + p) x 1 vector of prior means for the regression
-#'   coefficients.
-#' @param sigma0 A (K + p) x (K + p) prior variance-covariance matrix
-#'   for the regression coefficients.
-#' @export
-eta_logpost_logitx <- function(zbar, y, x, eta, mu0, sigma0) {
-    .Call(`_psychtm_eta_logpost_logitx`, zbar, y, x, eta, mu0, sigma0)
-}
-
-#' Compute full conditional log-posterior of eta for logistic regression
-#'
-#' @param y A D x 1 vector of the outcome variable for each document.
-#' @param x A D x (p + 1) matrix of additional predictors including a column of
-#'   1's for the intercept.
-#' @param eta A (p + 1) x 1 vector of regression coefficients
-#' @param mu0 A (p + 1) x 1 vector of prior means for the regression
-#'   coefficients.
-#' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix
-#'   for the regression coefficients.
-#' @export
-eta_logpost_glm <- function(y, x, eta, mu0, sigma0) {
-    .Call(`_psychtm_eta_logpost_glm`, y, x, eta, mu0, sigma0)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model
@@ -376,54 +461,30 @@ gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha
     .Call(`_psychtm_gibbs_sldax`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha_, gamma_, a0, b0, verbose, display_progress)
 }
 
-#' Posterior predictive likelihood for sLDA logistic
+#' Collapsed Gibbs sampler for multiple linear regression
 #'
-#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
-#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
-#'   sums to 1.
-#' @param eta A K x 1 vector of regression coefficients.
-#' @export
-post_pred_slda_logit <- function(zbar, eta) {
-    .Call(`_psychtm_post_pred_slda_logit`, zbar, eta)
-}
-
-#' Posterior predictive likelihood for sLDA-X logistic
+#' @include slda-class.R
 #'
-#' @param x A D x p matrix of additional predictors.
-#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
-#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
-#'   sums to 1.
-#' @param eta A (p + K) x 1 vector of regression coefficients.
-#' @export
-post_pred_sldax_logit <- function(x, zbar, eta) {
-    .Call(`_psychtm_post_pred_sldax_logit`, x, zbar, eta)
-}
-
-#' Posterior predictive likelihood for logistic regression
-#'
+#' @param m The number of iterations to run the Gibbs sampler.
+#' @param burn The number of iterations to discard as the burn-in period.
+#' @param y A D x 1 vector of outcomes to be predicted.
 #' @param x A D x (p + 1) matrix of additional predictors.
-#' @param eta A (p + 1) x 1 vector of regression coefficients.
+#' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression
+#'   coefficients.
+#' @param sigma0 A (p + 1) x (p + 1) variance-covariance matrix for the
+#'   prior on the regression coefficients.
+#' @param eta_start A (p + 1) x 1 vector of starting values for the
+#'   regression coefficients.
+#' @param a0 The shape parameter for the prior on sigma2 (default: 0.001)
+#' @param b0 The scale parameter for the prior on sigma2 (default: 0.001)
+#' @param verbose Should parameter draws be output during sampling? (default:
+#'   \code{FALSE}).
+#' @param display_progress Should percent progress of sampler be displayed
+#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+#'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-post_pred_glm <- function(x, eta) {
-    .Call(`_psychtm_post_pred_glm`, x, eta)
-}
-
-#' Contribution to effective number of parameters for WAIC from observation y_d
-#'
-#' @param like_pred A m x 1 vector of predictive likelihoods.
-#' @export
-pwaic_d <- function(like_pred) {
-    .Call(`_psychtm_pwaic_d`, like_pred)
-}
-
-#' WAIC for binomial likelihood for observation y_d
-#'
-#' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
-#' @param p_eff The contribution to the effective number of parameters from
-#'   obs y_d.
-#' @export
-waic_d <- function(like_pred, p_effd) {
-    .Call(`_psychtm_waic_d`, like_pred, p_effd)
+gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_mlr`, m, burn, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model with a binary outcome

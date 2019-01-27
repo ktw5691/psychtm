@@ -55,7 +55,10 @@ Slda <- setClass("Slda",
                sigma0    = "matrix",
                a0        = "numeric",
                b0        = "numeric",
-               eta_start = "numeric"),
+               eta_start = "numeric",
+               p_eff       = "numeric",
+               waic        = "numeric",
+               se_waic     = "numeric"),
   contains = "Lda")
 
 #' An S4 class to represent a sLDA logistic model.
@@ -119,6 +122,34 @@ Logistic <- setClass("Logistic",
                                    p_eff       = "numeric",
                                    waic        = "numeric",
                                    se_waic     = "numeric"))
+
+#' An S4 class to represent a logistic regression model.
+#'
+#' @slot eta A M x (p + 1) numeric matrix of draws of topic regression coefficients
+#' @slot mu0 A (p + 1) x 1 numeric matrix of prior means for eta
+#' @slot sigma0 A (p + 1) x (p + 1) numeric prior covariance matrix for eta
+#' @slot eta_start A (p + 1) x 1 numeric matrix of starting values for eta
+#' @slot ndocs The number of documents in the corpus.
+#' @slot nchain The number of iterations of the Gibbs sampler.
+#' @slot loglike The log-likelihood (up to an additive constant).
+#' @slot logpost The log-posterior (up to an additive constant).
+#' @slot waic WAIC (up to an additive constant).
+#' @slot se_waic Standard error of the WAIC.
+Mlr <- setClass("Mlr",
+                     slots = list(nchain      = "numeric",
+                                  ndocs       = "numeric",
+                                  eta         = "matrix",
+                                  sigma2      = "numeric",
+                                  mu0         = "numeric",
+                                  sigma0      = "matrix",
+                                  a0          = "numeric",
+                                  b0          = "numeric",
+                                  eta_start   = "numeric",
+                                  loglike     = "numeric",
+                                  logpost     = "numeric",
+                                  p_eff       = "numeric",
+                                  waic        = "numeric",
+                                  se_waic     = "numeric"))
 
 setMethod("initialize", "Lda",
           function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {
