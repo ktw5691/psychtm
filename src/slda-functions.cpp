@@ -128,8 +128,6 @@ double invlogit(double x) {
 //' @param mu0 A K x 1 vector of prior means for the regression coefficients.
 //' @param sigma0 A K x K prior variance-covariance matrix for the regression
 //'   coefficients.
-//' @export
-// [[Rcpp::export]]
 double eta_logpost_logit(const arma::mat& zbar, const arma::vec& y,
                          const arma::vec& eta,
                          const arma::vec& mu0, const arma::mat& sigma0) {
@@ -173,8 +171,6 @@ double eta_logpost_logit(const arma::mat& zbar, const arma::vec& y,
 //'   coefficients.
 //' @param sigma0 A (K + p) x (K + p) prior variance-covariance matrix
 //'   for the regression coefficients.
-//' @export
-// [[Rcpp::export]]
 double eta_logpost_logitx(const arma::mat& zbar, const arma::vec& y,
                           const arma::mat& x, const arma::vec& eta,
                           const arma::vec& mu0, const arma::mat& sigma0) {
@@ -221,8 +217,6 @@ double eta_logpost_logitx(const arma::mat& zbar, const arma::vec& y,
 //'   coefficients.
 //' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix
 //'   for the regression coefficients.
-//' @export
-// [[Rcpp::export]]
 double eta_logpost_glm(const arma::vec& y, const arma::mat& x,
                        const arma::vec& eta,
                        const arma::vec& mu0, const arma::mat& sigma0) {
@@ -1617,8 +1611,6 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
 //'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 //'   sums to 1.
 //' @param eta A K x 1 vector of regression coefficients.
-//' @export
-// [[Rcpp::export]]
 arma::colvec post_pred_slda_logit(const arma::mat& zbar,
                                   const arma::colvec& eta) {
 
@@ -1647,8 +1639,6 @@ arma::colvec post_pred_slda_logit(const arma::mat& zbar,
 //'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 //'   sums to 1.
 //' @param eta A (p + K) x 1 vector of regression coefficients.
-//' @export
-// [[Rcpp::export]]
 arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
                                    const arma::colvec& eta) {
 
@@ -1677,8 +1667,6 @@ arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
 //'
 //' @param x A D x (p + 1) matrix of additional predictors.
 //' @param eta A (p + 1) x 1 vector of regression coefficients.
-//' @export
-// [[Rcpp::export]]
 arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
 
   const uint16_t D = x.n_rows;
@@ -1701,8 +1689,6 @@ arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
 //' Contribution to effective number of parameters for WAIC from observation y_d
 //'
 //' @param like_pred A m x 1 vector of predictive likelihoods.
-//' @export
-// [[Rcpp::export]]
 double pwaic_d(const arma::colvec& like_pred) {
 
   const uint32_t m = like_pred.size();
@@ -1729,8 +1715,6 @@ double pwaic_d(const arma::colvec& like_pred) {
 //' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
 //' @param p_eff The contribution to the effective number of parameters from
 //'   obs y_d.
-//' @export
-// [[Rcpp::export]]
 double waic_d(const arma::colvec& like_pred, const double& p_effd) {
 
   const uint32_t m = like_pred.n_rows;
