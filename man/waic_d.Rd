@@ -2,16 +2,16 @@
 % Please edit documentation in R/RcppExports.R
 \name{waic_d}
 \alias{waic_d}
-\title{WAIC in sLDA logistic for observation y_d}
+\title{WAIC for binomial likelihood for observation y_d}
 \usage{
-waic_d(loglike_pred, p_effd)
+waic_d(like_pred, p_effd)
 }
 \arguments{
-\item{loglike_pred}{A m x 1 matrix of log-predictive likelihoods for y_d.}
+\item{like_pred}{A m x 1 vector of predictive likelihoods for y_d.}
 
-\item{p_eff}{The contributions to the effective number of parameters from
+\item{p_eff}{The contribution to the effective number of parameters from
 obs y_d.}
 }
 \description{
-WAIC in sLDA logistic for observation y_d
+WAIC for binomial likelihood for observation y_d
 }

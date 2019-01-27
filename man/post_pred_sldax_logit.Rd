@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{post_pred_sldax_logit}
 \alias{post_pred_sldax_logit}
-\title{Posterior predictive log-likelihood for sLDA-X logistic}
+\title{Posterior predictive likelihood for sLDA-X logistic}
 \usage{
 post_pred_sldax_logit(x, zbar, eta)
 }
@@ -16,5 +16,5 @@ sums to 1.}
 \item{eta}{A (p + K) x 1 vector of regression coefficients.}
 }
 \description{
-Posterior predictive log-likelihood for sLDA-X logistic
+Posterior predictive likelihood for sLDA-X logistic
 }
