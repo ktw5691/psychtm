@@ -13,6 +13,8 @@ topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
 
 \item{y}{A D x 1 vector of the outcome variable for each document.}
 
+\item{eta}{A K x 1 vector of regression coefficients}
+
 \item{mu0}{A K x 1 vector of prior means for the regression coefficients.}
 
 \item{sigma0}{A K x K prior variance-covariance matrix for the regression

@@ -53,6 +53,23 @@ NULL
 #' @param accept The number of accepted draws of eta by MH.
 NULL
 
+#' Draw eta from full conditional posterior for logistic regression using
+#'   Metropolis-Hastings (MH) algorithm
+#'
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param x A D x (p + 1) matrix of additional predictors including a column of
+#'   1s for the intercept.
+#' @param eta_prev A (p + 1) x 1 vector of the previous draw of the
+#'   regression coefficients.
+#' @param mu0 A (p + 1) x 1 vector of prior means for the regression
+#'   coefficients.
+#' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix for the
+#'   regression coefficients.
+#' @param proposal_sd The proposal distribution standard deviations.
+#' @param attempt The number of current attempted draws of eta by MH.
+#' @param accept The nnumber of accepted draws of eta by MH.
+NULL
+
 #' Draw eta from full conditional posterior for logistic sLDA-X using
 #'   Metropolis-Hastings (MH) algorithm
 #'
@@ -228,7 +245,7 @@ NULL
 #'
 #' @param D The number of documents.
 #' @param iter The current iteration of the chain.
-#' @param ll_pred loglike_pred A m x D matrix of log-predictive likelihoods.
+#' @param l_pred loglike_pred A m x D matrix of predictive likelihoods.
 NULL
 
 #' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
@@ -247,6 +264,7 @@ rmvnorm_cpp <- function(n, mu, sigma) {
 #'   topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
 #'   1.
 #' @param y A D x 1 vector of the outcome variable for each document.
+#' @param eta A K x 1 vector of regression coefficients
 #' @param mu0 A K x 1 vector of prior means for the regression coefficients.
 #' @param sigma0 A K x K prior variance-covariance matrix for the regression
 #'   coefficients.
@@ -263,6 +281,7 @@ eta_logpost_logit <- function(zbar, y, eta, mu0, sigma0) {
 #' @param y A D x 1 vector of the outcome variable for each document.
 #' @param x A D x p matrix of additional predictors including a column of
 #'   1's for the intercept.
+#' @param eta A (K + p) x 1 vector of regression coefficients
 #' @param mu0 A (K + p) x 1 vector of prior means for the regression
 #'   coefficients.
 #' @param sigma0 A (K + p) x (K + p) prior variance-covariance matrix
@@ -270,6 +289,21 @@ eta_logpost_logit <- function(zbar, y, eta, mu0, sigma0) {
 #' @export
 eta_logpost_logitx <- function(zbar, y, x, eta, mu0, sigma0) {
     .Call(`_psychtm_eta_logpost_logitx`, zbar, y, x, eta, mu0, sigma0)
+}
+
+#' Compute full conditional log-posterior of eta for logistic regression
+#'
+#' @param y A D x 1 vector of the outcome variable for each document.
+#' @param x A D x (p + 1) matrix of additional predictors including a column of
+#'   1's for the intercept.
+#' @param eta A (p + 1) x 1 vector of regression coefficients
+#' @param mu0 A (p + 1) x 1 vector of prior means for the regression
+#'   coefficients.
+#' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix
+#'   for the regression coefficients.
+#' @export
+eta_logpost_glm <- function(y, x, eta, mu0, sigma0) {
+    .Call(`_psychtm_eta_logpost_glm`, y, x, eta, mu0, sigma0)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model
@@ -342,7 +376,7 @@ gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha
     .Call(`_psychtm_gibbs_sldax`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha_, gamma_, a0, b0, verbose, display_progress)
 }
 
-#' Posterior predictive log-likelihood for sLDA logistic
+#' Posterior predictive likelihood for sLDA logistic
 #'
 #' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
 #'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
@@ -353,7 +387,7 @@ post_pred_slda_logit <- function(zbar, eta) {
     .Call(`_psychtm_post_pred_slda_logit`, zbar, eta)
 }
 
-#' Posterior predictive log-likelihood for sLDA-X logistic
+#' Posterior predictive likelihood for sLDA-X logistic
 #'
 #' @param x A D x p matrix of additional predictors.
 #' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
@@ -365,22 +399,31 @@ post_pred_sldax_logit <- function(x, zbar, eta) {
     .Call(`_psychtm_post_pred_sldax_logit`, x, zbar, eta)
 }
 
-#' Effective number of parameters for WAIC
+#' Posterior predictive likelihood for logistic regression
 #'
-#' @param loglike_pred A m x 1 matrix of log-predictive likelihoods.
+#' @param x A D x (p + 1) matrix of additional predictors.
+#' @param eta A (p + 1) x 1 vector of regression coefficients.
 #' @export
-pwaic_d <- function(loglike_pred) {
-    .Call(`_psychtm_pwaic_d`, loglike_pred)
+post_pred_glm <- function(x, eta) {
+    .Call(`_psychtm_post_pred_glm`, x, eta)
 }
 
-#' WAIC in sLDA logistic for observation y_d
+#' Contribution to effective number of parameters for WAIC from observation y_d
 #'
-#' @param loglike_pred A m x 1 matrix of log-predictive likelihoods for y_d.
-#' @param p_eff The contributions to the effective number of parameters from
+#' @param like_pred A m x 1 vector of predictive likelihoods.
+#' @export
+pwaic_d <- function(like_pred) {
+    .Call(`_psychtm_pwaic_d`, like_pred)
+}
+
+#' WAIC for binomial likelihood for observation y_d
+#'
+#' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
+#' @param p_eff The contribution to the effective number of parameters from
 #'   obs y_d.
 #' @export
-waic_d <- function(loglike_pred, p_effd) {
-    .Call(`_psychtm_waic_d`, loglike_pred, p_effd)
+waic_d <- function(like_pred, p_effd) {
+    .Call(`_psychtm_waic_d`, like_pred, p_effd)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model with a binary outcome
@@ -448,6 +491,32 @@ gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, pro
 #' @export
 gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_sldax_logit`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
+}
+
+#' Collapsed Gibbs sampler for logistic regression
+#'
+#' @include slda-class.R
+#'
+#' @param m The number of iterations to run the Gibbs sampler.
+#' @param burn The number of iterations to discard as the burn-in period.
+#' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
+#' @param x A D x p matrix of additional predictors (no column of 1s for
+#'   intercept).
+#' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression coefficients.
+#' @param sigma0 A (p + 1) x (p + 1) variance-covariance matrix for the prior
+#'   on the regression coefficients.
+#' @param eta_start A (p + 1) x 1 vector of starting values for the
+#'   regression coefficients.
+#' @param proposal_sd The proposal standard deviation for drawing the
+#'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+#' @param verbose Should parameter draws be output during sampling? (default:
+#'   \code{FALSE}).
+#' @param display_progress Should percent progress of sampler be displayed
+#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#' @export
+gibbs_logistic <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_logistic`, m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the LDA model

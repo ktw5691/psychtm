@@ -2,13 +2,13 @@
 % Please edit documentation in R/RcppExports.R
 \name{pwaic_d}
 \alias{pwaic_d}
-\title{Effective number of parameters for WAIC}
+\title{Contribution to effective number of parameters for WAIC from observation y_d}
 \usage{
-pwaic_d(loglike_pred)
+pwaic_d(like_pred)
 }
 \arguments{
-\item{loglike_pred}{A m x 1 matrix of log-predictive likelihoods.}
+\item{like_pred}{A m x 1 vector of predictive likelihoods.}
 }
 \description{
-Effective number of parameters for WAIC
+Contribution to effective number of parameters for WAIC from observation y_d
 }

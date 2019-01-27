@@ -16,6 +16,8 @@ topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row sums to
 \item{x}{A D x p matrix of additional predictors including a column of
 1's for the intercept.}
 
+\item{eta}{A (K + p) x 1 vector of regression coefficients}
+
 \item{mu0}{A (K + p) x 1 vector of prior means for the regression
 coefficients.}
 
