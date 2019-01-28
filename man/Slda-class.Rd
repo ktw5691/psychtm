@@ -48,5 +48,9 @@ probabilities.}
 \item{\code{loglike}}{The log-likelihood (up to an additive constant).}
 
 \item{\code{logpost}}{The log-posterior (up to an additive constant).}
+
+\item{\code{waic}}{WAIC (up to an additive constant).}
+
+\item{\code{se_waic}}{Standard error of the WAIC.}
 }}
 

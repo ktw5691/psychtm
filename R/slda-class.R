@@ -48,6 +48,8 @@ Lda <- setClass("Lda",
 #' @slot gamma A numeric prior hyperparameter for beta.
 #' @slot loglike The log-likelihood (up to an additive constant).
 #' @slot logpost The log-posterior (up to an additive constant).
+#' @slot waic WAIC (up to an additive constant).
+#' @slot se_waic Standard error of the WAIC.
 Slda <- setClass("Slda",
   slots = list(eta       = "matrix",
                sigma2    = "matrix",
@@ -56,9 +58,10 @@ Slda <- setClass("Slda",
                a0        = "numeric",
                b0        = "numeric",
                eta_start = "numeric",
-               p_eff       = "numeric",
-               waic        = "numeric",
-               se_waic     = "numeric"),
+               p_eff     = "numeric",
+               waic      = "numeric",
+               se_waic   = "numeric",
+               lpd       = "matrix"),
   contains = "Lda")
 
 #' An S4 class to represent a sLDA logistic model.
@@ -94,7 +97,8 @@ Sldalogit <- setClass("Sldalogit",
                               logpost     = "numeric",
                               p_eff       = "numeric",
                               waic        = "numeric",
-                              se_waic     = "numeric"),
+                              se_waic     = "numeric",
+                              lpd         = "matrix"),
                  contains = "Lda")
 
 #' An S4 class to represent a logistic regression model.
@@ -121,7 +125,8 @@ Logistic <- setClass("Logistic",
                                    logpost     = "numeric",
                                    p_eff       = "numeric",
                                    waic        = "numeric",
-                                   se_waic     = "numeric"))
+                                   se_waic     = "numeric",
+                                   lpd         = "matrix"))
 
 #' An S4 class to represent a logistic regression model.
 #'
@@ -149,7 +154,8 @@ Mlr <- setClass("Mlr",
                                   logpost     = "numeric",
                                   p_eff       = "numeric",
                                   waic        = "numeric",
-                                  se_waic     = "numeric"))
+                                  se_waic     = "numeric",
+                                  lpd         = "matrix"))
 
 setMethod("initialize", "Lda",
           function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {

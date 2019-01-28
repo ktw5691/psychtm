@@ -1070,6 +1070,8 @@ arma::colvec post_pred_slda(const arma::mat& zbar, const arma::colvec& y,
 //' Contribution to effective number of parameters for WAIC from observation y_d
 //'
 //' @param like_pred A m x 1 vector of predictive likelihoods.
+//' @export
+// [[Rcpp::export]]
 double pwaic_d(const arma::colvec& like_pred) {
 
   const uint32_t m = like_pred.size();
@@ -1096,6 +1098,8 @@ double pwaic_d(const arma::colvec& like_pred) {
 //' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
 //' @param p_eff The contribution to the effective number of parameters from
 //'   obs y_d.
+//' @export
+// [[Rcpp::export]]
 double waic_d(const arma::colvec& like_pred, const double& p_effd) {
 
   const uint32_t m = like_pred.n_rows;
@@ -1120,6 +1124,8 @@ double waic_d(const arma::colvec& like_pred, const double& p_effd) {
 //' @param D The number of documents.
 //' @param iter The current iteration of the chain.
 //' @param l_pred A m x D matrix of predictive likelihoods.
+//' @export
+// [[Rcpp::export]]
 NumericVector waic_all(uint16_t D, uint32_t iter, const arma::mat& l_pred) {
 
   NumericVector full_waic_se(3);
@@ -1140,19 +1146,66 @@ NumericVector waic_all(uint16_t D, uint32_t iter, const arma::mat& l_pred) {
   }
 
   // Compute SE(WAIC)
-  double mean_waic = waic_sum / static_cast<float>(iter);
+  double mean_waic = waic_sum / static_cast<float>(D); // Mean WAIC over all docs
   for (uint16_t d = 0; d < D; d++) {
     se_waic += ((waic(d) - mean_waic) * (waic(d) - mean_waic));
   }
-  se_waic /= static_cast<float>(D - 1);
-  se_waic *= static_cast<float>(D);
-  se_waic = sqrt(se_waic);
+  se_waic /= static_cast<float>(D - 1); // Variance of WAIC over all docs
+  se_waic *= static_cast<float>(D); // Variance of WAIC times D
+  se_waic = sqrt(se_waic); // SE(WAIC)
 
   full_waic_se(0) = waic_sum;
   full_waic_se(1) = se_waic;
   full_waic_se(2) = peff_sum;
 
   return full_waic_se;
+}
+
+//' Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.
+//'
+//' @param D The number of documents.
+//' @param m1 The length of the chain for model 1.
+//' @param m2 The length of the chain for model 2.
+//' @param l_pred1 A m x D matrix of predictive likelihoods from model 1.
+//' @param l_pred2 A m x D matrix of predictive likelihoods from model 2.
+//' @export
+// [[Rcpp::export]]
+NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
+                        const arma::mat& l_pred1, const arma::mat& l_pred2) {
+
+  NumericVector diff_waic_se(2);
+
+  double waic_diff_sum = 0.0;
+  arma::colvec waic1 = arma::zeros(D);
+  arma::colvec waic2 = arma::zeros(D);
+  arma::colvec peff1 = arma::zeros(D);
+  arma::colvec peff2 = arma::zeros(D);
+  arma::colvec waic_diff = arma::zeros(D);
+  double se_waic_diff = 0.0;
+
+  // Compute WAIC and p_eff for entire data set
+  for (uint16_t d = 0; d < D; d++) {
+    peff1(d) = pwaic_d(l_pred1.submat(0, d, m1 - 1, d));
+    peff2(d) = pwaic_d(l_pred2.submat(0, d, m2 - 1, d));
+    waic1(d) = waic_d(l_pred1.submat(0, d, m1 - 1, d), peff1(d));
+    waic2(d) = waic_d(l_pred2.submat(0, d, m2 - 1, d), peff2(d));
+    waic_diff(d) = waic1(d) - waic2(d); // Difference for doc d
+    waic_diff_sum += waic_diff(d); // Sum of differences
+  }
+
+  // Compute SE(WAIC1 - WAIC2)
+  double mean_diff_waic = waic_diff_sum / static_cast<float>(D); // Mean difference
+  for (uint16_t d = 0; d < D; d++) {
+    se_waic_diff += ((waic_diff(d) - mean_diff_waic) * (waic_diff(d) - mean_diff_waic));
+  }
+  se_waic_diff /= static_cast<float>(D - 1); // Variance of difference
+  se_waic_diff *= static_cast<float>(D); // Multiply variance of diff by D
+  se_waic_diff = sqrt(se_waic_diff); // SE(WAIC1 - WAIC2)
+
+  diff_waic_se(0) = waic_diff_sum; // Difference
+  diff_waic_se(1) = se_waic_diff; // SE(WAIC1 - WAIC2)
+
+  return diff_waic_se;
 }
 
 //' Collapsed Gibbs sampler for the sLDA model
@@ -1327,7 +1380,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   }
   logpost(0) += ((alpha_ - 1) * temp_thetapost);
 
-  // Compute WAIC (on deviance scale)
+  // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_slda(zbar, y, etam.row(0).t(), sigma2m(0)).t();
 
@@ -1482,12 +1535,8 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     if (i % 500 == 0) {
       if (verbose) {
-        NumericVector waic_and_se(3);
-        waic_and_se = waic_all(D, i, l_pred);
         Rcout << i << "eta: " << etam.row(i) << "~~~~ sigma2: " << sigma2m(i) <<
-          "~~~~ zbar2" << zbar.row(1) << "\n" <<
-          " p_eff: " << waic_and_se(2) << " waic: " << waic_and_se(0) <<
-          " se_waic: " << waic_and_se(1) << "\n";;
+          "~~~~ zbar2" << zbar.row(1) << "\n";
       }
     }
     if (display_progress) {
@@ -1513,7 +1562,8 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Compute WAIC and p_eff
   NumericVector waic_and_se(3);
-  waic_and_se = waic_all(D, m - burn, l_pred.submat(burn, 0, m - 1, D - 1));
+  arma::mat l_pred_keep = l_pred.submat(burn, 0, m - 1, D - 1);
+  waic_and_se = waic_all(D, m - burn, l_pred_keep);
 
   slda.slot("ntopics") = K;
   slda.slot("ndocs") = D;
@@ -1536,6 +1586,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("p_eff") = waic_and_se(2);
   slda.slot("waic") = waic_and_se(0);
   slda.slot("se_waic") = waic_and_se(1);
+  slda.slot("lpd") = l_pred_keep;
 
   return slda;
 }
@@ -1711,7 +1762,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   }
   logpost(0) += ((alpha_ - 1) * temp_thetapost);
 
-  // Compute WAIC (on deviance scale)
+  // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_sldax(zbar, x, y, etam.row(0).t(), sigma2m(0)).t();
 
@@ -1845,12 +1896,8 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     if (i % 500 == 0) {
       if (verbose) {
-        NumericVector waic_and_se(3);
-        waic_and_se = waic_all(D, i, l_pred);
         Rcout << i << "eta: " << etam.row(i) << "~~~~ sigma2: " << sigma2m(i) <<
-          "~~~~ zbar2" << zbar.row(1) << "\n" <<
-          " p_eff: " << waic_and_se(2) << " waic: " << waic_and_se(0) <<
-          " se_waic: " << waic_and_se(1) << "\n";;
+          "~~~~ zbar2" << zbar.row(1) << "\n";
       }
     }
     if (display_progress) {
@@ -1876,7 +1923,8 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Compute WAIC and p_eff
   NumericVector waic_and_se(3);
-  waic_and_se = waic_all(D, m - burn, l_pred.submat(burn, 0, m - 1, D - 1));
+  arma::mat l_pred_keep = l_pred.submat(burn, 0, m - 1, D - 1);
+  waic_and_se = waic_all(D, m - burn, l_pred_keep);
 
   slda.slot("ntopics") = K;
   slda.slot("ndocs") = D;
@@ -1899,6 +1947,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("p_eff") = waic_and_se(2);
   slda.slot("waic") = waic_and_se(0);
   slda.slot("se_waic") = waic_and_se(1);
+  slda.slot("lpd") = l_pred_keep;
 
   return slda;
 }
@@ -1968,7 +2017,7 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   Rcout << "Compute WAIC(0)\n";
 
-  // Compute WAIC (on deviance scale)
+  // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_mlr(x, y, etam.row(0).t(), sigma2m(0)).t();
 
@@ -2010,11 +2059,7 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     if (i % 500 == 0) {
       if (verbose) {
-        NumericVector waic_and_se(3);
-        waic_and_se = waic_all(D, i, l_pred);
-        Rcout << i << "eta: " << etam.row(i) << "~~~~ sigma2: " << sigma2m(i) <<
-          " p_eff: " << waic_and_se(2) << " waic: " << waic_and_se(0) <<
-          " se_waic: " << waic_and_se(1) << "\n";
+        Rcout << i << "eta: " << etam.row(i) << "~~~~ sigma2: " << sigma2m(i) << "\n";
       }
     }
     if (display_progress) {
@@ -2034,7 +2079,8 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Compute WAIC and p_eff
   NumericVector waic_and_se(3);
-  waic_and_se = waic_all(D, m - burn, l_pred.submat(burn, 0, m - 1, D - 1));
+  arma::mat l_pred_keep = l_pred.submat(burn, 0, m - 1, D - 1);
+  waic_and_se = waic_all(D, m - burn, l_pred_keep);
 
   slda.slot("ndocs") = D;
   slda.slot("nchain") = m - burn;
@@ -2050,6 +2096,7 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("p_eff") = waic_and_se(2);
   slda.slot("waic") = waic_and_se(0);
   slda.slot("se_waic") = waic_and_se(1);
+  slda.slot("lpd") = l_pred_keep;
 
   return slda;
 }
@@ -2301,7 +2348,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   arma::vec attempt = arma::zeros(K);
   arma::vec accept = arma::zeros(K);
 
-  // Compute WAIC (on deviance scale)
+  // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_slda_logit(zbar, etam.row(0).t()).t();
 
@@ -2450,14 +2497,9 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     if (i % 500 == 0) {
       if (verbose) {
-        NumericVector waic_and_se(3);
-        waic_and_se = waic_all(D, i, l_pred);
-
         Rcout << i << "eta: " << etam.row(i) <<
           "~~~~ zbar2: " << zbar.row(1) << "accept rate: " << acc_rate.t() << "\n" <<
-          "~~~~ prop_sd: " << proposal_sd.t() << "\n" <<
-          "p_eff: " << waic_and_se(2) << " waic: " << waic_and_se(0) <<
-          " se_waic: " << waic_and_se(1) << "\n";
+          "~~~~ prop_sd: " << proposal_sd.t() << "\n";
       }
     }
     if (display_progress) {
@@ -2482,7 +2524,8 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Compute WAIC and p_eff
   NumericVector waic_and_se(3);
-  waic_and_se = waic_all(D, m - burn, l_pred.submat(burn, 0, m - 1, D - 1));
+  arma::mat l_pred_keep = l_pred.submat(burn, 0, m - 1, D - 1);
+  waic_and_se = waic_all(D, m - burn, l_pred_keep);
 
   slda.slot("ntopics") = K;
   slda.slot("ndocs") = D;
@@ -2503,6 +2546,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("p_eff") = waic_and_se(2);
   slda.slot("waic") = waic_and_se(0);
   slda.slot("se_waic") = waic_and_se(1);
+  slda.slot("lpd") = l_pred_keep;
 
   return slda;
 }
@@ -2684,12 +2728,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   arma::vec attempt = arma::zeros(K + p);
   arma::vec accept = arma::zeros(K + p);
 
-  // int B = 10; // Number of times to adjust tuning parameter for MH proposal dist
-  // int b = 0;
-  // int T = 100; // Number of draws for each of B adjustments
-  // int t = 0;
-
-  // Compute WAIC (on deviance scale)
+  // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_sldax_logit(x, zbar, etam.row(0).t()).t();
 
@@ -2841,15 +2880,10 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     if (i % 500 == 0) {
       if (verbose) {
-        NumericVector waic_and_se(3);
-        waic_and_se = waic_all(D, i, l_pred);
-
         Rcout << i << "eta: " << etam.row(i) <<
           "~~~~ zbar2: " << zbar.row(1) <<
           "accept rate: " << acc_rate.t() << "\n" <<
-          "~~~~ prop_sd: " << proposal_sd.t() << "\n" <<
-          "p_eff: " << waic_and_se(2) << " waic: " << waic_and_se(0) <<
-          " se_waic: " << waic_and_se(1) << "\n";
+          "~~~~ prop_sd: " << proposal_sd.t() << "\n";
       }
     }
     if (display_progress) {
@@ -2874,7 +2908,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Compute WAIC and p_eff
   NumericVector waic_and_se(3);
-  waic_and_se = waic_all(D, m - burn, l_pred.submat(burn, 0, m - 1, D - 1));
+  arma::mat l_pred_keep = l_pred.submat(burn, 0, m - 1, D - 1);
+  waic_and_se = waic_all(D, m - burn, l_pred_keep);
 
   slda.slot("ntopics") = K;
   slda.slot("ndocs") = D;
@@ -2895,6 +2930,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("p_eff") = waic_and_se(2);
   slda.slot("waic") = waic_and_se(0);
   slda.slot("se_waic") = waic_and_se(1);
+  slda.slot("lpd") = l_pred_keep;
 
   return slda;
 }
@@ -2959,7 +2995,7 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
   arma::vec attempt = arma::zeros(pp1);
   arma::vec accept = arma::zeros(pp1);
 
-  // Compute WAIC (on deviance scale)
+  // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_glm(x, etam.row(0).t()).t();
 
@@ -3015,14 +3051,9 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     if (i % 500 == 0) {
       if (verbose) {
-        NumericVector waic_and_se(3);
-        waic_and_se = waic_all(D, i, l_pred);
-
         Rcout << i << "eta: " << etam.row(i) <<
           "accept rate: " << acc_rate.t() << "\n" <<
-          "~~~~ prop_sd: " << proposal_sd.t() << "\n" <<
-          "p_eff: " << waic_and_se(2) << " waic: " << waic_and_se(0) <<
-          " se_waic: " << waic_and_se(1) << "\n";
+          "~~~~ prop_sd: " << proposal_sd.t() << "\n";
       }
     }
     if (display_progress) {
@@ -3041,7 +3072,8 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Compute WAIC and p_eff
   NumericVector waic_and_se(3);
-  waic_and_se = waic_all(D, m - burn, l_pred.submat(burn, 0, m - 1, D - 1));
+  arma::mat l_pred_keep = l_pred.submat(burn, 0, m - 1, D - 1);
+  waic_and_se = waic_all(D, m - burn, l_pred_keep);
 
   slda.slot("ndocs") = D;
   slda.slot("nchain") = m - burn;
@@ -3055,6 +3087,7 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("p_eff") = waic_and_se(2);
   slda.slot("waic") = waic_and_se(0);
   slda.slot("se_waic") = waic_and_se(1);
+  slda.slot("lpd") = l_pred_keep;
 
   return slda;
 }

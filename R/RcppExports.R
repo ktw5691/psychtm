@@ -339,25 +339,6 @@ NULL
 #' @param sigma2 The residual variance.
 NULL
 
-#' Contribution to effective number of parameters for WAIC from observation y_d
-#'
-#' @param like_pred A m x 1 vector of predictive likelihoods.
-NULL
-
-#' WAIC for binomial likelihood for observation y_d
-#'
-#' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
-#' @param p_eff The contribution to the effective number of parameters from
-#'   obs y_d.
-NULL
-
-#' Compute WAIC for all outcomes.
-#'
-#' @param D The number of documents.
-#' @param iter The current iteration of the chain.
-#' @param l_pred A m x D matrix of predictive likelihoods.
-NULL
-
 #' Posterior predictive likelihood for sLDA logistic
 #'
 #' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
@@ -389,6 +370,46 @@ NULL
 #' @export
 rmvnorm_cpp <- function(n, mu, sigma) {
     .Call(`_psychtm_rmvnorm_cpp`, n, mu, sigma)
+}
+
+#' Contribution to effective number of parameters for WAIC from observation y_d
+#'
+#' @param like_pred A m x 1 vector of predictive likelihoods.
+#' @export
+pwaic_d <- function(like_pred) {
+    .Call(`_psychtm_pwaic_d`, like_pred)
+}
+
+#' WAIC for binomial likelihood for observation y_d
+#'
+#' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
+#' @param p_eff The contribution to the effective number of parameters from
+#'   obs y_d.
+#' @export
+waic_d <- function(like_pred, p_effd) {
+    .Call(`_psychtm_waic_d`, like_pred, p_effd)
+}
+
+#' Compute WAIC for all outcomes.
+#'
+#' @param D The number of documents.
+#' @param iter The current iteration of the chain.
+#' @param l_pred A m x D matrix of predictive likelihoods.
+#' @export
+waic_all <- function(D, iter, l_pred) {
+    .Call(`_psychtm_waic_all`, D, iter, l_pred)
+}
+
+#' Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.
+#'
+#' @param D The number of documents.
+#' @param m1 The length of the chain for model 1.
+#' @param m2 The length of the chain for model 2.
+#' @param l_pred1 A m x D matrix of predictive likelihoods from model 1.
+#' @param l_pred2 A m x D matrix of predictive likelihoods from model 2.
+#' @export
+waic_diff <- function(D, m1, m2, l_pred1, l_pred2) {
+    .Call(`_psychtm_waic_diff`, D, m1, m2, l_pred1, l_pred2)
 }
 
 #' Collapsed Gibbs sampler for the sLDA model

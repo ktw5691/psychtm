@@ -19,6 +19,57 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// pwaic_d
+double pwaic_d(const arma::colvec& like_pred);
+RcppExport SEXP _psychtm_pwaic_d(SEXP like_predSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type like_pred(like_predSEXP);
+    rcpp_result_gen = Rcpp::wrap(pwaic_d(like_pred));
+    return rcpp_result_gen;
+END_RCPP
+}
+// waic_d
+double waic_d(const arma::colvec& like_pred, const double& p_effd);
+RcppExport SEXP _psychtm_waic_d(SEXP like_predSEXP, SEXP p_effdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type like_pred(like_predSEXP);
+    Rcpp::traits::input_parameter< const double& >::type p_effd(p_effdSEXP);
+    rcpp_result_gen = Rcpp::wrap(waic_d(like_pred, p_effd));
+    return rcpp_result_gen;
+END_RCPP
+}
+// waic_all
+NumericVector waic_all(uint16_t D, uint32_t iter, const arma::mat& l_pred);
+RcppExport SEXP _psychtm_waic_all(SEXP DSEXP, SEXP iterSEXP, SEXP l_predSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< uint16_t >::type D(DSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type iter(iterSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type l_pred(l_predSEXP);
+    rcpp_result_gen = Rcpp::wrap(waic_all(D, iter, l_pred));
+    return rcpp_result_gen;
+END_RCPP
+}
+// waic_diff
+NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2, const arma::mat& l_pred1, const arma::mat& l_pred2);
+RcppExport SEXP _psychtm_waic_diff(SEXP DSEXP, SEXP m1SEXP, SEXP m2SEXP, SEXP l_pred1SEXP, SEXP l_pred2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< uint16_t >::type D(DSEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type m1(m1SEXP);
+    Rcpp::traits::input_parameter< uint32_t >::type m2(m2SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type l_pred1(l_pred1SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type l_pred2(l_pred2SEXP);
+    rcpp_result_gen = Rcpp::wrap(waic_diff(D, m1, m2, l_pred1, l_pred2));
+    return rcpp_result_gen;
+END_RCPP
+}
 // gibbs_slda
 S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y, const arma::mat& docs, const arma::mat& w, uint16_t K, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, bool constrain_eta, float alpha_, float gamma_, float a0, float b0, bool verbose, bool display_progress);
 RcppExport SEXP _psychtm_gibbs_slda(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP docsSEXP, SEXP wSEXP, SEXP KSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP constrain_etaSEXP, SEXP alpha_SEXP, SEXP gamma_SEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
@@ -200,6 +251,10 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_psychtm_rmvnorm_cpp", (DL_FUNC) &_psychtm_rmvnorm_cpp, 3},
+    {"_psychtm_pwaic_d", (DL_FUNC) &_psychtm_pwaic_d, 1},
+    {"_psychtm_waic_d", (DL_FUNC) &_psychtm_waic_d, 2},
+    {"_psychtm_waic_all", (DL_FUNC) &_psychtm_waic_all, 3},
+    {"_psychtm_waic_diff", (DL_FUNC) &_psychtm_waic_diff, 5},
     {"_psychtm_gibbs_slda", (DL_FUNC) &_psychtm_gibbs_slda, 16},
     {"_psychtm_gibbs_sldax", (DL_FUNC) &_psychtm_gibbs_sldax, 16},
     {"_psychtm_gibbs_mlr", (DL_FUNC) &_psychtm_gibbs_mlr, 11},
