@@ -1023,12 +1023,13 @@ arma::colvec post_pred_mlr(const arma::mat& x, const arma::colvec& y,
 //' @param x A D x p matrix of additional predictors.
 //' @param eta A (K + p) x 1 vector of regression coefficients.
 //' @param sigma2 The residual variance.
+//' @return Predictive posterior likelihood of all D observations
 arma::colvec post_pred_sldax(const arma::mat& zbar, const arma::mat& x,
                              const arma::colvec& y,
                              const arma::colvec& eta, double sigma2) {
 
   const uint16_t D = x.n_rows;
-  arma::colvec loglike_pred = arma::zeros(D);
+  arma::colvec like_pred = arma::zeros(D);
   arma::colvec mu_hat(D);
   arma::mat xzb = join_rows(x, zbar);
   mu_hat = xzb * eta;
@@ -1037,10 +1038,10 @@ arma::colvec post_pred_sldax(const arma::mat& zbar, const arma::mat& x,
     double yhat;
     yhat = Rcpp::rnorm(1, arma::as_scalar(mu_hat(d)), sigma2)(0);
     double temp_prod = (yhat - mu_hat(d)) * (yhat - mu_hat(d));
-    loglike_pred(d) = -0.5 / sigma2 * temp_prod;
+    like_pred(d) = exp(-0.5 / sigma2 * temp_prod);
   }
 
-  return exp(loglike_pred);
+  return like_pred;
 }
 
 //' Posterior predictive likelihood for sLDA
@@ -1049,11 +1050,12 @@ arma::colvec post_pred_sldax(const arma::mat& zbar, const arma::mat& x,
 //'   document \eqn{d} (should sum to 1).
 //' @param eta A K x 1 vector of regression coefficients.
 //' @param sigma2 The residual variance.
+//' @return Predictive posterior likelihood of all D observations
 arma::colvec post_pred_slda(const arma::mat& zbar, const arma::colvec& y,
                             const arma::colvec& eta, double sigma2) {
 
   const uint16_t D = zbar.n_rows;
-  arma::colvec loglike_pred = arma::zeros(D);
+  arma::colvec like_pred = arma::zeros(D);
   arma::colvec mu_hat(D);
   mu_hat = zbar * eta;
 
@@ -1061,16 +1063,18 @@ arma::colvec post_pred_slda(const arma::mat& zbar, const arma::colvec& y,
     double yhat;
     yhat = Rcpp::rnorm(1, arma::as_scalar(mu_hat(d)), sigma2)(0);
     double temp_prod = (yhat - mu_hat(d)) * (yhat - mu_hat(d));
-    loglike_pred(d) = -0.5 / sigma2 * temp_prod;
+    like_pred(d) = exp(-0.5 / sigma2 * temp_prod);
   }
 
-  return exp(loglike_pred);
+  return like_pred;
 }
 
 //' Contribution to effective number of parameters for WAIC from observation y_d
 //'
-//' @param like_pred A m x 1 vector of predictive likelihoods.
+//' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods).
 //' @export
+//' @return The contribution of y_d (its predictive posterior likelihood variance)
+//'   to the effective number of parameters.
 // [[Rcpp::export]]
 double pwaic_d(const arma::colvec& like_pred) {
 
@@ -1095,9 +1099,10 @@ double pwaic_d(const arma::colvec& like_pred) {
 
 //' WAIC for binomial likelihood for observation y_d
 //'
-//' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
+//' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods) for y_d.
 //' @param p_eff The contribution to the effective number of parameters from
 //'   obs y_d.
+//' @return WAIC contribution for observation d (on deviance scale).
 //' @export
 // [[Rcpp::export]]
 double waic_d(const arma::colvec& like_pred, const double& p_effd) {
@@ -1123,7 +1128,9 @@ double waic_d(const arma::colvec& like_pred, const double& p_effd) {
 //'
 //' @param D The number of documents.
 //' @param iter The current iteration of the chain.
-//' @param l_pred A m x D matrix of predictive likelihoods.
+//' @param l_pred A m x D matrix of predictive likelihoods (NOT log-likelihoods).
+//' @return Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
+//'   the effective number of parameters.
 //' @export
 // [[Rcpp::export]]
 NumericVector waic_all(uint16_t D, uint32_t iter, const arma::mat& l_pred) {
@@ -1166,8 +1173,10 @@ NumericVector waic_all(uint16_t D, uint32_t iter, const arma::mat& l_pred) {
 //' @param D The number of documents.
 //' @param m1 The length of the chain for model 1.
 //' @param m2 The length of the chain for model 2.
-//' @param l_pred1 A m x D matrix of predictive likelihoods from model 1.
-//' @param l_pred2 A m x D matrix of predictive likelihoods from model 2.
+//' @param l_pred1 A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.
+//' @param l_pred2 A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 2.
+//' @return A vector of (1) the difference in WAIC (on the deviance scale)
+//'   between models and (2) the standard error of the difference in WAIC.
 //' @export
 // [[Rcpp::export]]
 NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
@@ -2107,6 +2116,7 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
 //'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 //'   sums to 1.
 //' @param eta A K x 1 vector of regression coefficients.
+//' @return Predictive posterior likelihood of all D observations
 arma::colvec post_pred_slda_logit(const arma::mat& zbar,
                                   const arma::colvec& eta) {
 
@@ -2121,8 +2131,8 @@ arma::colvec post_pred_slda_logit(const arma::mat& zbar,
     uint16_t yhat;
     yhat = Rcpp::rbinom(1, 1, phat)(0);
     y_pred(d) = yhat;
-    loglike_pred(d) += (yhat * log(phat) +
-      (1.0 - yhat * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d)))))));
+    loglike_pred(d) = yhat * log(phat) +
+      (1.0 - yhat) * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d)))));
   }
 
   return exp(loglike_pred);
@@ -2135,6 +2145,7 @@ arma::colvec post_pred_slda_logit(const arma::mat& zbar,
 //'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 //'   sums to 1.
 //' @param eta A (p + K) x 1 vector of regression coefficients.
+//' @return Predictive posterior likelihood of all D observations
 arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
                                    const arma::colvec& eta) {
 
@@ -2152,8 +2163,8 @@ arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
     uint16_t yhat;
     yhat = Rcpp::rbinom(1, 1, phat)(0);
     y_pred(d) = yhat;
-    loglike_pred(d) += (yhat * log(phat) +
-      (1.0 - yhat * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d)))))));
+    loglike_pred(d) = yhat * log(phat) +
+      (1.0 - yhat) * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d)))));
   }
 
   return exp(loglike_pred);
@@ -2176,7 +2187,7 @@ arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
     yhat = Rcpp::rbinom(1, 1, phat)(0);
     y_pred(d) = yhat;
     loglike_pred(d) += (yhat * log(phat) +
-      (1.0 - yhat * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d)))))));
+      (1.0 - yhat) * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d))))));
   }
 
   return exp(loglike_pred);

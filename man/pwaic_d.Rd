@@ -7,7 +7,11 @@
 pwaic_d(like_pred)
 }
 \arguments{
-\item{like_pred}{A m x 1 vector of predictive likelihoods.}
+\item{like_pred}{A m x 1 vector of predictive likelihoods (NOT log-likelihoods).}
+}
+\value{
+The contribution of y_d (its predictive posterior likelihood variance)
+  to the effective number of parameters.
 }
 \description{
 Contribution to effective number of parameters for WAIC from observation y_d

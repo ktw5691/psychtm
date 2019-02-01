@@ -329,6 +329,7 @@ NULL
 #' @param x A D x p matrix of additional predictors.
 #' @param eta A (K + p) x 1 vector of regression coefficients.
 #' @param sigma2 The residual variance.
+#' @return Predictive posterior likelihood of all D observations
 NULL
 
 #' Posterior predictive likelihood for sLDA
@@ -337,6 +338,7 @@ NULL
 #'   document \eqn{d} (should sum to 1).
 #' @param eta A K x 1 vector of regression coefficients.
 #' @param sigma2 The residual variance.
+#' @return Predictive posterior likelihood of all D observations
 NULL
 
 #' Posterior predictive likelihood for sLDA logistic
@@ -345,6 +347,7 @@ NULL
 #'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 #'   sums to 1.
 #' @param eta A K x 1 vector of regression coefficients.
+#' @return Predictive posterior likelihood of all D observations
 NULL
 
 #' Posterior predictive likelihood for sLDA-X logistic
@@ -354,6 +357,7 @@ NULL
 #'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
 #'   sums to 1.
 #' @param eta A (p + K) x 1 vector of regression coefficients.
+#' @return Predictive posterior likelihood of all D observations
 NULL
 
 #' Posterior predictive likelihood for logistic regression
@@ -374,17 +378,20 @@ rmvnorm_cpp <- function(n, mu, sigma) {
 
 #' Contribution to effective number of parameters for WAIC from observation y_d
 #'
-#' @param like_pred A m x 1 vector of predictive likelihoods.
+#' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods).
 #' @export
+#' @return The contribution of y_d (its predictive posterior likelihood variance)
+#'   to the effective number of parameters.
 pwaic_d <- function(like_pred) {
     .Call(`_psychtm_pwaic_d`, like_pred)
 }
 
 #' WAIC for binomial likelihood for observation y_d
 #'
-#' @param like_pred A m x 1 vector of predictive likelihoods for y_d.
+#' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods) for y_d.
 #' @param p_eff The contribution to the effective number of parameters from
 #'   obs y_d.
+#' @return WAIC contribution for observation d (on deviance scale).
 #' @export
 waic_d <- function(like_pred, p_effd) {
     .Call(`_psychtm_waic_d`, like_pred, p_effd)
@@ -394,7 +401,9 @@ waic_d <- function(like_pred, p_effd) {
 #'
 #' @param D The number of documents.
 #' @param iter The current iteration of the chain.
-#' @param l_pred A m x D matrix of predictive likelihoods.
+#' @param l_pred A m x D matrix of predictive likelihoods (NOT log-likelihoods).
+#' @return Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
+#'   the effective number of parameters.
 #' @export
 waic_all <- function(D, iter, l_pred) {
     .Call(`_psychtm_waic_all`, D, iter, l_pred)
@@ -405,8 +414,10 @@ waic_all <- function(D, iter, l_pred) {
 #' @param D The number of documents.
 #' @param m1 The length of the chain for model 1.
 #' @param m2 The length of the chain for model 2.
-#' @param l_pred1 A m x D matrix of predictive likelihoods from model 1.
-#' @param l_pred2 A m x D matrix of predictive likelihoods from model 2.
+#' @param l_pred1 A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.
+#' @param l_pred2 A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 2.
+#' @return A vector of (1) the difference in WAIC (on the deviance scale)
+#'   between models and (2) the standard error of the difference in WAIC.
 #' @export
 waic_diff <- function(D, m1, m2, l_pred1, l_pred2) {
     .Call(`_psychtm_waic_diff`, D, m1, m2, l_pred1, l_pred2)

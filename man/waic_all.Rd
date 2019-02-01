@@ -11,7 +11,11 @@ waic_all(D, iter, l_pred)
 
 \item{iter}{The current iteration of the chain.}
 
-\item{l_pred}{A m x D matrix of predictive likelihoods.}
+\item{l_pred}{A m x D matrix of predictive likelihoods (NOT log-likelihoods).}
+}
+\value{
+Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
+  the effective number of parameters.
 }
 \description{
 Compute WAIC for all outcomes.

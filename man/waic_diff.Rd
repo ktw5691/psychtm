@@ -13,9 +13,13 @@ waic_diff(D, m1, m2, l_pred1, l_pred2)
 
 \item{m2}{The length of the chain for model 2.}
 
-\item{l_pred1}{A m x D matrix of predictive likelihoods from model 1.}
+\item{l_pred1}{A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.}
 
-\item{l_pred2}{A m x D matrix of predictive likelihoods from model 2.}
+\item{l_pred2}{A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 2.}
+}
+\value{
+A vector of (1) the difference in WAIC (on the deviance scale)
+  between models and (2) the standard error of the difference in WAIC.
 }
 \description{
 Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.

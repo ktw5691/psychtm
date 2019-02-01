@@ -7,10 +7,13 @@
 waic_d(like_pred, p_effd)
 }
 \arguments{
-\item{like_pred}{A m x 1 vector of predictive likelihoods for y_d.}
+\item{like_pred}{A m x 1 vector of predictive likelihoods (NOT log-likelihoods) for y_d.}
 
 \item{p_eff}{The contribution to the effective number of parameters from
 obs y_d.}
+}
+\value{
+WAIC contribution for observation d (on deviance scale).
 }
 \description{
 WAIC for binomial likelihood for observation y_d
