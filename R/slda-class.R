@@ -48,8 +48,11 @@ Lda <- setClass("Lda",
 #' @slot gamma A numeric prior hyperparameter for beta.
 #' @slot loglike The log-likelihood (up to an additive constant).
 #' @slot logpost The log-posterior (up to an additive constant).
-#' @slot waic WAIC (up to an additive constant).
+#' @slot p_eff The effective number of parameters.
+#' @slot waic WAIC (up to an additive constant) on the deviance scale.
 #' @slot se_waic Standard error of the WAIC.
+#' @slot lpd A matrix of iterations x observations of predictive posterior
+#'   likelihoods (NOT log-likelihoods).
 Slda <- setClass("Slda",
   slots = list(eta       = "matrix",
                sigma2    = "matrix",
@@ -83,8 +86,11 @@ Slda <- setClass("Slda",
 #' @slot gamma A numeric prior hyperparameter for beta.
 #' @slot loglike The log-likelihood (up to an additive constant).
 #' @slot logpost The log-posterior (up to an additive constant).
-#' @slot waic WAIC (up to an additive constant).
+#' @slot p_eff The effective number of parameters.
+#' @slot waic WAIC (up to an additive constant) on the deviance scale.
 #' @slot se_waic Standard error of the WAIC.
+#' @slot lpd A matrix of iterations x observations of predictive posterior
+#'   likelihoods (NOT log-likelihoods).
 Sldalogit <- setClass("Sldalogit",
                  slots = list(ndocs       = "numeric",
                               nchain      = "numeric",
@@ -111,8 +117,11 @@ Sldalogit <- setClass("Sldalogit",
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot loglike The log-likelihood (up to an additive constant).
 #' @slot logpost The log-posterior (up to an additive constant).
-#' @slot waic WAIC (up to an additive constant).
+#' @slot p_eff The effective number of parameters.
+#' @slot waic WAIC (up to an additive constant) on the deviance scale.
 #' @slot se_waic Standard error of the WAIC.
+#' @slot lpd A matrix of iterations x observations of predictive posterior
+#'   likelihoods (NOT log-likelihoods).
 Logistic <- setClass("Logistic",
                       slots = list(nchain      = "numeric",
                                    ndocs       = "numeric",
@@ -138,8 +147,11 @@ Logistic <- setClass("Logistic",
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot loglike The log-likelihood (up to an additive constant).
 #' @slot logpost The log-posterior (up to an additive constant).
-#' @slot waic WAIC (up to an additive constant).
+#' @slot p_eff The effective number of parameters.
+#' @slot waic WAIC (up to an additive constant) on the deviance scale.
 #' @slot se_waic Standard error of the WAIC.
+#' @slot lpd A matrix of iterations x observations of predictive posterior
+#'   likelihoods (NOT log-likelihoods).
 Mlr <- setClass("Mlr",
                      slots = list(nchain      = "numeric",
                                   ndocs       = "numeric",
