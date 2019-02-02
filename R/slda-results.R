@@ -20,10 +20,8 @@ term_score = function(beta_) {
 #'
 #' @return A tibble with three columns: \code{doc}: the document number,
 #'   \code{topic}: the topic number, \code{prob}: the probability of each topic.
-#' @export
 setMethod("get_toptopics",
-          c(mcmc_fit = "Lda", burn = "numeric", thin = "numeric",
-            stat = "character"),
+          c(mcmc_fit = "Lda"),
           function(mcmc_fit, burn, thin, stat) {
 
             m <- mcmc_fit@nchain
@@ -45,7 +43,7 @@ setMethod("get_toptopics",
               for (k in seq_len(ntopics)) {
                 doc_toptopics[row + k - 1, 1] <- d
                 doc_toptopics[row + k - 1, 2] <- which(
-                  theta_out[d, ] == sorted[k])
+                  theta_out[d, ] == sorted[k])[1] # If tie, pick first match
                 doc_toptopics[row + k - 1, 3] <- sorted[k]
               }
               row <- d * ntopics + 1
@@ -65,11 +63,8 @@ setMethod("get_toptopics",
 #' @return A tibble with three columns: \code{topic}: the topic number,
 #'   \code{word}: the vocabulary term, \code{prob}: the term-score or
 #'   probability of each word for a given topic.
-#' @export
 setMethod("get_topwords",
-          c(mcmc_fit = "Lda", nwords = "numeric", vocab = "character",
-            burn = "numeric", thin = "numeric",
-            method = "character", stat = "character"),
+          c(mcmc_fit = "Lda", nwords = "numeric", vocab = "character"),
           function(mcmc_fit, nwords, vocab, burn, thin, method, stat) {
 
             m <- mcmc_fit@nchain
@@ -90,7 +85,7 @@ setMethod("get_topwords",
               for (v in seq_len(nwords)) {
                 topic_topwords[row + v - 1, 1] <- k
                 topic_topwords[row + v - 1, 2] <- vocab[
-                  which(beta_out[k, ] == sorted[v])]
+                  which(beta_out[k, ] == sorted[v])[1]] # If tie, pick first match
                 topic_topwords[row + v - 1, 3] <- sorted[v]
               }
               row <- k * nwords + 1
@@ -114,9 +109,8 @@ setMethod("get_topwords",
 #' @param thin The thinning period of draws to discard (default: 1; no thinning).
 #' @return A D x K matrix of empirical topic proportions (i.e., the relative
 #'   frequency of draws for each topic in each document).
-#' @export
 setMethod("get_zbar",
-          c(mcmc_fit = "Lda", burn = "numeric", thin = "numeric"),
+          c(mcmc_fit = "Lda"),
           function(mcmc_fit, burn, thin) {
 
             m <- mcmc_fit@nchain

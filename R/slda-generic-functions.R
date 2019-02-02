@@ -59,10 +59,11 @@ setGeneric("get_topwords",
              if (!isClass(mcmc_fit, "Lda"))
                stop("mcmc_fit must be an Lda object.")
              if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
-             if ((nwords %% 1) != 0) stop("n_words must be an integer.")
-             if (nwords < 1) stop("n_words must be an integer greater than 0.")
+             if ((nwords %% 1) != 0) stop("nwords must be an integer.")
+             if (nwords < 1) stop("nwords must be an integer greater than 0.")
              if (length(vocab) == 0) stop("vocab must contain at least one element.")
-             if (nwords > length(unique(vocab))) stop("n_words cannot exceed the number of unique terms in vocab.")
+             if (nwords > length(unique(vocab)))
+               stop("n_words cannot exceed the number of unique terms in vocab.")
              if ((burn %% 1) != 0) stop("burn must be an integer.")
              if (burn < 0) stop("burn must be non-negative.")
              if ((thin %% 1) != 0) stop("thin must be an integer.")
@@ -110,6 +111,6 @@ setGeneric("get_zbar",
              if (burn >= m) stop("burn cannot exceed length of chain.")
              if (thin >= (m - burn)) stop("thin cannot exceed length of chain less burn.")
 
-             standardgeneric("get_zbar")
+             standardGeneric("get_zbar")
            }
 )

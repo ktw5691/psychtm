@@ -54,18 +54,18 @@ Lda <- setClass("Lda",
 #' @slot lpd A matrix of iterations x observations of predictive posterior
 #'   likelihoods (NOT log-likelihoods).
 Slda <- setClass("Slda",
-  slots = list(eta       = "matrix",
-               sigma2    = "matrix",
-               mu0       = "numeric",
-               sigma0    = "matrix",
-               a0        = "numeric",
-               b0        = "numeric",
-               eta_start = "numeric",
-               p_eff     = "numeric",
-               waic      = "numeric",
-               se_waic   = "numeric",
-               lpd       = "matrix"),
-  contains = "Lda")
+                 slots = list(eta       = "matrix",
+                              sigma2    = "matrix",
+                              mu0       = "numeric",
+                              sigma0    = "matrix",
+                              a0        = "numeric",
+                              b0        = "numeric",
+                              eta_start = "numeric",
+                              p_eff     = "numeric",
+                              waic      = "numeric",
+                              se_waic   = "numeric",
+                              lpd       = "matrix"),
+                 contains = "Lda")
 
 #' An S4 class to represent a sLDA logistic model.
 #'
@@ -92,20 +92,20 @@ Slda <- setClass("Slda",
 #' @slot lpd A matrix of iterations x observations of predictive posterior
 #'   likelihoods (NOT log-likelihoods).
 Sldalogit <- setClass("Sldalogit",
-                 slots = list(ndocs       = "numeric",
-                              nchain      = "numeric",
-                              eta         = "matrix",
-                              mu0         = "numeric",
-                              sigma0      = "matrix",
-                              eta_start   = "numeric",
-                              proposal_sd = "numeric",
-                              loglike     = "numeric",
-                              logpost     = "numeric",
-                              p_eff       = "numeric",
-                              waic        = "numeric",
-                              se_waic     = "numeric",
-                              lpd         = "matrix"),
-                 contains = "Lda")
+                      slots = list(ndocs       = "numeric",
+                                   nchain      = "numeric",
+                                   eta         = "matrix",
+                                   mu0         = "numeric",
+                                   sigma0      = "matrix",
+                                   eta_start   = "numeric",
+                                   proposal_sd = "numeric",
+                                   loglike     = "numeric",
+                                   logpost     = "numeric",
+                                   p_eff       = "numeric",
+                                   waic        = "numeric",
+                                   se_waic     = "numeric",
+                                   lpd         = "matrix"),
+                      contains = "Lda")
 
 #' An S4 class to represent a logistic regression model.
 #'
