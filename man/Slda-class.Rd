@@ -49,8 +49,13 @@ probabilities.}
 
 \item{\code{logpost}}{The log-posterior (up to an additive constant).}
 
-\item{\code{waic}}{WAIC (up to an additive constant).}
+\item{\code{p_eff}}{The effective number of parameters.}
+
+\item{\code{waic}}{WAIC (up to an additive constant) on the deviance scale.}
 
 \item{\code{se_waic}}{Standard error of the WAIC.}
+
+\item{\code{lpd}}{A matrix of iterations x observations of predictive posterior
+likelihoods (NOT log-likelihoods).}
 }}
 

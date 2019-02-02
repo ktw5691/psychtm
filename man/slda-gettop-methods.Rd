@@ -5,15 +5,13 @@
 \alias{get_topwords}
 \title{Generic function to retrieve the top topics for each document}
 \usage{
-get_toptopics(mcmc_fit, n_topics, burn = 0, thin = 1, stat = "mean")
+get_toptopics(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
-get_topwords(mcmc_fit, n_words, vocab, burn = 0, thin = 1,
-  stat = "mean")
+get_topwords(mcmc_fit, nwords, vocab, burn = 0, thin = 1,
+  method = "termscore", stat = "mean")
 }
 \arguments{
 \item{mcmc_fit}{An Lda object.}
-
-\item{n_topics}{The number of topics to retrieve.}
 
 \item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
 
@@ -21,9 +19,14 @@ get_topwords(mcmc_fit, n_words, vocab, burn = 0, thin = 1,
 
 \item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
 
-\item{n_words}{The number of words to retrieve.}
+\item{nwords}{The number of words to retrieve.}
 
 \item{vocab}{A character vector containing the vocabulary.}
+
+\item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
+use probabilities. Default: "termscore".}
+
+\item{ntopics}{The number of topics to retrieve.}
 
 \item{mcmc_fit}{An Lda object.}
 

@@ -7,6 +7,17 @@
 \usage{
 \S4method{get_zbar}{Lda}(mcmc_fit, burn = 0, thin = 1)
 }
+\arguments{
+\item{mcmc_fit}{An Lda object.}
+
+\item{burn}{The burn-in period of draws to discard (default: 0).}
+
+\item{thin}{The thinning period of draws to discard (default: 1; no thinning).}
+}
+\value{
+A D x K matrix of empirical topic proportions (i.e., the relative
+  frequency of draws for each topic in each document).
+}
 \description{
 Compute empirical topic proportions (zbar) from \code{@topics} in an Lda
 object
