@@ -12,6 +12,9 @@ Imports:
     Rcpp,
     RcppProgress,
     tibble
+Suggests:
+    dplyr,
+    ggplot2
 LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress
