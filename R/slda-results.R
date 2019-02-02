@@ -140,3 +140,149 @@ setMethod("get_zbar",
             return(zbar)
           }
 )
+
+setMethod("gg_coef",
+          c(mcmc_fit = "Slda"),
+          function(mcmc_fit, nwords, vocab, burn, thin, method, stat) {
+
+            if (!requireNamespace("dplyr", quietly = TRUE)) {
+              stop("Package \"dplyr\" needed for this function to work. Please install it.",
+                   call. = FALSE)
+            }
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+              stop("Package \"ggplot2\" needed for this function to work. Please install it.",
+                   call. = FALSE)
+            }
+
+            m <- mcmc_fit@nchain
+            keep_index <- seq(burn + 1, m, thin)
+
+            if (stat == "mean") {
+              eta = apply(mcmc_fit@eta[keep_index, ], 2, mean)
+            }
+            if (stat == "median") {
+              eta = apply(mcmc_fit@eta[keep_index, ], 2, median)
+            }
+
+            topic_dist = get_topwords(mcmc_fit, nwords, vocab, burn, thin,
+                                      method, stat)
+
+            len = ncol(mcmc_fit@eta)
+            ntopics = mcmc_fit@ntopics
+            # Top words per topic
+            topics_top = vector("character", len)
+            topics_top[seq_len(len - ntopics)] <- paste0("V", seq_len(len - ntopics))
+            for (k in seq_len(ntopics)) {
+              temp = dplyr::filter(topic_dist, topic == k)
+              temp = dplyr::top_n(temp, nwords, prob)
+              temp = paste(temp$word, collapse = ", ")
+              topics_top[len - ntopics + k] = temp
+            }
+
+            # Regression coefficients for each topic
+            coefs <- tibble::tibble(
+              coef = eta,
+              lbcl = apply(mcmc_fit@eta[keep_index, ], 2, quantile, .025),
+              ubcl = apply(mcmc_fit@eta[keep_index, ], 2, quantile, .975))
+
+            names(coefs) = c("est", "lbcl", "ubcl")
+            coefs <- cbind(
+              coefs, topics = factor(topics_top,
+                                     topics_top[order(coefs$est, coefs$lbcl)]))
+            coefs <- coefs[order(coefs$est), ]
+
+            coefs <- dplyr::mutate(
+              dplyr::ungroup(
+                dplyr::mutate(dplyr::rowwise(coefs),
+                              sig = dplyr::if_else(lbcl > 0 || ubcl < 0, 1, 0))),
+              sig = factor(sig))
+
+            ggp <- ggplot2::ggplot(coefs, ggplot2::aes(topics, est, color = sig))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_point())
+            ggp <- ggplot2::`%+%`(ggp,
+                                  ggplot2::geom_errorbar(width = 0.25,
+                                                         ggplot2::aes(ymin = lbcl,
+                                                                      ymax = ubcl)))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_hline(yintercept = 0))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::theme_bw())
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::scale_color_discrete("Non-Zero"))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::xlab("Predictor"))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::ylab("Posterior Estimate"))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::theme(axis.text.x = ggplot2::element_text(
+              size = 10, angle = 57.5, hjust = 1), legend.position = "left"))
+            print(ggp)
+          }
+)
+
+setMethod("gg_coef",
+          c(mcmc_fit = "Sldalogit"),
+          function(mcmc_fit, nwords, vocab, burn, thin, method, stat) {
+
+            if (!requireNamespace("dplyr", quietly = TRUE)) {
+              stop("Package \"dplyr\" needed for this function to work. Please install it.",
+                   call. = FALSE)
+            }
+            if (!requireNamespace("ggplot2", quietly = TRUE)) {
+              stop("Package \"ggplot2\" needed for this function to work. Please install it.",
+                   call. = FALSE)
+            }
+
+            m <- mcmc_fit@nchain
+            keep_index <- seq(burn + 1, m, thin)
+
+            if (stat == "mean") {
+              eta = apply(mcmc_fit@eta[keep_index, ], 2, mean)
+            }
+            if (stat == "median") {
+              eta = apply(mcmc_fit@eta[keep_index, ], 2, median)
+            }
+
+            topic_dist = get_topwords(mcmc_fit, nwords, vocab, burn, thin,
+                                      method, stat)
+
+            len = ncol(mcmc_fit@eta)
+            ntopics = mcmc_fit@ntopics
+            # Top words per topic
+            topics_top = vector("character", len)
+            topics_top[seq_len(len - ntopics)] <- paste0("V", seq_len(len - ntopics))
+            for (k in seq_len(ntopics)) {
+              temp = dplyr::filter(topic_dist, topic == k)
+              temp = dplyr::top_n(temp, nwords, prob)
+              temp = paste(temp$word, collapse = ", ")
+              topics_top[len - ntopics + k] = temp
+            }
+
+            # Regression coefficients for each topic
+            coefs <- tibble::tibble(
+              coef = eta,
+              lbcl = apply(mcmc_fit@eta[keep_index, ], 2, quantile, .025),
+              ubcl = apply(mcmc_fit@eta[keep_index, ], 2, quantile, .975))
+
+            names(coefs) = c("est", "lbcl", "ubcl")
+            coefs <- cbind(
+              coefs, topics = factor(topics_top,
+                                     topics_top[order(coefs$est, coefs$lbcl)]))
+            coefs <- coefs[order(coefs$est), ]
+
+            coefs <- dplyr::mutate(
+              dplyr::ungroup(
+                dplyr::mutate(dplyr::rowwise(coefs),
+                              sig = dplyr::if_else(lbcl > 0 || ubcl < 0, 1, 0))),
+              sig = factor(sig))
+
+            ggp <- ggplot2::ggplot(coefs, ggplot2::aes(topics, est, color = sig))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_point())
+            ggp <- ggplot2::`%+%`(ggp,
+                                  ggplot2::geom_errorbar(width = 0.5,
+                                                         ggplot2::aes(ymin = lbcl,
+                                                                      ymax = ubcl)))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_hline(yintercept = 0))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::theme_bw())
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::scale_color_discrete("Non-Zero"))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::xlab("Predictor"))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::ylab("Posterior Estimate"))
+            ggp <- ggplot2::`%+%`(ggp, ggplot2::theme(axis.text.x = ggplot2::element_text(
+              size = 10, angle = 57.5, hjust = 1), legend.position = "left"))
+            print(ggp)
+          }
+)

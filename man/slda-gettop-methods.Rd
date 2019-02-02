@@ -3,11 +3,15 @@
 \name{get_toptopics}
 \alias{get_toptopics}
 \alias{get_topwords}
+\alias{gg_coef}
 \title{Generic function to retrieve the top topics for each document}
 \usage{
 get_toptopics(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
 get_topwords(mcmc_fit, nwords, vocab, burn = 0, thin = 1,
+  method = "termscore", stat = "mean")
+
+gg_coef(mcmc_fit, nwords, vocab, burn = 0, thin = 1,
   method = "termscore", stat = "mean")
 }
 \arguments{
@@ -35,9 +39,26 @@ use probabilities. Default: "termscore".}
 \item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
 
 \item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
+
+\item{mcmc_fit}{An Lda object.}
+
+\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
+
+\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
+
+\item{nwords}{The number of words to retrieve.}
+
+\item{vocab}{A character vector containing the vocabulary.}
+
+\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
+
+\item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
+use probabilities. Default: "termscore".}
 }
 \value{
 A tibble containing \code{doc}, \code{topic}, and \code{prob}.
+
+A tibble containing \code{topic}, \code{word}, and \code{prob}
 
 A tibble containing \code{topic}, \code{word}, and \code{prob}
 }
