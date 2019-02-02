@@ -122,12 +122,28 @@ setMethod("get_zbar",
 
             m <- mcmc_fit@nchain
             keep_index <- seq(burn + 1, m, thin)
-            beta_keep <- mcmc_fit@beta[, , keep_index]
 
-            # Exclude 0 ("missing value" in C++ code for unused word positions)
-            zbarm = apply(mcmc_fit@topics, 3, function(x) table(x, exclude = 0))
-            zbarm = apply(zbarm, 2, function(x) x / sum(x))
+            topics <- mcmc_fit@topics[, , keep_index]
+            topics[topics == 0] <- NA # C++ returns 0 if not assigned (no word there)
 
-            return(zbarm)
+            # Median topic draw for each word and doc
+            z_med <- apply(topics, c(1, 2),
+                          function(x) round(median(x, na.rm = TRUE), 0))
+            ndoc <- mcmc_fit@ndocs
+            ntopic <- mcmc_fit@ntopics
+
+            zbar <- matrix(nrow = ndoc, ncol = ntopic)
+            for (d in seq_len(ndoc)) {
+              prow <- numeric(ntopic)
+              zrow <- z_med[d, ]
+              zrow <- zrow[!is.na(zrow)]
+              for (j in seq_len(ntopic)) {
+                prow[j] <- sum(zrow == j)
+              }
+              prow <- prow / length(zrow)
+              zbar[d, ] <- prow
+            }
+
+            return(zbar)
           }
 )
