@@ -22,7 +22,8 @@ term_score = function(beta_) {
 #'   \code{topic}: the topic number, \code{prob}: the probability of each topic.
 #' @export
 setMethod("get_toptopics",
-          c(mcmc_fit = "Lda"),
+          c(mcmc_fit = "Lda", burn = "numeric", thin = "numeric",
+            stat = "character"),
           function(mcmc_fit, burn, thin, stat) {
 
             m <- mcmc_fit@nchain
@@ -66,8 +67,9 @@ setMethod("get_toptopics",
 #'   probability of each word for a given topic.
 #' @export
 setMethod("get_topwords",
-          c(mcmc_fit = "Lda",
-            method = "character"),
+          c(mcmc_fit = "Lda", nwords = "numeric", vocab = "character",
+            burn = "numeric", thin = "numeric",
+            method = "character", stat = "character"),
           function(mcmc_fit, nwords, vocab, burn, thin, method, stat) {
 
             m <- mcmc_fit@nchain
@@ -114,7 +116,7 @@ setMethod("get_topwords",
 #'   frequency of draws for each topic in each document).
 #' @export
 setMethod("get_zbar",
-          c(mcmc_fit = "Lda"),
+          c(mcmc_fit = "Lda", burn = "numeric", thin = "numeric"),
           function(mcmc_fit, burn, thin) {
 
             m <- mcmc_fit@nchain
