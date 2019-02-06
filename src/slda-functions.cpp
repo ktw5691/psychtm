@@ -652,9 +652,11 @@ arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K) {
 //'   the corpus.
 //' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
 //'
+//' @export
+// [[Rcpp::export]]
 arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
                                const arma::mat& doc_topic,
-                               const arma::mat& doc_word) {
+                               const arma::mat& doc_word, uint16_t ncore = 1) {
 
   if (K < 2) error("number of topics must be at least 2");
   if (V < 2) error("size of vocabulary V must be at least 2");
@@ -668,20 +670,37 @@ arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
   // Matrix to store number of topic/word co-occurences
   arma::mat topic_word_freq = arma::zeros(K, V);
   // Loop through documents
-  // for (uint32_t doc = 0; doc < D; doc++) {
-  for (uint32_t doc : docs_index) {
-    // Loop through words in document
-    for (uint32_t pos = 0; pos < doc_word.n_cols; pos++) {
-      // Loop through topics
-      for (uint16_t topic = 1; topic <= K; topic++) {
-        // Loop through vocabulary
-        for (uint32_t v = 1; v <= V; v++) {
-          topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
-            (doc_word(doc, pos) == v));
+
+  #ifdef _OPENMP
+    #pragma omp parallel for num_threads(ncore)
+    for (uint32_t doc = 0; doc < D; doc++) {
+      // Loop through words in document
+      for (uint32_t pos = 0; pos < doc_word.n_cols; pos++) {
+        // Loop through topics
+        for (uint16_t topic = 1; topic <= K; topic++) {
+          // Loop through vocabulary
+          for (uint32_t v = 1; v <= V; v++) {
+            topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
+              (doc_word(doc, pos) == v));
+          }
         }
       }
     }
-  }
+  #else
+    for (uint32_t doc : docs_index) {
+      // Loop through words in document
+      for (uint32_t pos = 0; pos < doc_word.n_cols; pos++) {
+        // Loop through topics
+        for (uint16_t topic = 1; topic <= K; topic++) {
+          // Loop through vocabulary
+          for (uint32_t v = 1; v <= V; v++) {
+            topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
+              (doc_word(doc, pos) == v));
+          }
+        }
+      }
+    }
+  #endif
   return topic_word_freq;
 }
 

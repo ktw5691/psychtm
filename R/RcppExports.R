@@ -209,17 +209,6 @@ NULL
 #'
 NULL
 
-#' Count topic-word co-occurences in corpus (ntopic x nvocab) (parallelizable)
-#'
-#' @param D The number of documents in the corpus.
-#' @param K The number of topics.
-#' @param V The number of terms in the corpus vocabulary.
-#' @param doc_topic A D x max(\eqn{N_d}) matrix of topic assignments for
-#'   the corpus.
-#' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
-#'
-NULL
-
 #' Draw zdn from full conditional distribution for sLDA
 #'
 #' @param yd A the outcome variable for document \eqn{d}.
@@ -374,6 +363,20 @@ NULL
 #' @export
 rmvnorm_cpp <- function(n, mu, sigma) {
     .Call(`_psychtm_rmvnorm_cpp`, n, mu, sigma)
+}
+
+#' Count topic-word co-occurences in corpus (ntopic x nvocab) (parallelizable)
+#'
+#' @param D The number of documents in the corpus.
+#' @param K The number of topics.
+#' @param V The number of terms in the corpus vocabulary.
+#' @param doc_topic A D x max(\eqn{N_d}) matrix of topic assignments for
+#'   the corpus.
+#' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
+#'
+#' @export
+count_topic_word_cpp <- function(D, K, V, doc_topic, doc_word, ncore = 1L) {
+    .Call(`_psychtm_count_topic_word_cpp`, D, K, V, doc_topic, doc_word, ncore)
 }
 
 #' Contribution to effective number of parameters for WAIC from observation y_d
