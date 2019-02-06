@@ -8,6 +8,11 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppProgress)]]
 // [[Rcpp::plugins(cpp11)]]
 
+#ifdef _OPENMP
+  #include <omp.h>
+  // [[Rcpp::plugins(omp)]]
+#endif
+
 // Function to handle errors
 void error(std::string s) {
   throw std::runtime_error(s);
@@ -900,8 +905,6 @@ uint16_t draw_zdn_sldax_logit(double yd, const arma::vec& xd,
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K;
 
-  const uint16_t p = xd.size() - 1; // xd contains a 1 for the intercept
-
   if (K < 2) error("number of topics must be at least 2");
   if (V < 2) error("size of vocabulary V must be at least 2");
   if (zbar_d.size() != K) error("zbar_d must be a vector of length K");
@@ -1108,7 +1111,6 @@ double pwaic_d(const arma::colvec& like_pred) {
 double waic_d(const arma::colvec& like_pred, const double& p_effd) {
 
   const uint32_t m = like_pred.n_rows;
-  double likey = 0.0;
   double likeyd = 0;
 
   // Get mean predictive likelihood for y_d
@@ -1141,7 +1143,6 @@ NumericVector waic_all(uint16_t D, uint32_t iter, const arma::mat& l_pred) {
   double waic_sum = 0.0;
   arma::colvec waic = arma::zeros(D);
   arma::colvec peff = arma::zeros(D);
-  double mean_waic_d = 0.0;
   double se_waic = 0.0;
 
   // Compute WAIC and p_eff for entire data set
@@ -1288,6 +1289,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   arma::mat zbar = arma::zeros(D, K);
   for (uint16_t k = 0; k < K; k++)
     init_topic_probs(k) = 1.0 / static_cast<float>(K);
+
   for (uint32_t d : docs_index) {
     for (uint32_t n = 0; n < N(d); n++) {
       zdocs(d, n) = RcppArmadillo::sample(
@@ -1341,8 +1343,8 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                  gamma_ = gamma_).t();
+      betam.slice(0).row(k) = est_betak_cpp(
+        k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -1723,8 +1725,8 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                  gamma_ = gamma_).t();
+      betam.slice(0).row(k) = est_betak_cpp(
+        k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -2121,7 +2123,6 @@ arma::colvec post_pred_slda_logit(const arma::mat& zbar,
                                   const arma::colvec& eta) {
 
   const uint16_t D = zbar.n_rows;
-  const uint16_t K = zbar.n_cols;
   arma::colvec y_pred = arma::zeros(D); // Store set of D predictions
   arma::colvec loglike_pred = arma::zeros(D);
   arma::colvec mu_hat(D);
@@ -2150,7 +2151,6 @@ arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
                                    const arma::colvec& eta) {
 
   const uint16_t D = x.n_rows;
-  const uint16_t K = zbar.n_cols;
   // Omit last topic mean due to colinearity with intercept in x
   //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
   arma::mat xzb = join_rows(x, zbar);
@@ -2304,8 +2304,8 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                  gamma_ = gamma_).t();
+      betam.slice(0).row(k) = est_betak_cpp(
+        k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -2681,8 +2681,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                  gamma_ = gamma_).t();
+      betam.slice(0).row(k) = est_betak_cpp(
+        k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -3192,8 +3192,8 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                  gamma_ = gamma_).t();
+      betam.slice(0).row(k) = est_betak_cpp(
+        k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
