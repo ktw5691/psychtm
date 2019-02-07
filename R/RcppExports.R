@@ -191,24 +191,6 @@ NULL
 #' @param eta A (p + 1) x 1 vector of regression coefficients.
 NULL
 
-#' Estimate beta_k (on log-scale)
-#'
-#' @param k The topic label (i.e., the row of the K x V beta matrix).
-#' @param V The number of terms in the corpus vocabulary.
-#' @param wz_co A V x 1 vector of counts of the draws of each word for topic
-#'   \eqn{k} over all documents.
-#' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
-#'
-NULL
-
-#' Estimate theta_d (on log scale)
-#'
-#' @param z_count A K x 1 vector of counts of topic draw in document \eqn{d}.
-#' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
-#' @param K The number of topics.
-#'
-NULL
-
 #' Draw zdn from full conditional distribution for sLDA
 #'
 #' @param yd A the outcome variable for document \eqn{d}.
@@ -365,6 +347,30 @@ rmvnorm_cpp <- function(n, mu, sigma) {
     .Call(`_psychtm_rmvnorm_cpp`, n, mu, sigma)
 }
 
+#' Estimate beta_k (on log-scale)
+#'
+#' @param k The topic label (i.e., the row of the K x V beta matrix).
+#' @param V The number of terms in the corpus vocabulary.
+#' @param wz_co A V x 1 vector of counts of the draws of each word for topic
+#'   \eqn{k} over all documents.
+#' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
+#'
+#' @export
+est_betak_cpp <- function(k, V, wz_co, gamma_) {
+    .Call(`_psychtm_est_betak_cpp`, k, V, wz_co, gamma_)
+}
+
+#' Estimate theta_d (on log scale)
+#'
+#' @param z_count A K x 1 vector of counts of topic draw in document \eqn{d}.
+#' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
+#' @param K The number of topics.
+#'
+#' @export
+est_thetad_cpp <- function(z_count, alpha_, K) {
+    .Call(`_psychtm_est_thetad_cpp`, z_count, alpha_, K)
+}
+
 #' Count topic-word co-occurences in corpus (ntopic x nvocab) (parallelizable)
 #'
 #' @param D The number of documents in the corpus.
@@ -375,8 +381,8 @@ rmvnorm_cpp <- function(n, mu, sigma) {
 #' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
 #'
 #' @export
-count_topic_word_cpp <- function(D, K, V, doc_topic, doc_word, ncore = 1L) {
-    .Call(`_psychtm_count_topic_word_cpp`, D, K, V, doc_topic, doc_word, ncore)
+count_topic_word_cpp <- function(D, K, V, doc_topic, doc_word) {
+    .Call(`_psychtm_count_topic_word_cpp`, D, K, V, doc_topic, doc_word)
 }
 
 #' Contribution to effective number of parameters for WAIC from observation y_d

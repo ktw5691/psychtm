@@ -8,11 +8,6 @@ using namespace Rcpp;
 // [[Rcpp::depends(RcppProgress)]]
 // [[Rcpp::plugins(cpp11)]]
 
-#ifdef _OPENMP
-  #include <omp.h>
-  // [[Rcpp::plugins(omp)]]
-#endif
-
 // Function to handle errors
 void error(std::string s) {
   throw std::runtime_error(s);
@@ -604,6 +599,8 @@ long double draw_sigma2_mlr(uint32_t D, float a0, float b0,
 //'   \eqn{k} over all documents.
 //' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 //'
+//' @export
+// [[Rcpp::export]]
 arma::vec est_betak_cpp(uint16_t k, uint32_t V, const arma::vec& wz_co,
                         float gamma_) {
 
@@ -626,6 +623,8 @@ arma::vec est_betak_cpp(uint16_t k, uint32_t V, const arma::vec& wz_co,
 //' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 //' @param K The number of topics.
 //'
+//' @export
+// [[Rcpp::export]]
 arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
@@ -656,7 +655,7 @@ arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K) {
 // [[Rcpp::export]]
 arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
                                const arma::mat& doc_topic,
-                               const arma::mat& doc_word, uint16_t ncore = 1) {
+                               const arma::mat& doc_word) {
 
   if (K < 2) error("number of topics must be at least 2");
   if (V < 2) error("size of vocabulary V must be at least 2");
@@ -670,37 +669,19 @@ arma::mat count_topic_word_cpp(uint32_t D, uint16_t K, uint32_t V,
   // Matrix to store number of topic/word co-occurences
   arma::mat topic_word_freq = arma::zeros(K, V);
   // Loop through documents
-
-  #ifdef _OPENMP
-    #pragma omp parallel for num_threads(ncore)
-    for (uint32_t doc = 0; doc < D; doc++) {
-      // Loop through words in document
-      for (uint32_t pos = 0; pos < doc_word.n_cols; pos++) {
-        // Loop through topics
-        for (uint16_t topic = 1; topic <= K; topic++) {
-          // Loop through vocabulary
-          for (uint32_t v = 1; v <= V; v++) {
-            topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
-              (doc_word(doc, pos) == v));
-          }
+  for (uint32_t doc : docs_index) {
+    // Loop through words in document
+    for (uint32_t pos = 0; pos < doc_word.n_cols; pos++) {
+      // Loop through topics
+      for (uint16_t topic = 1; topic <= K; topic++) {
+        // Loop through vocabulary
+        for (uint32_t v = 1; v <= V; v++) {
+          topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
+            (doc_word(doc, pos) == v));
         }
       }
     }
-  #else
-    for (uint32_t doc : docs_index) {
-      // Loop through words in document
-      for (uint32_t pos = 0; pos < doc_word.n_cols; pos++) {
-        // Loop through topics
-        for (uint16_t topic = 1; topic <= K; topic++) {
-          // Loop through vocabulary
-          for (uint32_t v = 1; v <= V; v++) {
-            topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
-              (doc_word(doc, pos) == v));
-          }
-        }
-      }
-    }
-  #endif
+  }
   return topic_word_freq;
 }
 
@@ -1288,16 +1269,16 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
   const uint32_t maxNd = max(N);
   arma::mat etam(m, K);
+  arma::colvec eta;
   NumericVector sigma2m(m);
+  double sigma2;
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
 
-  // D x K x m array
-  arma::cube thetam = arma::zeros(D, K, m);
-  // K x V x m array
-  arma::cube betam = arma::zeros(K, V, m);
-  // D x K x m array to store topic draw counts
-  arma::cube ndk = arma::zeros(D, K, m);
+  arma::mat theta(D, K);
+  arma::mat beta(K, V);
+  // Topic draw counts
+  arma::mat ndk(D, K);
   // Topic draws for all words and docs
   arma::mat zdocs = arma::zeros(D, maxNd);
   // D x max(N_d) x m array to store topic draws
@@ -1305,7 +1286,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
-  arma::mat zbar = arma::zeros(D, K);
+  arma::mat zbar(D, K);
   for (uint16_t k = 0; k < K; k++)
     init_topic_probs(k) = 1.0 / static_cast<float>(K);
 
@@ -1317,14 +1298,14 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
-      ndk(d, k, 0) = sum(zdocs.row(d) == (k + 1));
+      ndk(d, k) = sum(zdocs.row(d) == (k + 1));
       // Compute topic empirical proportions
-      zbar(d, k) = static_cast<double>(ndk(d, k, 0)) / static_cast<double>(N(d));
+      zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
     }
   }
 
   // Counts of topic-word co-occurences in corpus (K x V)
-  arma::mat nkm = arma::zeros(K, V);
+  arma::mat nkm(K, V);
   try {
     nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
   } catch(std::exception& e) {
@@ -1332,10 +1313,11 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
       " while computing topic-word co-occurrences\n";
   }
   NumericVector nk(K);
-  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
 
   // Initialize sigma^2
-  sigma2m(0) = var(y);
+  sigma2 = var(y);
+  sigma2m(0) = sigma2;
 
   if (constrain_eta) {
     // Constrain starting values of eta s.t. components are in descending order
@@ -1344,15 +1326,14 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   etam.row(0) = eta_start.t();
 
   if (verbose) {
-    Rcout << 1 << "eta: " << etam.row(0) << "~~~~ sigma2: " << sigma2m(0) <<
+    Rcout << 1 << "eta: " << etam.row(0) << "~~~~ sigma2: " << sigma2 <<
       "~~~~ zbar2" << zbar.row(1) << "\n";
   }
 
   // Estimate theta
   for (uint32_t d : docs_index) {
     try {
-      thetam.slice(0).row(d) = est_thetad_cpp(
-        ndk.slice(0).row(d).t(), alpha_, K).t();
+      theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " when estimating theta vector for document " << d << "\n";
@@ -1362,8 +1343,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(
-        k, V, nkm.row(k).t(), gamma_).t();
+      beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -1375,14 +1355,14 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_prod = arma::as_scalar(
     (y - zbar * etam.row(0).t()).t() * (y - zbar * etam.row(0).t())
   );
-  loglike(0) = -0.5 / sigma2m(0) * temp_prod;
+  loglike(0) = -0.5 / sigma2 * temp_prod;
   // Add likelihood of documents
   for (uint32_t d : docs_index) {
     for (uint32_t n = 0; n < N(d); n++) {
       uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
       uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-      loglike(0) += log(thetam(d, zdn, 0));  // f(z_{dn} | theta_d)
-      loglike(0) += log(betam(zdn, wdn, 0)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+      loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+      loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
     }
   }
   logpost(0) = loglike(0);
@@ -1397,7 +1377,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_betapost = 0;
   for (uint16_t k = 0; k < K; k++) {
     for (uint32_t v = 0; v < V; v++) {
-      temp_betapost += log(betam(k, v, 0));
+      temp_betapost += log(beta(k, v));
     }
   }
   logpost(0) += ((gamma_ - 1.0) * temp_betapost);
@@ -1405,14 +1385,14 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_thetapost = 0;
   for (uint32_t d : docs_index) {
     for (uint16_t k = 0; k < K; k++) {
-      temp_thetapost = log(thetam(d, k, 0));
+      temp_thetapost = log(theta(d, k));
     }
   }
   logpost(0) += ((alpha_ - 1) * temp_thetapost);
 
   // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
-  l_pred.row(0) = post_pred_slda(zbar, y, etam.row(0).t(), sigma2m(0)).t();
+  l_pred.row(0) = post_pred_slda(zbar, y, etam.row(0).t(), sigma2).t();
 
   Progress p(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
@@ -1423,10 +1403,10 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
         // Exclude word n from topic counts in doc d
-        arma::vec ndk_n = ndk.slice(i - 1).row(d).t();
+        arma::vec ndk_n = ndk.row(d).t();
         ndk_n(topic - 1)--;
         if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
-        ndk.slice(i).row(d) = ndk_n.t();
+        ndk.row(d) = ndk_n.t();
         // Exclude word n from topic counts in corpus
         arma::vec nk_n = nk;
         nk_n(topic - 1)--;
@@ -1442,17 +1422,17 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 
         try {
           topic = draw_zdn_slda(y(d), zbar.row(d).t(), etam.row(i - 1).t(),
-                               sigma2m(i - 1), K, V, ndk_n, nkm_n.t(), nk_n,
-                               alpha_, gamma_);
+                                sigma2m(i - 1), K, V, ndk_n, nkm_n.t(), nk_n,
+                                alpha_, gamma_);
         } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() <<
             " occurred while drawing topic for word " << n << " in document " <<
-            d << "\n";
+              d << "\n";
         }
         zdocs(d, n) = topic;
         topicsm(d, n, i) = topic;
         // Update topic count in doc d
-        ndk(d, topic - 1, i)++;
+        ndk(d, topic - 1)++;
         // Update topic count in corpus
         nk(topic - 1)++;
         // Update topic-word counts in corpus
@@ -1462,13 +1442,11 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     for (uint32_t d: docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        ndk(d, k, i) = sum(zdocs.row(d) == (k + 1));
-        zbar(d, k) = static_cast<double>(ndk(d, k, i)) /
-          static_cast<double>(N(d));
+        ndk(d, k) = sum(zdocs.row(d) == (k + 1));
+        zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
         // Estimate beta
         try {
-          betam.slice(i).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                                                gamma_).t();
+          beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
         } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
             "of beta matrix\n";
@@ -1476,8 +1454,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
       // Estimate theta
       try {
-        thetam.slice(i).row(d) = est_thetad_cpp(
-          ndk.slice(i).row(d).t(), alpha_, K).t();
+        theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
@@ -1532,8 +1509,8 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
       for (uint32_t n = 0; n < N(d); n++) {
         uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
         uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-        loglike(i) += log(thetam(d, zdn, i));  // f(z_{dn} | theta_d)
-        loglike(i) += log(betam(zdn, wdn, i)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+        loglike(i) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+        loglike(i) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
       }
     }
     logpost(i) = loglike(i);
@@ -1548,7 +1525,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_betapost = 0;
     for (uint16_t k = 0; k < K; k++) {
       for (uint32_t v = 0; v < V; v++) {
-        temp_betapost += log(betam(k, v, i));
+        temp_betapost += log(beta(k, v));
       }
     }
     logpost(i) += ((gamma_ - 1.0) * temp_betapost);
@@ -1556,7 +1533,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_thetapost = 0;
     for (uint32_t d : docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        temp_thetapost = log(thetam(d, k, i));
+        temp_thetapost = log(theta(d, k));
       }
     }
     logpost(i) += ((alpha_ - 1) * temp_thetapost);
@@ -1578,15 +1555,11 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   NumericVector keep_sigma2(m - burn);
   NumericVector keep_loglike(m - burn);
   NumericVector keep_logpost(m - burn);
-  arma::cube keep_beta(K, V, m - burn);
-  arma::cube keep_theta(D, K, m - burn);
   arma::cube keep_topics(D, maxNd, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_sigma2(t) = sigma2m(t + burn);
     keep_loglike(t) = loglike(t + burn);
     keep_logpost(t) = logpost(t + burn);
-    keep_beta.slice(t) = betam.slice(t + burn);
-    keep_theta.slice(t) = thetam.slice(t + burn);
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
@@ -1602,8 +1575,6 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("eta") = etam.rows(burn, m - 1);
   slda.slot("sigma2") = keep_sigma2;
   slda.slot("topics") = keep_topics;
-  slda.slot("beta") = keep_beta;
-  slda.slot("theta") = keep_theta;
   slda.slot("mu0") = mu0;
   slda.slot("sigma0") = sigma0;
   slda.slot("alpha") = alpha_;
@@ -1681,12 +1652,10 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
 
-  // D x K x m array
-  arma::cube thetam = arma::zeros(D, K, m);
-  // K x V x m array
-  arma::cube betam = arma::zeros(K, V, m);
-  // D x K x m array to store topic draw counts
-  arma::cube ndk = arma::zeros(D, K, m);
+  arma::mat theta(D, K);
+  arma::mat beta(K, V);
+  // Topic draw counts
+  arma::mat ndk(D, K);
   // Topic draws for all words and docs
   arma::mat zdocs = arma::zeros(D, maxNd);
   // D x max(N_d) x m array to store topic draws
@@ -1694,7 +1663,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
-  arma::mat zbar = arma::zeros(D, K);
+  arma::mat zbar(D, K);
   for (uint16_t k = 0; k < K; k++)
     init_topic_probs(k) = 1.0 / static_cast<float>(K);
   for (uint32_t d : docs_index) {
@@ -1705,14 +1674,14 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
-      ndk(d, k, 0) = sum(zdocs.row(d) == (k + 1));
+      ndk(d, k) = sum(zdocs.row(d) == (k + 1));
       // Compute topic empirical proportions
-      zbar(d, k) = static_cast<double>(ndk(d, k, 0)) / static_cast<double>(N(d));
+      zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
     }
   }
 
   // Counts of topic-word co-occurences in corpus (K x V)
-  arma::mat nkm = arma::zeros(K, V);
+  arma::mat nkm(K, V);
   try {
     nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
   } catch(std::exception& e) {
@@ -1720,7 +1689,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
       " while computing topic-word co-occurrences\n";
   }
   NumericVector nk(K);
-  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
 
   // Initialize sigma^2
   sigma2m(0) = var(y);
@@ -1733,8 +1702,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate theta
   for (uint32_t d : docs_index) {
     try {
-      thetam.slice(0).row(d) = est_thetad_cpp(
-        ndk.slice(0).row(d).t(), alpha_, K).t();
+      theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " when estimating theta vector for document " << d << "\n";
@@ -1744,8 +1712,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(
-        k, V, nkm.row(k).t(), gamma_).t();
+      beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -1763,8 +1730,8 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
     for (uint32_t n = 0; n < N(d); n++) {
       uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
       uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-      loglike(0) += log(thetam(d, zdn, 0));  // f(z_{dn} | theta_d)
-      loglike(0) += log(betam(zdn, wdn, 0)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+      loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+      loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
     }
   }
   logpost(0) = loglike(0);
@@ -1779,7 +1746,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_betapost = 0;
   for (uint16_t k = 0; k < K; k++) {
     for (uint32_t v = 0; v < V; v++) {
-      temp_betapost += log(betam(k, v, 0));
+      temp_betapost += log(beta(k, v));
     }
   }
   logpost(0) += ((gamma_ - 1.0) * temp_betapost);
@@ -1787,7 +1754,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_thetapost = 0;
   for (uint32_t d : docs_index) {
     for (uint16_t k = 0; k < K; k++) {
-      temp_thetapost = log(thetam(d, k, 0));
+      temp_thetapost = log(theta(d, k));
     }
   }
   logpost(0) += ((alpha_ - 1) * temp_thetapost);
@@ -1805,10 +1772,10 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
         // Exclude word n from topic counts in doc d
-        arma::vec ndk_n = ndk.slice(i - 1).row(d).t();
+        arma::vec ndk_n = ndk.row(d).t();
         ndk_n(topic - 1)--;
         if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
-        ndk.slice(i).row(d) = ndk_n.t();
+        ndk.row(d) = ndk_n.t();
         // Exclude word n from topic counts in corpus
         arma::vec nk_n = nk;
         nk_n(topic - 1)--;
@@ -1835,7 +1802,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
         zdocs(d, n) = topic;
         topicsm(d, n, i) = topic;
         // Update topic count in doc d
-        ndk(d, topic - 1, i)++;
+        ndk(d, topic - 1)++;
         // Update topic count in corpus
         nk(topic - 1)++;
         // Update topic-word counts in corpus
@@ -1845,13 +1812,11 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     for (uint32_t d: docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        ndk(d, k, i) = sum(zdocs.row(d) == (k + 1));
-        zbar(d, k) = static_cast<double>(ndk(d, k, i)) /
-          static_cast<double>(N(d));
+        ndk(d, k) = sum(zdocs.row(d) == (k + 1));
+        zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
         // Estimate beta
         try {
-          betam.slice(i).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                      gamma_).t();
+          beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
         } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
             "of beta matrix\n";
@@ -1859,8 +1824,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
       // Estimate theta
       try {
-        thetam.slice(i).row(d) = est_thetad_cpp(
-          ndk.slice(i).row(d).t(), alpha_, K).t();
+        theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
@@ -1893,8 +1857,8 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
       for (uint32_t n = 0; n < N(d); n++) {
         uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
         uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-        loglike(i) += log(thetam(d, zdn, i));  // f(z_{dn} | theta_d)
-        loglike(i) += log(betam(zdn, wdn, i)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+        loglike(i) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+        loglike(i) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
       }
     }
     logpost(i) = loglike(i);
@@ -1909,7 +1873,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_betapost = 0;
     for (uint16_t k = 0; k < K; k++) {
       for (uint32_t v = 0; v < V; v++) {
-        temp_betapost += log(betam(k, v, i));
+        temp_betapost += log(beta(k, v));
       }
     }
     logpost(i) += ((gamma_ - 1.0) * temp_betapost);
@@ -1917,7 +1881,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_thetapost = 0;
     for (uint32_t d : docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        temp_thetapost = log(thetam(d, k, i));
+        temp_thetapost = log(theta(d, k));
       }
     }
     logpost(i) += ((alpha_ - 1) * temp_thetapost);
@@ -1939,15 +1903,11 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   NumericVector keep_sigma2(m - burn);
   NumericVector keep_loglike(m - burn);
   NumericVector keep_logpost(m - burn);
-  arma::cube keep_beta(K, V, m - burn);
-  arma::cube keep_theta(D, K, m - burn);
   arma::cube keep_topics(D, maxNd, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_sigma2(t) = sigma2m(t + burn);
     keep_loglike(t) = loglike(t + burn);
     keep_logpost(t) = logpost(t + burn);
-    keep_beta.slice(t) = betam.slice(t + burn);
-    keep_theta.slice(t) = thetam.slice(t + burn);
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
@@ -1963,8 +1923,6 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("eta") = etam.rows(burn, m - 1);
   slda.slot("sigma2") = keep_sigma2;
   slda.slot("topics") = keep_topics;
-  slda.slot("beta") = keep_beta;
-  slda.slot("theta") = keep_theta;
   slda.slot("mu0") = mu0;
   slda.slot("sigma0") = sigma0;
   slda.slot("alpha") = alpha_;
@@ -2045,13 +2003,11 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Add prior on sigma2
   logpost(0) += ((-0.5 * a0 - 1.0) * log(sigma2m(0)) - 0.5 * b0 / sigma2m(0));
 
-  Rcout << "Compute WAIC(0)\n";
-
   // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_mlr(x, y, etam.row(0).t(), sigma2m(0)).t();
 
-  Rcout << "Start iterations\n";
+  Rcout << "Start MCMC iterations\n";
 
   Progress p(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
@@ -2097,7 +2053,6 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
   }
-  //const IntegerVector keep = seq(burn, m - 1);
   NumericVector keep_sigma2(m - burn);
   NumericVector keep_loglike(m - burn);
   NumericVector keep_logpost(m - burn);
@@ -2142,8 +2097,8 @@ arma::colvec post_pred_slda_logit(const arma::mat& zbar,
                                   const arma::colvec& eta) {
 
   const uint16_t D = zbar.n_rows;
-  arma::colvec y_pred = arma::zeros(D); // Store set of D predictions
-  arma::colvec loglike_pred = arma::zeros(D);
+  arma::colvec y_pred(D); // Store set of D predictions
+  arma::colvec loglike_pred(D);
   arma::colvec mu_hat(D);
   mu_hat = zbar * eta;
   for (uint16_t d = 0; d < D; d++) {
@@ -2173,8 +2128,8 @@ arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
   // Omit last topic mean due to colinearity with intercept in x
   //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
   arma::mat xzb = join_rows(x, zbar);
-  arma::colvec y_pred = arma::zeros(D); // Store set of D predictions
-  arma::colvec loglike_pred = arma::zeros(D);
+  arma::colvec y_pred(D); // Store set of D predictions
+  arma::colvec loglike_pred(D);
   arma::colvec mu_hat(D);
   mu_hat = xzb * eta;
   for (uint16_t d = 0; d < D; d++) {
@@ -2196,8 +2151,8 @@ arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
 arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
 
   const uint16_t D = x.n_rows;
-  arma::colvec y_pred = arma::zeros(D); // Store set of D predictions
-  arma::colvec loglike_pred = arma::zeros(D);
+  arma::colvec y_pred(D); // Store set of D predictions
+  arma::colvec loglike_pred(D);
   arma::colvec mu_hat(D);
   mu_hat = x * eta;
   for (uint16_t d = 0; d < D; d++) {
@@ -2205,7 +2160,7 @@ arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
     uint16_t yhat;
     yhat = Rcpp::rbinom(1, 1, phat)(0);
     y_pred(d) = yhat;
-    loglike_pred(d) += (yhat * log(phat) +
+    loglike_pred(d) = (yhat * log(phat) +
       (1.0 - yhat) * log(1.0 / (1.0 + exp(arma::as_scalar(mu_hat(d))))));
   }
 
@@ -2259,17 +2214,15 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
   const uint32_t maxNd = max(N);
   // Omit last topic since colinear with intercept
-  arma::mat etam = arma::zeros(m, K);
+  arma::mat etam(m, K);
   etam.row(0) = eta_start.t();
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
 
-  // D x K x m array
-  arma::cube thetam = arma::zeros(D, K, m);
-  // K x V x m array
-  arma::cube betam = arma::zeros(K, V, m);
-  // D x K x m array to store topic draw counts
-  arma::cube ndk = arma::zeros(D, K, m);
+  arma::mat theta(D, K);
+  arma::mat beta(K, V);
+  // Topic draw counts
+  arma::mat ndk(D, K);
   // Topic draws for all words and docs
   arma::mat zdocs = arma::zeros(D, maxNd);
   // D x max(N_d) x m array to store topic draws
@@ -2277,7 +2230,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
-  arma::mat zbar = arma::zeros(D, K);
+  arma::mat zbar(D, K);
   for (uint16_t k = 0; k < K; k++)
     init_topic_probs(k) = 1.0 / static_cast<float>(K);
   for (uint32_t d : docs_index) {
@@ -2288,14 +2241,14 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
-      ndk(d, k, 0) = sum(zdocs.row(d) == (k + 1));
+      ndk(d, k) = sum(zdocs.row(d) == (k + 1));
       // Compute topic empirical proportions
-      zbar(d, k) = static_cast<double>(ndk(d, k, 0)) / static_cast<double>(N(d));
+      zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
     }
   }
 
   // Counts of topic-word co-occurences in corpus (K x V)
-  arma::mat nkm = arma::zeros(K, V);
+  arma::mat nkm(K, V);
   try {
     nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
   } catch(std::exception& e) {
@@ -2303,7 +2256,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       " while computing topic-word co-occurrences\n";
   }
   NumericVector nk(K);
-  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
 
   if (verbose) {
     Rcout << 1 << "eta: " << etam.row(0) << "\n";
@@ -2312,8 +2265,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate theta
   for (uint32_t d : docs_index) {
     try {
-      thetam.slice(0).row(d) = est_thetad_cpp(
-        ndk.slice(0).row(d).t(), alpha_, K).t();
+      theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " when estimating theta vector for document " << d << "\n";
@@ -2323,8 +2275,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(
-        k, V, nkm.row(k).t(), gamma_).t();
+      beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -2347,8 +2298,8 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     for (uint32_t n = 0; n < N(d); n++) {
       uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
       uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-      loglike(0) += log(thetam(d, zdn, 0));  // f(z_{dn} | theta_d)
-      loglike(0) += log(betam(zdn, wdn, 0)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+      loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+      loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
     }
   }
 
@@ -2362,7 +2313,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_betapost = 0;
   for (uint16_t k = 0; k < K; k++) {
     for (uint32_t v = 0; v < V; v++) {
-      temp_betapost += log(betam(k, v, 0));
+      temp_betapost += log(beta(k, v));
     }
   }
   logpost(0) += ((gamma_ - 1.0) * temp_betapost);
@@ -2370,7 +2321,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_thetapost = 0;
   for (uint32_t d : docs_index) {
     for (uint16_t k = 0; k < K; k++) {
-      temp_thetapost = log(thetam(d, k, 0));
+      temp_thetapost = log(theta(d, k));
     }
   }
   logpost(0) += ((alpha_ - 1) * temp_thetapost);
@@ -2393,10 +2344,10 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
         // Exclude word n from topic counts in doc d
-        arma::vec ndk_n = ndk.slice(i - 1).row(d).t();
+        arma::vec ndk_n = ndk.row(d).t();
         ndk_n(topic - 1)--;
         if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
-        ndk.slice(i).row(d) = ndk_n.t();
+        ndk.row(d) = ndk_n.t();
         // Exclude word n from topic counts in corpus
         arma::vec nk_n = nk;
         nk_n(topic - 1)--;
@@ -2423,7 +2374,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
         zdocs(d, n) = topic;
         topicsm(d, n, i) = topic;
         // Update topic count in doc d
-        ndk(d, topic - 1, i)++;
+        ndk(d, topic - 1)++;
         // Update topic count in corpus
         nk(topic - 1)++;
         // Update topic-word counts in corpus
@@ -2433,13 +2384,11 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     for (uint32_t d: docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        ndk(d, k, i) = sum(zdocs.row(d) == (k + 1));
-        zbar(d, k) = static_cast<double>(ndk(d, k, i)) /
-          static_cast<double>(N(d));
+        ndk(d, k) = sum(zdocs.row(d) == (k + 1));
+        zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
         // Estimate beta
         try {
-          betam.slice(i).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                      gamma_).t();
+          beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
         } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
             "of beta matrix\n";
@@ -2447,8 +2396,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
       // Estimate theta
       try {
-        thetam.slice(i).row(d) = est_thetad_cpp(
-          ndk.slice(i).row(d).t(), alpha_, K).t();
+        theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
@@ -2478,8 +2426,8 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       for (uint32_t n = 0; n < N(d); n++) {
         uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
         uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-        loglike(i) += log(thetam(d, zdn, i));  // f(z_{dn} | theta_d)
-        loglike(i) += log(betam(zdn, wdn, i)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+        loglike(i) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+        loglike(i) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
       }
     }
     logpost(i) = loglike(i);
@@ -2492,7 +2440,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_betapost = 0;
     for (uint16_t k = 0; k < K; k++) {
       for (uint32_t v = 0; v < V; v++) {
-        temp_betapost += log(betam(k, v, i));
+        temp_betapost += log(beta(k, v));
       }
     }
     logpost(i) += ((gamma_ - 1.0) * temp_betapost);
@@ -2500,7 +2448,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_thetapost = 0;
     for (uint32_t d : docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        temp_thetapost = log(thetam(d, k, i));
+        temp_thetapost = log(theta(d, k));
       }
     }
     logpost(i) += ((alpha_ - 1) * temp_thetapost);
@@ -2538,17 +2486,12 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
   }
 
-  const IntegerVector keep = seq(burn, m - 1);
   NumericVector keep_loglike(m - burn);
   NumericVector keep_logpost(m - burn);
-  arma::cube keep_beta(K, V, m - burn);
-  arma::cube keep_theta(D, K, m - burn);
   arma::cube keep_topics(D, maxNd, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_loglike(t) = loglike(t + burn);
     keep_logpost(t) = logpost(t + burn);
-    keep_beta.slice(t) = betam.slice(t + burn);
-    keep_theta.slice(t) = thetam.slice(t + burn);
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
@@ -2563,8 +2506,6 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("nchain") = m - burn;
   slda.slot("eta") = etam.rows(burn, m - 1);
   slda.slot("topics") = keep_topics;
-  slda.slot("beta") = keep_beta;
-  slda.slot("theta") = keep_theta;
   slda.slot("mu0") = mu0;
   slda.slot("sigma0") = sigma0;
   slda.slot("alpha") = alpha_;
@@ -2636,17 +2577,15 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
   const uint32_t maxNd = max(N);
   // Omit last topic since colinear with intercept
-  arma::mat etam = arma::zeros(m, p + K);
+  arma::mat etam(m, p + K);
   etam.row(0) = eta_start.t();
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
 
-  // D x K x m array
-  arma::cube thetam = arma::zeros(D, K, m);
-  // K x V x m array
-  arma::cube betam = arma::zeros(K, V, m);
-  // D x K x m array to store topic draw counts
-  arma::cube ndk = arma::zeros(D, K, m);
+  arma::mat theta(D, K);
+  arma::mat beta(K, V);
+  // Topic draw counts
+  arma::mat ndk(D, K);
   // Topic draws for all words and docs
   arma::mat zdocs = arma::zeros(D, maxNd);
   // D x max(N_d) x m array to store topic draws
@@ -2654,7 +2593,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
-  arma::mat zbar = arma::zeros(D, K);
+  arma::mat zbar(D, K);
   for (uint16_t k = 0; k < K; k++)
     init_topic_probs(k) = 1.0 / static_cast<float>(K);
   for (uint32_t d : docs_index) {
@@ -2665,14 +2604,14 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
-      ndk(d, k, 0) = sum(zdocs.row(d) == (k + 1));
+      ndk(d, k) = sum(zdocs.row(d) == (k + 1));
       // Compute topic empirical proportions
-      zbar(d, k) = static_cast<double>(ndk(d, k, 0)) / static_cast<double>(N(d));
+      zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
     }
   }
 
   // Counts of topic-word co-occurences in corpus (K x V)
-  arma::mat nkm = arma::zeros(K, V);
+  arma::mat nkm(K, V);
   try {
     nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
   } catch(std::exception& e) {
@@ -2680,7 +2619,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       " while computing topic-word co-occurrences\n";
   }
   NumericVector nk(K);
-  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
 
   if (verbose) {
     Rcout << 1 << "eta: " << etam.row(0) << "\n";
@@ -2689,8 +2628,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate theta
   for (uint32_t d : docs_index) {
     try {
-      thetam.slice(0).row(d) = est_thetad_cpp(
-        ndk.slice(0).row(d).t(), alpha_, K).t();
+      theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " when estimating theta vector for document " << d << "\n";
@@ -2700,8 +2638,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(
-        k, V, nkm.row(k).t(), gamma_).t();
+      beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -2727,8 +2664,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     for (uint32_t n = 0; n < N(d); n++) {
       uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
       uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-      loglike(0) += log(thetam(d, zdn, 0));  // f(z_{dn} | theta_d)
-      loglike(0) += log(betam(zdn, wdn, 0)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+      loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+      loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
     }
   }
 
@@ -2742,7 +2679,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_betapost = 0;
   for (uint16_t k = 0; k < K; k++) {
     for (uint32_t v = 0; v < V; v++) {
-      temp_betapost += log(betam(k, v, 0));
+      temp_betapost += log(beta(k, v));
     }
   }
   logpost(0) += ((gamma_ - 1.0) * temp_betapost);
@@ -2750,7 +2687,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   double temp_thetapost = 0;
   for (uint32_t d : docs_index) {
     for (uint16_t k = 0; k < K; k++) {
-      temp_thetapost = log(thetam(d, k, 0));
+      temp_thetapost = log(theta(d, k));
     }
   }
   logpost(0) += ((alpha_ - 1) * temp_thetapost);
@@ -2773,10 +2710,10 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
         // Exclude word n from topic counts in doc d
-        arma::vec ndk_n = ndk.slice(i - 1).row(d).t();
+        arma::vec ndk_n = ndk.row(d).t();
         ndk_n(topic - 1)--;
         if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
-        ndk.slice(i).row(d) = ndk_n.t();
+        ndk.row(d) = ndk_n.t();
         // Exclude word n from topic counts in corpus
         arma::vec nk_n = nk;
         nk_n(topic - 1)--;
@@ -2803,7 +2740,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
         zdocs(d, n) = topic;
         topicsm(d, n, i) = topic;
         // Update topic count in doc d
-        ndk(d, topic - 1, i)++;
+        ndk(d, topic - 1)++;
         // Update topic count in corpus
         nk(topic - 1)++;
         // Update topic-word counts in corpus
@@ -2813,13 +2750,11 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 
     for (uint32_t d: docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        ndk(d, k, i) = sum(zdocs.row(d) == (k + 1));
-        zbar(d, k) = static_cast<double>(ndk(d, k, i)) /
-          static_cast<double>(N(d));
+        ndk(d, k) = sum(zdocs.row(d) == (k + 1));
+        zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
         // Estimate beta
         try {
-          betam.slice(i).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                      gamma_).t();
+          beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
         } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
             "of beta matrix\n";
@@ -2827,8 +2762,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
       // Estimate theta
       try {
-        thetam.slice(i).row(d) = est_thetad_cpp(
-          ndk.slice(i).row(d).t(), alpha_, K).t();
+        theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
@@ -2861,8 +2795,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       for (uint32_t n = 0; n < N(d); n++) {
         uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
         uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-        loglike(i) += log(thetam(d, zdn, i));  // f(z_{dn} | theta_d)
-        loglike(i) += log(betam(zdn, wdn, i)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+        loglike(i) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+        loglike(i) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
       }
     }
     logpost(i) = loglike(i);
@@ -2875,7 +2809,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_betapost = 0;
     for (uint16_t k = 0; k < K; k++) {
       for (uint32_t v = 0; v < V; v++) {
-        temp_betapost += log(betam(k, v, i));
+        temp_betapost += log(beta(k, v));
       }
     }
     logpost(i) += ((gamma_ - 1.0) * temp_betapost);
@@ -2883,7 +2817,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     double temp_thetapost = 0;
     for (uint32_t d : docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        temp_thetapost = log(thetam(d, k, i));
+        temp_thetapost = log(theta(d, k));
       }
     }
     logpost(i) += ((alpha_ - 1) * temp_thetapost);
@@ -2922,17 +2856,12 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
     Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
   }
 
-  const IntegerVector keep = seq(burn, m - 1);
   NumericVector keep_loglike(m - burn);
   NumericVector keep_logpost(m - burn);
-  arma::cube keep_beta(K, V, m - burn);
-  arma::cube keep_theta(D, K, m - burn);
   arma::cube keep_topics(D, maxNd, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_loglike(t) = loglike(t + burn);
     keep_logpost(t) = logpost(t + burn);
-    keep_beta.slice(t) = betam.slice(t + burn);
-    keep_theta.slice(t) = thetam.slice(t + burn);
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
@@ -2947,8 +2876,6 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   slda.slot("nchain") = m - burn;
   slda.slot("eta") = etam.rows(burn, m - 1);
   slda.slot("topics") = keep_topics;
-  slda.slot("beta") = keep_beta;
-  slda.slot("theta") = keep_theta;
   slda.slot("mu0") = mu0;
   slda.slot("sigma0") = sigma0;
   slda.slot("alpha") = alpha_;
@@ -2999,7 +2926,7 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
   const uint32_t D = y.size();
   const uint16_t pp1 = x.n_cols;
 
-  arma::mat etam = arma::zeros(m, pp1);
+  arma::mat etam(m, pp1);
   etam.row(0) = eta_start.t();
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
@@ -3155,16 +3082,13 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
 
   for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
   const uint32_t maxNd = max(N);
-  arma::mat etam(m, K);
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
 
-  // D x K x m array
-  arma::cube thetam = arma::zeros(D, K, m);
-  // K x V x m array
-  arma::cube betam = arma::zeros(K, V, m);
-  // D x K x m array to store topic draw counts
-  arma::cube ndk = arma::zeros(D, K, m);
+  arma::mat theta(D, K);
+  arma::mat beta(K, V);
+  // Topic draw counts
+  arma::mat ndk(D, K);
   // Topic draws for all words and docs
   arma::mat zdocs = arma::zeros(D, maxNd);
   // D x max(N_d) x m array to store topic draws
@@ -3182,12 +3106,12 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
     }
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
-      ndk(d, k, 0) = sum(zdocs.row(d) == (k + 1));
+      ndk(d, k) = sum(zdocs.row(d) == (k + 1));
     }
   }
 
   // Counts of topic-word co-occurences in corpus (K x V)
-  arma::mat nkm = arma::zeros(K, V);
+  arma::mat nkm(K, V);
   try {
     nkm = count_topic_word_cpp(D, K, V, zdocs, docs);
   } catch(std::exception& e) {
@@ -3195,13 +3119,12 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
       " while computing topic-word co-occurrences\n";
   }
   NumericVector nk(K);
-  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.slice(0).col(k));
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
 
   // Estimate theta
   for (uint32_t d : docs_index) {
     try {
-      thetam.slice(0).row(d) = est_thetad_cpp(
-        ndk.slice(0).row(d).t(), alpha_, K).t();
+      theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " when estimating theta vector for document " << d << "\n";
@@ -3211,8 +3134,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      betam.slice(0).row(k) = est_betak_cpp(
-        k, V, nkm.row(k).t(), gamma_).t();
+      beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -3225,8 +3147,8 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
     for (uint32_t n = 0; n < N(d); n++) {
       uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
       uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-      loglike(0) += log(thetam(d, zdn, 0));  // f(z_{dn} | theta_d)
-      loglike(0) += log(betam(zdn, wdn, 0)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+      loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+      loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
     }
   }
   logpost(0) = loglike(0);
@@ -3234,7 +3156,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   double temp_betapost = 0;
   for (uint16_t k = 0; k < K; k++) {
     for (uint32_t v = 0; v < V; v++) {
-      temp_betapost += log(betam(k, v, 0));
+      temp_betapost += log(beta(k, v));
     }
   }
   logpost(0) += ((gamma_ - 1.0) * temp_betapost);
@@ -3242,7 +3164,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   double temp_thetapost = 0;
   for (uint32_t d : docs_index) {
     for (uint16_t k = 0; k < K; k++) {
-      temp_thetapost = log(thetam(d, k, 0));
+      temp_thetapost = log(theta(d, k));
     }
   }
   logpost(0) += ((alpha_ - 1) * temp_thetapost);
@@ -3256,10 +3178,10 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
         // Exclude word n from topic counts in doc d
-        arma::vec ndk_n = ndk.slice(i - 1).row(d).t();
+        arma::vec ndk_n = ndk.row(d).t();
         ndk_n(topic - 1)--;
         if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
-        ndk.slice(i).row(d) = ndk_n.t();
+        ndk.row(d) = ndk_n.t();
         // Exclude word n from topic counts in corpus
         arma::vec nk_n = nk;
         nk_n(topic - 1)--;
@@ -3283,7 +3205,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
         zdocs(d, n) = topic;
         topicsm(d, n, i) = topic;
         // Update topic count in doc d
-        ndk(d, topic - 1, i)++;
+        ndk(d, topic - 1)++;
         // Update topic count in corpus
         nk(topic - 1)++;
         // Update topic-word counts in corpus
@@ -3293,11 +3215,10 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
 
     for (uint32_t d: docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        ndk(d, k, i) = sum(zdocs.row(d) == (k + 1));
+        ndk(d, k) = sum(zdocs.row(d) == (k + 1));
         // Estimate beta
         try {
-          betam.slice(i).row(k) = est_betak_cpp(k, V, nkm.row(k).t(),
-                      gamma_).t();
+          beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
         } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
             "of beta matrix\n";
@@ -3305,8 +3226,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
       }
       // Estimate theta
       try {
-        thetam.slice(i).row(d) = est_thetad_cpp(
-          ndk.slice(i).row(d).t(), alpha_, K).t();
+        theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
@@ -3319,8 +3239,8 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
       for (uint32_t n = 0; n < N(d); n++) {
         uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
         uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-        loglike(i) += log(thetam(d, zdn, i));  // f(z_{dn} | theta_d)
-        loglike(i) += log(betam(zdn, wdn, i)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+        loglike(i) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+        loglike(i) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
       }
     }
     logpost(i) = loglike(i);
@@ -3328,7 +3248,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
     double temp_betapost = 0;
     for (uint16_t k = 0; k < K; k++) {
       for (uint32_t v = 0; v < V; v++) {
-        temp_betapost += log(betam(k, v, i));
+        temp_betapost += log(beta(k, v));
       }
     }
     logpost(i) += ((gamma_ - 1.0) * temp_betapost);
@@ -3336,7 +3256,7 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
     double temp_thetapost = 0;
     for (uint32_t d : docs_index) {
       for (uint16_t k = 0; k < K; k++) {
-        temp_thetapost = log(thetam(d, k, i));
+        temp_thetapost = log(theta(d, k));
       }
     }
     logpost(i) += ((alpha_ - 1) * temp_thetapost);
@@ -3349,14 +3269,10 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   const IntegerVector keep = seq(burn, m - 1);
   NumericVector keep_loglike(m - burn);
   NumericVector keep_logpost(m - burn);
-  arma::cube keep_beta(K, V, m - burn);
-  arma::cube keep_theta(D, K, m - burn);
   arma::cube keep_topics(D, maxNd, m - burn);
   for (uint32_t t = 0; t < m - burn; t ++) {
     keep_loglike(t) = loglike(t + burn);
     keep_logpost(t) = logpost(t + burn);
-    keep_beta.slice(t) = betam.slice(t + burn);
-    keep_theta.slice(t) = thetam.slice(t + burn);
     keep_topics.slice(t) = topicsm.slice(t + burn);
   }
 
@@ -3365,8 +3281,6 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
   lda.slot("nvocab") = V;
   lda.slot("nchain") = m - burn;
   lda.slot("topics") = keep_topics;
-  lda.slot("beta") = keep_beta;
-  lda.slot("theta") = keep_theta;
   lda.slot("alpha") = alpha_;
   lda.slot("gamma") = gamma_;
   lda.slot("loglike") = keep_loglike;
