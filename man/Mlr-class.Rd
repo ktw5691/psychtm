@@ -4,9 +4,9 @@
 \name{Mlr-class}
 \alias{Mlr-class}
 \alias{Mlr}
-\title{An S4 class to represent a logistic regression model.}
+\title{An S4 class to represent a regression model.}
 \description{
-An S4 class to represent a logistic regression model.
+An S4 class to represent a regression model.
 }
 \section{Slots}{
 

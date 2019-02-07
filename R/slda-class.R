@@ -5,10 +5,7 @@
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
-#' unused word index (i.e., the document did not have a word at that index).
-#' @slot beta A K x V x M numeric array of draws of topic-word probabilities.
-#' @slot theta A D x K x M numeric array of draws of document-topic
-#' probabilities.
+#'   unused word index (i.e., the document did not have a word at that index).
 #' @slot alpha A numeric prior hyperparameter for theta.
 #' @slot gamma A numeric prior hyperparameter for beta.
 #' @slot loglike The log-likelihood (up to an additive constant).
@@ -19,8 +16,6 @@ Lda <- setClass("Lda",
                               nvocab    = "numeric",
                               nchain    = "numeric",
                               topics    = "numeric",
-                              beta      = "array",
-                              theta     = "array",
                               alpha     = "numeric",
                               gamma     = "numeric",
                               loglike   = "numeric",
@@ -40,10 +35,7 @@ Lda <- setClass("Lda",
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
-#' unused word index (i.e., the document did not have a word at that index).
-#' @slot beta A K x V x M numeric array of draws of topic-word probabilities.
-#' @slot theta A D x K x M numeric array of draws of document-topic
-#' probabilities.
+#'   unused word index (i.e., the document did not have a word at that index).
 #' @slot alpha A numeric prior hyperparameter for theta.
 #' @slot gamma A numeric prior hyperparameter for beta.
 #' @slot loglike The log-likelihood (up to an additive constant).
@@ -78,10 +70,7 @@ Slda <- setClass("Slda",
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
-#' unused word index (i.e., the document did not have a word at that index).
-#' @slot beta A K x V x M numeric array of draws of topic-word probabilities.
-#' @slot theta A D x K x M numeric array of draws of document-topic
-#' probabilities.
+#'   unused word index (i.e., the document did not have a word at that index).
 #' @slot alpha A numeric prior hyperparameter for theta.
 #' @slot gamma A numeric prior hyperparameter for beta.
 #' @slot loglike The log-likelihood (up to an additive constant).
@@ -137,7 +126,7 @@ Logistic <- setClass("Logistic",
                                    se_waic     = "numeric",
                                    lpd         = "matrix"))
 
-#' An S4 class to represent a logistic regression model.
+#' An S4 class to represent a regression model.
 #'
 #' @slot eta A M x (p + 1) numeric matrix of draws of topic regression coefficients
 #' @slot mu0 A (p + 1) x 1 numeric matrix of prior means for eta
