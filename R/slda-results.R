@@ -59,24 +59,21 @@ setMethod("get_toptopics",
 
 #' Return most probable words for each topic.
 #'
-#' @param mcmc_fit An Lda object.
+#' @param beta_ A K x V matrix of topic-word probabilities.
 #' @return A tibble with three columns: \code{topic}: the topic number,
 #'   \code{word}: the vocabulary term, \code{prob}: the term-score or
 #'   probability of each word for a given topic.
 setMethod("get_topwords",
-          c(mcmc_fit = "Lda", nwords = "numeric", vocab = "character"),
-          function(mcmc_fit, nwords, vocab, burn, thin, method, stat) {
+          c(beta_ = "matrix", nwords = "numeric", vocab = "character"),
+          function(beta_, nwords, vocab, method) {
 
-            m <- mcmc_fit@nchain
-            keep_index <- seq(burn + 1, m, thin)
-            beta_keep <- mcmc_fit@beta[, , keep_index]
+            if (method == "termscore") {
+              beta_out = term_score(beta_)
+            } else {
+              beta_out = beta_
+            }
 
-            if (stat == "mean") beta_out <- apply(beta_keep, c(1, 2), mean)
-            if (stat == "median") beta_out <- apply(beta_keep, c(1, 2), median)
-
-            if (method == "termscore") beta_out = term_score(beta_out)
-
-            ntopics <- mcmc_fit@ntopics
+            ntopics <- nrow(beta_)
             topic_topwords <- matrix("", ntopics * nwords, 3)
 
             row <- 1
@@ -143,7 +140,7 @@ setMethod("get_zbar",
 
 setMethod("gg_coef",
           c(mcmc_fit = "Slda"),
-          function(mcmc_fit, nwords, vocab, burn, thin, method, stat) {
+          function(mcmc_fit, beta_, nwords, vocab, varnames, burn, thin, method, stat, errorbw) {
 
             if (!requireNamespace("dplyr", quietly = TRUE)) {
               stop("Package \"dplyr\" needed for this function to work. Please install it.",
@@ -164,14 +161,17 @@ setMethod("gg_coef",
               eta = apply(mcmc_fit@eta[keep_index, ], 2, median)
             }
 
-            topic_dist = get_topwords(mcmc_fit, nwords, vocab, burn, thin,
-                                      method, stat)
+            topic_dist = get_topwords(beta_, nwords, vocab, method)
 
             len = ncol(mcmc_fit@eta)
             ntopics = mcmc_fit@ntopics
             # Top words per topic
             topics_top = vector("character", len)
-            topics_top[seq_len(len - ntopics)] <- paste0("V", seq_len(len - ntopics))
+            if (is.null(varnames) | length(varnames) != len - ntopics) {
+              topics_top[seq_len(len - ntopics)] <- paste0("V", seq_len(len - ntopics))
+            } else {
+              topics_top[seq_len(len - ntopics)] <- varnames
+            }
             for (k in seq_len(ntopics)) {
               temp = dplyr::filter(topic_dist, topic == k)
               temp = dplyr::top_n(temp, nwords, prob)
@@ -200,7 +200,7 @@ setMethod("gg_coef",
             ggp <- ggplot2::ggplot(coefs, ggplot2::aes(topics, est, color = sig))
             ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_point())
             ggp <- ggplot2::`%+%`(ggp,
-                                  ggplot2::geom_errorbar(width = 0.25,
+                                  ggplot2::geom_errorbar(width = errorbw,
                                                          ggplot2::aes(ymin = lbcl,
                                                                       ymax = ubcl)))
             ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_hline(yintercept = 0))
@@ -216,7 +216,7 @@ setMethod("gg_coef",
 
 setMethod("gg_coef",
           c(mcmc_fit = "Sldalogit"),
-          function(mcmc_fit, nwords, vocab, burn, thin, method, stat) {
+          function(mcmc_fit, beta_, nwords, vocab, varnames, burn, thin, method, stat, errorbw) {
 
             if (!requireNamespace("dplyr", quietly = TRUE)) {
               stop("Package \"dplyr\" needed for this function to work. Please install it.",
@@ -237,14 +237,17 @@ setMethod("gg_coef",
               eta = apply(mcmc_fit@eta[keep_index, ], 2, median)
             }
 
-            topic_dist = get_topwords(mcmc_fit, nwords, vocab, burn, thin,
-                                      method, stat)
+            topic_dist = get_topwords(beta_, nwords, vocab, method)
 
             len = ncol(mcmc_fit@eta)
             ntopics = mcmc_fit@ntopics
             # Top words per topic
             topics_top = vector("character", len)
-            topics_top[seq_len(len - ntopics)] <- paste0("V", seq_len(len - ntopics))
+            if (is.null(varnames) | length(varnames) != len - ntopics) {
+              topics_top[seq_len(len - ntopics)] <- paste0("V", seq_len(len - ntopics))
+            } else {
+              topics_top[seq_len(len - ntopics)] <- varnames
+            }
             for (k in seq_len(ntopics)) {
               temp = dplyr::filter(topic_dist, topic == k)
               temp = dplyr::top_n(temp, nwords, prob)
@@ -273,7 +276,7 @@ setMethod("gg_coef",
             ggp <- ggplot2::ggplot(coefs, ggplot2::aes(topics, est, color = sig))
             ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_point())
             ggp <- ggplot2::`%+%`(ggp,
-                                  ggplot2::geom_errorbar(width = 0.5,
+                                  ggplot2::geom_errorbar(width = errorbw,
                                                          ggplot2::aes(ymin = lbcl,
                                                                       ymax = ubcl)))
             ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_hline(yintercept = 0))

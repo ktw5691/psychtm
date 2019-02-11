@@ -8,11 +8,10 @@
 \usage{
 get_toptopics(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
-get_topwords(mcmc_fit, nwords, vocab, burn = 0, thin = 1,
-  method = "termscore", stat = "mean")
+get_topwords(beta_, nwords, vocab, method = "termscore")
 
-gg_coef(mcmc_fit, nwords, vocab, burn = 0, thin = 1,
-  method = "termscore", stat = "mean")
+gg_coef(mcmc_fit, beta_, nwords, vocab, varnames, burn = 0, thin = 1,
+  method = "termscore", stat = "mean", errorbw = 0.5)
 }
 \arguments{
 \item{mcmc_fit}{An Lda object.}
