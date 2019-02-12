@@ -1,7 +1,6 @@
 #include <RcppArmadilloExtensions/sample.h>
 #include <iostream>
 #include <vector>
-#include <cmath>
 #include <progress.hpp>
 #include <progress_bar.hpp>
 using namespace Rcpp;
