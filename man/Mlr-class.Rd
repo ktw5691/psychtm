@@ -11,11 +11,18 @@ An S4 class to represent a regression model.
 \section{Slots}{
 
 \describe{
-\item{\code{eta}}{A M x (p + 1) numeric matrix of draws of topic regression coefficients}
+\item{\code{eta}}{A M x (p + 1) numeric matrix of draws of topic regression
+coefficients}
+
+\item{\code{sigma2}}{A M x 1 numeric vector of draws of residual variance}
 
 \item{\code{mu0}}{A (p + 1) x 1 numeric matrix of prior means for eta}
 
 \item{\code{sigma0}}{A (p + 1) x (p + 1) numeric prior covariance matrix for eta}
+
+\item{\code{a0}}{A numeric prior shape hyperparameter for sigma2}
+
+\item{\code{b0}}{A numeric prior rate hyperparameter for sigma2}
 
 \item{\code{eta_start}}{A (p + 1) x 1 numeric matrix of starting values for eta}
 

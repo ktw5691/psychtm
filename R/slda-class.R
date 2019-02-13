@@ -65,6 +65,8 @@ Slda <- setClass("Slda",
 #' @slot mu0 A K x 1 numeric matrix of prior means for eta
 #' @slot sigma0 A K x K numeric prior covariance matrix for eta
 #' @slot eta_start A K x 1 numeric matrix of starting values for eta
+#' @slot proposal_sd A K x 1 vector of proposal scales for Metropolis-Hastings
+#'   sampling of eta.
 #' @slot ntopics The number of topics for the LDA model (default: 2).
 #' @slot ndocs The number of documents in the corpus.
 #' @slot nvocab The number of terms in the corpus vocabulary.
@@ -102,6 +104,8 @@ Sldalogit <- setClass("Sldalogit",
 #' @slot mu0 A (p + 1) x 1 numeric matrix of prior means for eta
 #' @slot sigma0 A (p + 1) x (p + 1) numeric prior covariance matrix for eta
 #' @slot eta_start A (p + 1) x 1 numeric matrix of starting values for eta
+#' @slot proposal_sd A K x 1 vector of proposal scales for Metropolis-Hastings
+#'   sampling of eta.
 #' @slot ndocs The number of documents in the corpus.
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot loglike The log-likelihood (up to an additive constant).
@@ -128,9 +132,13 @@ Logistic <- setClass("Logistic",
 
 #' An S4 class to represent a regression model.
 #'
-#' @slot eta A M x (p + 1) numeric matrix of draws of topic regression coefficients
+#' @slot eta A M x (p + 1) numeric matrix of draws of topic regression
+#'   coefficients
+#' @slot sigma2 A M x 1 numeric vector of draws of residual variance
 #' @slot mu0 A (p + 1) x 1 numeric matrix of prior means for eta
 #' @slot sigma0 A (p + 1) x (p + 1) numeric prior covariance matrix for eta
+#' @slot a0 A numeric prior shape hyperparameter for sigma2
+#' @slot b0 A numeric prior rate hyperparameter for sigma2
 #' @slot eta_start A (p + 1) x 1 numeric matrix of starting values for eta
 #' @slot ndocs The number of documents in the corpus.
 #' @slot nchain The number of iterations of the Gibbs sampler.

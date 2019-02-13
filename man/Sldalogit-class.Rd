@@ -19,6 +19,9 @@ An S4 class to represent a sLDA logistic model.
 
 \item{\code{eta_start}}{A K x 1 numeric matrix of starting values for eta}
 
+\item{\code{proposal_sd}}{A K x 1 vector of proposal scales for Metropolis-Hastings
+sampling of eta.}
+
 \item{\code{ntopics}}{The number of topics for the LDA model (default: 2).}
 
 \item{\code{ndocs}}{The number of documents in the corpus.}
