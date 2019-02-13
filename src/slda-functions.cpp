@@ -612,7 +612,7 @@ arma::vec est_betak_cpp(uint16_t k, uint32_t V, const arma::vec& wz_co,
 
   arma::vec betak = exp(log(wz_co + gamma_) - log(sum(wz_co) + V * gamma_));
   for (uint32_t v = 0; v < V; v++) {
-    if ((betak[v] > 1.0) | (isnan(betak[v]))) betak[v] = 0.0;
+    if ((betak[v] > 1.0) | (std::isnan(betak[v]))) betak[v] = 0.0;
   }
   return betak;
 }
@@ -636,7 +636,7 @@ arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K) {
   arma::vec thetad = exp(log(z_count + alpha_) - log(sum(z_count) +
     static_cast<float>(K) * alpha_));
   for (uint32_t k = 0; k < K; k++) {
-    if ((thetad[k] > 1.0) | (isnan(thetad[k]))) thetad[k] = 0.0;
+    if ((thetad[k] > 1.0) | (std::isnan(thetad[k]))) thetad[k] = 0.0;
   }
 
   return thetad;
