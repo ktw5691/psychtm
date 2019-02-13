@@ -289,3 +289,59 @@ setMethod("gg_coef",
             print(ggp)
           }
 )
+
+setMethod("est_theta",
+          c(mcmc_fit = "Lda"),
+          function(mcmc_fit, burn, thin, stat) {
+            m <- mcmc_fit@nchain
+            K <- mcmc_fit@ntopics
+            ndoc <- mcmc_fit@ndocs
+            alpha_ <- mcmc_fit@alpha
+            keep <- seq(burn + 1, m, thin)
+            topics <- mcmc_fit@topics[, , keep]
+            len <- dim(topics)[3]
+            topics[topics == 0] <- NA
+            theta <- array(dim = c(ndoc, ncol = K, len))
+
+            for (i in seq_len(len)) {
+              for (d in seq_len(ndoc)) {
+                z_count = numeric(K)
+                for (k in seq_len(K)) z_count[k] = sum(
+                  topics[d, , i] == k, na.rm = TRUE)
+                theta[d, , i] = est_thetad_cpp(z_count, alpha_, K)
+              }
+              if (i %% (len / 10) == 0) cat("Iteration ", i)
+            }
+
+            if (stat == "mean") theta_mean = apply(theta, c(1, 2), mean)
+            if (stat == "median") theta_mean = apply(theta, c(1, 2), median)
+            return(theta_mean)
+          }
+)
+
+setMethod("est_beta",
+          c(mcmc_fit = "Lda"),
+          function(mcmc_fit, burn, thin, stat) {
+            m <- mcmc_fit@nchain
+            K <- mcmc_fit@ntopics
+            V <- mcmc_fit@nvocab
+            ndoc <- mcmc_fit@ndocs
+            gamma_ <- mcmc_fit@gamma
+            keep <- seq(burn + 1, m, thin)
+            topics <- mcmc_fit@topics[, , keep]
+            len <- dim(topics)[3]
+            topics[topics == 0] <- NA
+            beta_ <- array(dim = c(K, ncol = V, len))
+
+            for (i in seq_len(len)) {
+              wz_co = count_topic_word_cpp(ndoc, K, V, topics[, , i], docs)
+              for (k in seq_len(K)) beta_[k, , i] = est_betak_cpp(
+                1, V, wz_co[k, ], gamma_)
+              if (i %% (len / 10) == 0) cat("Iteration ", i)
+            }
+
+            if (stat == "mean") beta_mean = apply(beta_, c(1, 2), mean)
+            if (stat == "median") beta_mean = apply(beta_, c(1, 2), median)
+            return(beta_mean)
+          }
+)

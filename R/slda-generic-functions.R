@@ -143,3 +143,63 @@ setGeneric("gg_coef",
              standardGeneric("gg_coef")
            }
 )
+
+#' Generic function to estimate mean/median theta matrix
+#'
+#' @param mcmc_fit An Lda object.
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param stat The summary statistic to use on the posterior draws. Default: mean.
+#'
+#' @export
+#' @rdname slda-gettop-methods
+setGeneric("est_theta",
+           function(mcmc_fit, burn = 0, thin = 1, stat = "mean") {
+
+             if (!isClass(mcmc_fit, "Lda"))
+               stop("mcmc_fit must be an Lda object.")
+             if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
+             if ((burn %% 1) != 0) stop("burn must be an integer.")
+             if (burn < 0) stop("burn must be non-negative.")
+             m <- mcmc_fit@nchain
+             if (burn >= m) stop("burn cannot exceed length of chain.")
+
+             if (length(stat > 1)) stat = stat[1]
+             if (!(stat %in% c("mean", "median")))
+               stop("stat must be either 'mean' or 'median'")
+             if (is.null(stat)) stat = "mean" # Default to mean
+
+             standardGeneric("est_theta")
+           }
+)
+
+#' Generic function to estimate mean/median beta matrix
+#'
+#' @param mcmc_fit An Lda object.
+#' @param docs A D x max(N_d) matrix of the words in all documents. Unused word
+#'   positions should be set to 0.
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param stat The summary statistic to use on the posterior draws. Default: mean.
+#'
+#' @export
+#' @rdname slda-gettop-methods
+setGeneric("est_beta",
+           function(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean") {
+
+             if (!isClass(mcmc_fit, "Lda"))
+               stop("mcmc_fit must be an Lda object.")
+             if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
+             if ((burn %% 1) != 0) stop("burn must be an integer.")
+             if (burn < 0) stop("burn must be non-negative.")
+             m <- mcmc_fit@nchain
+             if (burn >= m) stop("burn cannot exceed length of chain.")
+
+             if (length(stat > 1)) stat = stat[1]
+             if (!(stat %in% c("mean", "median")))
+               stop("stat must be either 'mean' or 'median'")
+             if (is.null(stat)) stat = "mean" # Default to mean
+
+             standardGeneric("est_beta")
+           }
+)

@@ -4,6 +4,8 @@
 \alias{get_toptopics}
 \alias{get_topwords}
 \alias{gg_coef}
+\alias{est_theta}
+\alias{est_beta}
 \title{Generic function to retrieve the top topics for each document}
 \usage{
 get_toptopics(mcmc_fit, burn = 0, thin = 1, stat = "mean")
@@ -12,6 +14,10 @@ get_topwords(beta_, nwords, vocab, method = "termscore")
 
 gg_coef(mcmc_fit, beta_, nwords, vocab, varnames, burn = 0, thin = 1,
   method = "termscore", stat = "mean", errorbw = 0.5)
+
+est_theta(mcmc_fit, burn = 0, thin = 1, stat = "mean")
+
+est_beta(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean")
 }
 \arguments{
 \item{mcmc_fit}{An Lda object.}
@@ -28,6 +34,9 @@ gg_coef(mcmc_fit, beta_, nwords, vocab, varnames, burn = 0, thin = 1,
 
 \item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
 use probabilities. Default: "termscore".}
+
+\item{docs}{A D x max(N_d) matrix of the words in all documents. Unused word
+positions should be set to 0.}
 
 \item{ntopics}{The number of topics to retrieve.}
 
@@ -53,6 +62,22 @@ use probabilities. Default: "termscore".}
 
 \item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
 use probabilities. Default: "termscore".}
+
+\item{mcmc_fit}{An Lda object.}
+
+\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
+
+\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
+
+\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
+
+\item{mcmc_fit}{An Lda object.}
+
+\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
+
+\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
+
+\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
 }
 \value{
 A tibble containing \code{doc}, \code{topic}, and \code{prob}.
