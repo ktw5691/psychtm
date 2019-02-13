@@ -19,6 +19,9 @@ An S4 class to represent a logistic regression model.
 
 \item{\code{eta_start}}{A (p + 1) x 1 numeric matrix of starting values for eta}
 
+\item{\code{proposal_sd}}{A K x 1 vector of proposal scales for Metropolis-Hastings
+sampling of eta.}
+
 \item{\code{ndocs}}{The number of documents in the corpus.}
 
 \item{\code{nchain}}{The number of iterations of the Gibbs sampler.}

@@ -11,7 +11,8 @@ License: GPL-3
 Imports: 
     Rcpp,
     RcppProgress,
-    tibble
+    tibble,
+    methods
 Suggests:
     dplyr,
     ggplot2

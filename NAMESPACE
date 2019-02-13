@@ -1,3 +1,5 @@
 useDynLib(psychtm, .registration=TRUE)
-importFrom(Rcpp, evalCpp)
+importFrom("Rcpp", "evalCpp")
+importFrom("methods", "callNextMethod", "isClass", "new")
+importFrom("stats", "median", "quantile")
 exportPattern("^[[:alpha:]]+")
