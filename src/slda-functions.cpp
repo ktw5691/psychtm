@@ -1612,6 +1612,9 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 //' @param eta_start A (K + p + 1) x 1 vector of starting values for the
 //'   regression coefficients. The first p + 1 elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
+//' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//'   regression coefficients will be constrained so that they are in descending
+//'   order; if \code{FALSE}, no constraints will be applied.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
 //'   (default: 0.1).
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -1629,7 +1632,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
                const arma::mat& x,
                const arma::mat& docs, const arma::mat& w, uint16_t K,
                const arma::colvec& mu0, const arma::mat& sigma0,
-               arma::colvec eta_start,
+               arma::colvec eta_start, bool constrain_eta = false,
                float alpha_ = 0.1, float gamma_ = 1.01,
                float a0 = 0.001, float b0 = 0.001,
                bool verbose = false, bool display_progress = false) {
@@ -1647,6 +1650,11 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
   for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
   const uint32_t maxNd = max(N);
   arma::mat etam(m, pp1 + K);
+
+  if (constrain_eta) {
+    // Constrain starting values of eta s.t. components are in descending order
+    std::sort(eta_start.begin() + pp1, eta_start.end(), std::greater<float>());
+  }
   etam.row(0) = eta_start.t();
   NumericVector sigma2m(m);
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
@@ -1832,12 +1840,43 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
     }
 
     // Draw eta
-    try {
-      etam.row(i) = draw_eta_sldax(zbar, y, x, sigma2m(i - 1), mu0, sigma0);
-    } catch (std::exception& e) {
-      Rcerr << "Runtime Error: " << e.what() <<
-        " while drawing eta vector\n";
+    if (constrain_eta) {
+      bool eta_order = false;
+      uint16_t iter = 0;
+      constexpr uint16_t max_iter = 1000;
+      arma::vec etac(K + pp1);
+      while (!eta_order & (iter < max_iter)) {
+        iter++;
+        try {
+          etac = draw_eta_sldax(zbar, y, x, sigma2m(i - 1), mu0, sigma0).t();
+        } catch (std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() <<
+            " while drawing eta vector\n";
+        }
+        for (uint16_t k = pp1 + 1; k < K + pp1; k++) {
+          // Force eta components to be in descending order (first is largest)
+          //   to resolve label switching of topics
+          eta_order = etac(k - 1) >= etac(k);
+          if (!eta_order) break;
+        }
+      }
+      etam.row(i) = etac.t();
+      Rcout << etac.t() << "\n";
+    } else {
+      try {
+        etam.row(i) = draw_eta_sldax(zbar, y, x, sigma2m(i - 1), mu0, sigma0);
+      } catch (std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() <<
+          " while drawing eta vector\n";
+      }
     }
+
+    // try {
+    //   etam.row(i) = draw_eta_sldax(zbar, y, x, sigma2m(i - 1), mu0, sigma0);
+    // } catch (std::exception& e) {
+    //   Rcerr << "Runtime Error: " << e.what() <<
+    //     " while drawing eta vector\n";
+    // }
 
     // Draw sigma2
     try {

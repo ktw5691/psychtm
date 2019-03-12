@@ -139,8 +139,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // gibbs_sldax
-S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y, const arma::mat& x, const arma::mat& docs, const arma::mat& w, uint16_t K, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, float alpha_, float gamma_, float a0, float b0, bool verbose, bool display_progress);
-RcppExport SEXP _psychtm_gibbs_sldax(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP xSEXP, SEXP docsSEXP, SEXP wSEXP, SEXP KSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP alpha_SEXP, SEXP gamma_SEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
+S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y, const arma::mat& x, const arma::mat& docs, const arma::mat& w, uint16_t K, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, bool constrain_eta, float alpha_, float gamma_, float a0, float b0, bool verbose, bool display_progress);
+RcppExport SEXP _psychtm_gibbs_sldax(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP xSEXP, SEXP docsSEXP, SEXP wSEXP, SEXP KSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP constrain_etaSEXP, SEXP alpha_SEXP, SEXP gamma_SEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -154,13 +154,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::colvec& >::type mu0(mu0SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type sigma0(sigma0SEXP);
     Rcpp::traits::input_parameter< arma::colvec >::type eta_start(eta_startSEXP);
+    Rcpp::traits::input_parameter< bool >::type constrain_eta(constrain_etaSEXP);
     Rcpp::traits::input_parameter< float >::type alpha_(alpha_SEXP);
     Rcpp::traits::input_parameter< float >::type gamma_(gamma_SEXP);
     Rcpp::traits::input_parameter< float >::type a0(a0SEXP);
     Rcpp::traits::input_parameter< float >::type b0(b0SEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(gibbs_sldax(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, alpha_, gamma_, a0, b0, verbose, display_progress));
+    rcpp_result_gen = Rcpp::wrap(gibbs_sldax(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -301,7 +302,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_psychtm_waic_all", (DL_FUNC) &_psychtm_waic_all, 3},
     {"_psychtm_waic_diff", (DL_FUNC) &_psychtm_waic_diff, 5},
     {"_psychtm_gibbs_slda", (DL_FUNC) &_psychtm_gibbs_slda, 16},
-    {"_psychtm_gibbs_sldax", (DL_FUNC) &_psychtm_gibbs_sldax, 16},
+    {"_psychtm_gibbs_sldax", (DL_FUNC) &_psychtm_gibbs_sldax, 17},
     {"_psychtm_gibbs_mlr", (DL_FUNC) &_psychtm_gibbs_mlr, 11},
     {"_psychtm_gibbs_slda_logit", (DL_FUNC) &_psychtm_gibbs_slda_logit, 14},
     {"_psychtm_gibbs_sldax_logit", (DL_FUNC) &_psychtm_gibbs_sldax_logit, 15},
