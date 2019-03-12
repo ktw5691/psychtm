@@ -337,6 +337,18 @@ NULL
 #' @param eta A (p + 1) x 1 vector of regression coefficients.
 NULL
 
+#' Simulate data from the sLDA model
+#'
+#' @param D The number of documents in the corpus.
+#' @param V The number of terms in the corpus vocabulary.
+#' @param N A D x 1 vector of the number of words in each document.
+#' @param K The number of topics.
+#' @param theta A D x K matrix of topic proportions (each row must sum to 1).
+#' @param beta A K x V matrix of word probabilities per topic (each row must
+#'   sum to 1).
+#'
+NULL
+
 #' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 #'
 #' @param n The number of samples to draw.
@@ -585,6 +597,9 @@ gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, e
 #' @param eta_start A (K + p) x 1 vector of starting values for the
 #'   regression coefficients. The first p elements correspond to predictors
 #'   in X, while the last K elements correspond to the K topic means.
+#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#'   regression coefficients will be constrained so that they are in descending
+#'   order; if \code{FALSE}, no constraints will be applied.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
 #'   (default: 0.1).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -597,8 +612,8 @@ gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, e
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_sldax_logit`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
+gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_sldax_logit`, m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta, alpha_, gamma_, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for logistic regression
@@ -645,20 +660,5 @@ gibbs_logistic <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, v
 #' @export
 gibbs_lda <- function(m, burn, docs, w, K, alpha_ = 0.1, gamma_ = 1.01, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_lda`, m, burn, docs, w, K, alpha_, gamma_, display_progress)
-}
-
-#' Simulate data from the sLDA model
-#'
-#' @param D The number of documents in the corpus.
-#' @param V The number of terms in the corpus vocabulary.
-#' @param N A D x 1 vector of the number of words in each document.
-#' @param K The number of topics.
-#' @param theta A D x K matrix of topic proportions (each row must sum to 1).
-#' @param beta A K x V matrix of word probabilities per topic (each row must
-#'   sum to 1).
-#'
-#' @export
-sim_slda <- function(D, V, N, K, theta, beta, eta, sigma2) {
-    .Call(`_psychtm_sim_slda`, D, V, N, K, theta, beta, eta, sigma2)
 }
 

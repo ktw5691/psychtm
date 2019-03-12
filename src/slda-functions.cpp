@@ -1861,7 +1861,6 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
         }
       }
       etam.row(i) = etac.t();
-      Rcout << etac.t() << "\n";
     } else {
       try {
         etam.row(i) = draw_eta_sldax(zbar, y, x, sigma2m(i - 1), mu0, sigma0);
@@ -2045,8 +2044,6 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_mlr(x, y, etam.row(0).t(), sigma2m(0)).t();
-
-  Rcout << "Start MCMC iterations\n";
 
   Progress p(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
@@ -2381,8 +2378,6 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_slda_logit(zbar, etam.row(0).t()).t();
 
-  Rcout << "Starting MCMC iterations\n";
-
   Progress prog(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
 
@@ -2627,6 +2622,9 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 //' @param eta_start A (K + p) x 1 vector of starting values for the
 //'   regression coefficients. The first p elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
+//' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//'   regression coefficients will be constrained so that they are in descending
+//'   order; if \code{FALSE}, no constraints will be applied.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
 //'   (default: 0.1).
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -2644,7 +2642,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
                      const arma::mat& x,
                      const arma::mat& docs, const arma::mat& w, uint16_t K,
                      const arma::colvec& mu0, const arma::mat& sigma0,
-                     arma::colvec eta_start, arma::vec proposal_sd,
+                     arma::vec proposal_sd,
+                     arma::colvec eta_start, bool constrain_eta = false,
                      float alpha_ = 0.1, float gamma_ = 1.01,
                      bool verbose = false, bool display_progress = false) {
 
@@ -2663,6 +2662,11 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   const uint32_t maxNd = max(N);
   // Omit last topic since colinear with intercept
   arma::mat etam(m, p + K);
+
+  if (constrain_eta) {
+    // Constrain starting values of eta s.t. components are in descending order
+    std::sort(eta_start.begin() + p, eta_start.end(), std::greater<float>());
+  }
   etam.row(0) = eta_start.t();
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
@@ -2784,8 +2788,6 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_sldax_logit(x, zbar, etam.row(0).t()).t();
 
-  Rcout << "Starting MCMC iterations\n";
-
   Progress prog(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
 
@@ -2854,15 +2856,54 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
     }
 
+
+
     // Draw eta
-    try {
-      etam.row(i) = draw_eta_sldax_logit(zbar, y, x, etam.row(i - 1).t(),
-                                         mu0, sigma0, proposal_sd,
-                                         attempt, accept).t();
-    } catch (std::exception& e) {
-      Rcerr << "Runtime Error: " << e.what() <<
-        " while drawing eta vector\n";
+    if (constrain_eta) {
+      bool eta_order = false;
+      uint16_t iter = 0;
+      constexpr uint16_t max_iter = 1000;
+      arma::vec etac(K + p);
+      while (!eta_order & (iter < max_iter)) {
+        iter++;
+        try {
+          etac = draw_eta_sldax_logit(zbar, y, x, etam.row(i - 1).t(),
+                                      mu0, sigma0, proposal_sd,
+                                      attempt, accept);
+        } catch (std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() <<
+            " while drawing eta vector\n";
+        }
+        for (uint16_t k = p + 1; k < K + p; k++) {
+          // Force eta components to be in descending order (first is largest)
+          //   to resolve label switching of topics
+          eta_order = etac(k - 1) >= etac(k);
+          if (!eta_order) break;
+        }
+      }
+      etam.row(i) = etac.t();
+    } else {
+      try {
+        etam.row(i) = draw_eta_sldax_logit(zbar, y, x, etam.row(i - 1).t(),
+                                           mu0, sigma0, proposal_sd,
+                                           attempt, accept).t();
+      } catch (std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() <<
+          " while drawing eta vector\n";
+      }
     }
+
+
+
+    // // Draw eta
+    // try {
+    //   etam.row(i) = draw_eta_sldax_logit(zbar, y, x, etam.row(i - 1).t(),
+    //                                      mu0, sigma0, proposal_sd,
+    //                                      attempt, accept).t();
+    // } catch (std::exception& e) {
+    //   Rcerr << "Runtime Error: " << e.what() <<
+    //     " while drawing eta vector\n";
+    // }
 
     // Add likelihood of y
     // Omit last topic mean (colinear with intercept)
@@ -3040,8 +3081,6 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
   // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
   l_pred.row(0) = post_pred_glm(x, etam.row(0).t()).t();
-
-  Rcout << "Starting MCMC iterations\n";
 
   Progress prog(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
@@ -3384,8 +3423,6 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
 //' @param beta A K x V matrix of word probabilities per topic (each row must
 //'   sum to 1).
 //'
-//' @export
-// [[Rcpp::export]]
 List sim_slda(uint32_t D, uint32_t V, arma::vec N, uint16_t K, arma::mat theta,
               arma::mat beta, arma::colvec eta, long double sigma2) {
 
