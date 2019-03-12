@@ -2221,6 +2221,9 @@ arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
 //'   regression coefficients.
 //' @param eta_start A K x 1 vector of starting values for the regression
 //'   coefficients.
+//' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//'   regression coefficients will be constrained so that they are in descending
+//'   order; if \code{FALSE}, no constraints will be applied.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
 //'   (default: 0.1).
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -2237,7 +2240,8 @@ arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
 S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
                     const arma::mat& docs, const arma::mat& w, uint16_t K,
                     const arma::colvec& mu0, const arma::mat& sigma0,
-                    arma::colvec eta_start, arma::vec proposal_sd,
+                    arma::vec proposal_sd,
+                    arma::colvec eta_start, bool constrain_eta = false,
                     float alpha_ = 0.1, float gamma_ = 1.01,
                     bool verbose = false, bool display_progress = false) {
 
@@ -2254,6 +2258,11 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
   const uint32_t maxNd = max(N);
   // Omit last topic since colinear with intercept
   arma::mat etam(m, K);
+
+  if (constrain_eta) {
+    // Constrain starting values of eta s.t. components are in descending order
+    std::sort(eta_start.begin(), eta_start.end(), std::greater<int>());
+  }
   etam.row(0) = eta_start.t();
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(m); // Store log-posterior (up to an additive constant)
@@ -2442,15 +2451,52 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
       }
     }
 
+
+
     // Draw eta
-    try {
-      etam.row(i) = draw_eta_slda_logit(zbar, y, etam.row(i - 1).t(),
-                                        mu0, sigma0, proposal_sd,
-                                        attempt, accept).t();
-    } catch (std::exception& e) {
-      Rcerr << "Runtime Error: " << e.what() <<
-        " while drawing eta vector\n";
+    if (constrain_eta) {
+      bool eta_order = false;
+      uint16_t iter = 0;
+      constexpr uint16_t max_iter = 1000;
+      arma::vec etac(K);
+      while (!eta_order & (iter < max_iter)) {
+        iter++;
+        try {
+          etac = draw_eta_slda_logit(zbar, y, etam.row(i - 1).t(),
+                                     mu0, sigma0, proposal_sd,
+                                     attempt, accept);
+        } catch (std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() <<
+            " while drawing eta vector\n";
+        }
+        for (uint16_t k = 1; k < K; k++) {
+          // Force eta components to be in descending order (first is largest)
+          //   to resolve label switching of topics
+          eta_order = etac(k - 1) >= etac(k);
+          if (!eta_order) break;
+        }
+      }
+      etam.row(i) = etac.t();
+    } else {
+      try {
+        etam.row(i) = draw_eta_slda_logit(zbar, y, etam.row(i - 1).t(),
+                                          mu0, sigma0, proposal_sd,
+                                          attempt, accept).t();
+      } catch (std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() <<
+          " while drawing eta vector\n";
+      }
     }
+
+    // // Draw eta
+    // try {
+    //   etam.row(i) = draw_eta_slda_logit(zbar, y, etam.row(i - 1).t(),
+    //                                     mu0, sigma0, proposal_sd,
+    //                                     attempt, accept).t();
+    // } catch (std::exception& e) {
+    //   Rcerr << "Runtime Error: " << e.what() <<
+    //     " while drawing eta vector\n";
+    // }
 
     // Add likelihood of y
     arma::colvec muhat(D);

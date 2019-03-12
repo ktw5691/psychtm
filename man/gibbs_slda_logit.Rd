@@ -4,9 +4,9 @@
 \alias{gibbs_slda_logit}
 \title{Collapsed Gibbs sampler for the sLDA model with a binary outcome}
 \usage{
-gibbs_slda_logit(m, burn, y, docs, w, K, mu0, sigma0, eta_start,
-  proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE,
-  display_progress = FALSE)
+gibbs_slda_logit(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd,
+  eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01,
+  verbose = FALSE, display_progress = FALSE)
 }
 \arguments{
 \item{m}{The number of iterations to run the Gibbs sampler.}
@@ -26,11 +26,15 @@ gibbs_slda_logit(m, burn, y, docs, w, K, mu0, sigma0, eta_start,
 \item{sigma0}{A K x K variance-covariance matrix for the prior on the
 regression coefficients.}
 
+\item{proposal_sd}{A vector of proposal standard deviations for drawing the
+regression coefficients, N(0, proposal_sd) (default: 0.2).}
+
 \item{eta_start}{A K x 1 vector of starting values for the regression
 coefficients.}
 
-\item{proposal_sd}{A vector of proposal standard deviations for drawing the
-regression coefficients, N(0, proposal_sd) (default: 0.2).}
+\item{constrain_eta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+regression coefficients will be constrained so that they are in descending
+order; if \code{FALSE}, no constraints will be applied.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
 (default: 0.1).}

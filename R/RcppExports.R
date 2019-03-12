@@ -546,6 +546,9 @@ gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.
 #'   regression coefficients.
 #' @param eta_start A K x 1 vector of starting values for the regression
 #'   coefficients.
+#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#'   regression coefficients will be constrained so that they are in descending
+#'   order; if \code{FALSE}, no constraints will be applied.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
 #'   (default: 0.1).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -558,8 +561,8 @@ gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_slda_logit`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, proposal_sd, alpha_, gamma_, verbose, display_progress)
+gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_slda_logit`, m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta, alpha_, gamma_, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
