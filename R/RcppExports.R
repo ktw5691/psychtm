@@ -459,7 +459,7 @@ waic_diff <- function(D, m1, m2, l_pred1, l_pred2) {
 #'   regression coefficients.
 #' @param eta_start A K x 1 vector of starting values for the regression
 #'   coefficients.
-#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 #'   regression coefficients will be constrained so that they are in descending
 #'   order; if \code{FALSE}, no constraints will be applied.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -474,7 +474,7 @@ waic_diff <- function(D, m1, m2, l_pred1, l_pred2) {
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_slda <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
+gibbs_slda <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_slda`, m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress)
 }
 
@@ -498,7 +498,7 @@ gibbs_slda <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain
 #' @param eta_start A (K + p + 1) x 1 vector of starting values for the
 #'   regression coefficients. The first p + 1 elements correspond to predictors
 #'   in X, while the last K elements correspond to the K topic means.
-#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 #'   regression coefficients will be constrained so that they are in descending
 #'   order; if \code{FALSE}, no constraints will be applied.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -513,7 +513,7 @@ gibbs_slda <- function(m, burn, y, docs, w, K, mu0, sigma0, eta_start, constrain
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
+gibbs_sldax <- function(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_sldax`, m, burn, y, x, docs, w, K, mu0, sigma0, eta_start, constrain_eta, alpha_, gamma_, a0, b0, verbose, display_progress)
 }
 
@@ -558,7 +558,7 @@ gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.
 #'   regression coefficients.
 #' @param eta_start A K x 1 vector of starting values for the regression
 #'   coefficients.
-#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 #'   regression coefficients will be constrained so that they are in descending
 #'   order; if \code{FALSE}, no constraints will be applied.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -573,7 +573,7 @@ gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
+gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_slda_logit`, m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta, alpha_, gamma_, verbose, display_progress)
 }
 
@@ -597,7 +597,7 @@ gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, e
 #' @param eta_start A (K + p) x 1 vector of starting values for the
 #'   regression coefficients. The first p elements correspond to predictors
 #'   in X, while the last K elements correspond to the K topic means.
-#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 #'   regression coefficients will be constrained so that they are in descending
 #'   order; if \code{FALSE}, no constraints will be applied.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -612,7 +612,7 @@ gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, e
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
+gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_sldax_logit`, m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta, alpha_, gamma_, verbose, display_progress)
 }
 

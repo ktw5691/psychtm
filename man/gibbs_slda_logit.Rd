@@ -5,7 +5,7 @@
 \title{Collapsed Gibbs sampler for the sLDA model with a binary outcome}
 \usage{
 gibbs_slda_logit(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd,
-  eta_start, constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01,
+  eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01,
   verbose = FALSE, display_progress = FALSE)
 }
 \arguments{
@@ -32,7 +32,7 @@ regression coefficients, N(0, proposal_sd) (default: 0.2).}
 \item{eta_start}{A K x 1 vector of starting values for the regression
 coefficients.}
 
-\item{constrain_eta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+\item{constrain_eta}{A logical (default = \code{TRUE}): If \code{TRUE}, the
 regression coefficients will be constrained so that they are in descending
 order; if \code{FALSE}, no constraints will be applied.}
 

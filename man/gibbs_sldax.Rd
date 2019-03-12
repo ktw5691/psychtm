@@ -5,7 +5,7 @@
 \title{Collapsed Gibbs sampler for the sLDA-X model}
 \usage{
 gibbs_sldax(m, burn, y, x, docs, w, K, mu0, sigma0, eta_start,
-  constrain_eta = FALSE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001,
+  constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01, a0 = 0.001,
   b0 = 0.001, verbose = FALSE, display_progress = FALSE)
 }
 \arguments{
@@ -35,7 +35,7 @@ the K topic means.}
 regression coefficients. The first p + 1 elements correspond to predictors
 in X, while the last K elements correspond to the K topic means.}
 
-\item{constrain_eta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+\item{constrain_eta}{A logical (default = \code{TRUE}): If \code{TRUE}, the
 regression coefficients will be constrained so that they are in descending
 order; if \code{FALSE}, no constraints will be applied.}
 

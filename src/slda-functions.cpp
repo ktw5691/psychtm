@@ -1233,7 +1233,7 @@ NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
 //'   regression coefficients.
 //' @param eta_start A K x 1 vector of starting values for the regression
 //'   coefficients.
-//' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 //'   regression coefficients will be constrained so that they are in descending
 //'   order; if \code{FALSE}, no constraints will be applied.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -1252,7 +1252,7 @@ NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
 S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
               const arma::mat& docs, const arma::mat& w, uint16_t K,
               const arma::colvec& mu0, const arma::mat& sigma0,
-              arma::colvec eta_start, bool constrain_eta = false,
+              arma::colvec eta_start, bool constrain_eta = true,
               float alpha_ = 0.1, float gamma_ = 1.01,
               float a0 = 0.001, float b0 = 0.001,
               bool verbose = false, bool display_progress = false) {
@@ -1612,7 +1612,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 //' @param eta_start A (K + p + 1) x 1 vector of starting values for the
 //'   regression coefficients. The first p + 1 elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
-//' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 //'   regression coefficients will be constrained so that they are in descending
 //'   order; if \code{FALSE}, no constraints will be applied.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -1632,7 +1632,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
                const arma::mat& x,
                const arma::mat& docs, const arma::mat& w, uint16_t K,
                const arma::colvec& mu0, const arma::mat& sigma0,
-               arma::colvec eta_start, bool constrain_eta = false,
+               arma::colvec eta_start, bool constrain_eta = true,
                float alpha_ = 0.1, float gamma_ = 1.01,
                float a0 = 0.001, float b0 = 0.001,
                bool verbose = false, bool display_progress = false) {
@@ -2218,7 +2218,7 @@ arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
 //'   regression coefficients.
 //' @param eta_start A K x 1 vector of starting values for the regression
 //'   coefficients.
-//' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 //'   regression coefficients will be constrained so that they are in descending
 //'   order; if \code{FALSE}, no constraints will be applied.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -2238,7 +2238,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
                     const arma::mat& docs, const arma::mat& w, uint16_t K,
                     const arma::colvec& mu0, const arma::mat& sigma0,
                     arma::vec proposal_sd,
-                    arma::colvec eta_start, bool constrain_eta = false,
+                    arma::colvec eta_start, bool constrain_eta = true,
                     float alpha_ = 0.1, float gamma_ = 1.01,
                     bool verbose = false, bool display_progress = false) {
 
@@ -2622,7 +2622,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 //' @param eta_start A (K + p) x 1 vector of starting values for the
 //'   regression coefficients. The first p elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
-//' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 //'   regression coefficients will be constrained so that they are in descending
 //'   order; if \code{FALSE}, no constraints will be applied.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
@@ -2643,7 +2643,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
                      const arma::mat& docs, const arma::mat& w, uint16_t K,
                      const arma::colvec& mu0, const arma::mat& sigma0,
                      arma::vec proposal_sd,
-                     arma::colvec eta_start, bool constrain_eta = false,
+                     arma::colvec eta_start, bool constrain_eta = true,
                      float alpha_ = 0.1, float gamma_ = 1.01,
                      bool verbose = false, bool display_progress = false) {
 
