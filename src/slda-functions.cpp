@@ -1257,6 +1257,10 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
               float a0 = 0.001, float b0 = 0.001,
               bool verbose = false, bool display_progress = false) {
 
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
+
   S4 slda("Slda"); // Create object slda of class Slda
 
   const uint32_t D = w.n_rows;
@@ -1637,6 +1641,10 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
                float a0 = 0.001, float b0 = 0.001,
                bool verbose = false, bool display_progress = false) {
 
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
+
   S4 slda("Slda"); // Create object slda of class Slda
 
   const uint32_t D = w.n_rows;
@@ -2008,7 +2016,18 @@ S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
                float a0 = 0.001, float b0 = 0.001,
                bool verbose = false, bool display_progress = false) {
 
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
+
   S4 slda("Mlr"); // Create object slda of class Mlr
+
+  try {
+
+  } catch (std::exception& e) {
+    Rcerr << "Runtime Error: " << e.what() <<
+      " while drawing eta vector\n";
+  }
 
   const uint32_t D = x.n_rows;
   const uint16_t pp1 = x.n_cols;
@@ -2241,6 +2260,10 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
                     arma::colvec eta_start, bool constrain_eta = true,
                     float alpha_ = 0.1, float gamma_ = 1.01,
                     bool verbose = false, bool display_progress = false) {
+
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
 
   S4 slda("Sldalogit"); // Create object slda of class Sldalogit
 
@@ -2647,6 +2670,10 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
                      float alpha_ = 0.1, float gamma_ = 1.01,
                      bool verbose = false, bool display_progress = false) {
 
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
+
   S4 slda("Sldalogit"); // Create object slda of class Sldalogit
 
   const uint32_t D = w.n_rows;
@@ -3047,6 +3074,10 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
                     arma::colvec eta_start, arma::vec proposal_sd,
                     bool verbose = false, bool display_progress = false) {
 
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
+
   S4 slda("Logistic"); // Create object slda of class Logistic
 
   const uint32_t D = y.size();
@@ -3194,6 +3225,10 @@ S4 gibbs_lda(uint32_t m, uint16_t burn,
              const arma::mat& docs, const arma::mat& w, uint16_t K,
              float alpha_ = 0.1, float gamma_ = 1.01,
              bool display_progress = false) {
+
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
 
   S4 lda("Lda"); // Create object slda of class Lda
 
