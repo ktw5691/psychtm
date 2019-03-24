@@ -13,6 +13,10 @@ void error(std::string s) {
   throw std::runtime_error(s);
 }
 
+void testy(std::string s) {
+  throw std::runtime_error(s);
+}
+
 //' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 //'
 //' @param n The number of samples to draw.
@@ -1249,7 +1253,7 @@ NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
+S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
               const arma::mat& docs, const arma::mat& w, uint16_t K,
               const arma::colvec& mu0, const arma::mat& sigma0,
               arma::colvec eta_start, bool constrain_eta = true,
@@ -1632,7 +1636,7 @@ S4 gibbs_slda(uint32_t m, uint16_t burn, const arma::colvec& y,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
+S4 gibbs_sldax(uint32_t m, uint32_t burn, const arma::colvec& y,
                const arma::mat& x,
                const arma::mat& docs, const arma::mat& w, uint16_t K,
                const arma::colvec& mu0, const arma::mat& sigma0,
@@ -2009,7 +2013,7 @@ S4 gibbs_sldax(uint32_t m, uint16_t burn, const arma::colvec& y,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_mlr(uint32_t m, uint16_t burn, const arma::colvec& y,
+S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
                const arma::mat& x,
                const arma::colvec& mu0, const arma::mat& sigma0,
                arma::colvec eta_start,
@@ -2253,7 +2257,7 @@ arma::colvec post_pred_glm(const arma::mat& x, const arma::colvec& eta) {
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
+S4 gibbs_slda_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
                     const arma::mat& docs, const arma::mat& w, uint16_t K,
                     const arma::colvec& mu0, const arma::mat& sigma0,
                     arma::vec proposal_sd,
@@ -2661,7 +2665,7 @@ S4 gibbs_slda_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
+S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
                      const arma::mat& x,
                      const arma::mat& docs, const arma::mat& w, uint16_t K,
                      const arma::colvec& mu0, const arma::mat& sigma0,
@@ -3068,7 +3072,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint16_t burn, const arma::colvec& y,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
+S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
                     const arma::mat& x,
                     const arma::colvec& mu0, const arma::mat& sigma0,
                     arma::colvec eta_start, arma::vec proposal_sd,
@@ -3221,7 +3225,7 @@ S4 gibbs_logistic(uint32_t m, uint16_t burn, const arma::colvec& y,
 //'   (default: \code{FALSE}).
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_lda(uint32_t m, uint16_t burn,
+S4 gibbs_lda(uint32_t m, uint32_t burn,
              const arma::mat& docs, const arma::mat& w, uint16_t K,
              float alpha_ = 0.1, float gamma_ = 1.01,
              bool display_progress = false) {
