@@ -254,7 +254,7 @@ NULL
 #' Draw zdn from full conditional distribution for sLDA-X with binary outcome
 #'
 #' @param yd A the outcome variable for document \eqn{d}.
-#' @param x A D x p matrix of additional predictors.
+#' @param xd A p x 1 matrix of additional predictors for document \eqn{d}.
 #' @param zbar_d A K x 1 vector containing the empirical topic proportions in
 #'   document \eqn{d} (should sum to 1).
 #' @param eta A (p + K) x 1 vector of regression coefficients.
@@ -612,8 +612,8 @@ gibbs_slda_logit <- function(m, burn, y, docs, w, K, mu0, sigma0, proposal_sd, e
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_sldax_logit <- function(m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_sldax_logit`, m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta, alpha_, gamma_, verbose, display_progress)
+gibbs_sldax_logit <- function(m, burn, y, x, interaction_xcol, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_sldax_logit`, m, burn, y, x, interaction_xcol, docs, w, K, mu0, sigma0, proposal_sd, eta_start, constrain_eta, alpha_, gamma_, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for logistic regression
