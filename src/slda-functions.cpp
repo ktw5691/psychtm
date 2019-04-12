@@ -2740,7 +2740,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
     // Constrain starting values of eta s.t. components are in descending order
     if (interaction_xcol > 0) {
       // Only sort topic "linear effects", not interactions
-      std::sort(eta_start.begin() + p - K, eta_start.end() - K, std::greater<float>());
+      std::partial_sort(eta_start.begin() + p - K + 1, eta_start.end() - K + 1,
+                        eta_start.end(), std::greater<float>());
     } else {
       std::sort(eta_start.begin() + p, eta_start.end(), std::greater<float>());
     }
@@ -2959,7 +2960,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
             " while drawing eta vector\n";
         }
         if (interaction_xcol > 0) {
-          for (uint16_t k = p - K + 1; k < p; k++) {
+          for (uint16_t k = p - K + 2; k < p + 1; k++) {
             // Force eta components to be in descending order (first is largest)
             //   to resolve label switching of topics
             eta_order = etac(k - 1) >= etac(k);
