@@ -209,12 +209,18 @@ double eta_logpost_logit(const arma::mat& zbar, const arma::vec& y,
 //'   for the regression coefficients.
 double eta_logpost_logitx(const arma::mat& zbar, const arma::vec& y,
                           const arma::mat& x, const arma::vec& eta,
-                          const arma::vec& mu0, const arma::mat& sigma0) {
+                          const arma::vec& mu0, const arma::mat& sigma0,
+                          int interaction_xcol) {
 
   const uint32_t D = zbar.n_rows;
   const uint16_t K = zbar.n_cols;
+  uint16_t p = 0;
   //const uint16_t p = x.n_cols - 1; // x contains an intercept column of 1s
-  const uint16_t p = x.n_cols; // x does not have an intercept column
+  if (interaction_xcol > 0) {
+    p = x.n_cols + K - 1; // Need K - 1 interaction product columns
+  } else {
+    p = x.n_cols; // x does not have an intercept column
+  }
   if (K < 2) error("number of topics must be at least 2.");
   if (x.n_rows != D) error("x must have D rows.");
   if (y.size() != D) error("y must be of length D.");
@@ -225,6 +231,13 @@ double eta_logpost_logitx(const arma::mat& zbar, const arma::vec& y,
   // Omit last topic mean due to colinearity with intercept col in x
   //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
   arma::mat xzb = join_rows(x, zbar); // x has no intercept column
+  if (interaction_xcol > 0) {
+    arma::mat xz_int = arma::zeros(D, K - 1); // Need K - 1 interaction columns
+    for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
+      xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
+    }
+    xzb = join_rows(xzb, xz_int);
+  }
   arma::colvec muhat(D);
   muhat = xzb * eta;
 
@@ -455,13 +468,18 @@ arma::mat draw_eta_glm(const arma::colvec& y, const arma::mat& x,
 arma::mat draw_eta_sldax_logit(const arma::mat& zbar, const arma::colvec& y,
                                const arma::mat& x, const arma::colvec& eta_prev,
                                const arma::colvec& mu0, const arma::mat& sigma0,
-                               const arma::vec& proposal_sd,
+                               const arma::vec& proposal_sd, int interaction_xcol,
                                arma::vec &attempt, arma::vec &accept) {
 
   const uint32_t D = zbar.n_rows;
   const uint16_t K = zbar.n_cols;
+  uint16_t p = 0;
   //const uint16_t p = x.n_cols - 1; // x contains a column for intercept of 1s
-  const uint16_t p = x.n_cols; // x does not have a column for intercept
+  if (interaction_xcol > 0) {
+    p = x.n_cols + K - 1; // Need K - 1 interaction columns
+  } else {
+    p = x.n_cols; // x does not have a column for intercept
+  }
   if (K < 2) error("number of topics must be at least 2.");
   if (x.n_rows != D) error("x must have D rows.");
   if (y.size() != D) error("y must be of length D.");
@@ -474,14 +492,16 @@ arma::mat draw_eta_sldax_logit(const arma::mat& zbar, const arma::colvec& y,
   cand_eta = eta_prev;
   arma::vec eta(K + p);
   eta = eta_prev;
-  double cur_logpost = eta_logpost_logitx(zbar, y, x, eta_prev, mu0, sigma0);
+  double cur_logpost = eta_logpost_logitx(zbar, y, x, eta_prev, mu0, sigma0,
+                                          interaction_xcol);
 
   for (uint16_t j = 0; j < K + p; j++) {
     cand_eta(j) = rnorm(1, eta_prev(j), proposal_sd(j))(0);
     attempt(j)++; // Passed by reference to update outside function
 
     // Compute acceptance ratio
-    double cand_logpost = eta_logpost_logitx(zbar, y, x, cand_eta, mu0, sigma0);
+    double cand_logpost = eta_logpost_logitx(zbar, y, x, cand_eta, mu0, sigma0,
+                                             interaction_xcol);
     double log_r = cand_logpost - cur_logpost; // Symmetric proposals
     double log_u = log(runif(1)(0));
     if (log_r > log_u) {
@@ -884,7 +904,7 @@ uint16_t draw_zdn_slda_logit(double yd, const arma::vec& zbar_d,
 //' Draw zdn from full conditional distribution for sLDA-X with binary outcome
 //'
 //' @param yd A the outcome variable for document \eqn{d}.
-//' @param x A D x p matrix of additional predictors.
+//' @param xd A p x 1 matrix of additional predictors for document \eqn{d}.
 //' @param zbar_d A K x 1 vector containing the empirical topic proportions in
 //'   document \eqn{d} (should sum to 1).
 //' @param eta A (p + K) x 1 vector of regression coefficients.
@@ -904,7 +924,7 @@ uint16_t draw_zdn_sldax_logit(double yd, const arma::vec& xd,
                               const arma::vec& eta, uint16_t K,
                               uint32_t V, const arma::vec& ndk_n,
                               const arma::vec& nkm_n, const arma::vec& nk_n,
-                              float alpha_, float gamma_) {
+                              float alpha_, float gamma_, int interaction_xcol) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K;
@@ -921,6 +941,14 @@ uint16_t draw_zdn_sldax_logit(double yd, const arma::vec& xd,
   // Omit last topic mean; colinearity with intercept "1" in xd
   //arma::colvec xzb_d = join_cols(xd, zbar_d.subvec(0, K - 2));
   arma::colvec xzb_d = join_cols(xd, zbar_d);
+  if (interaction_xcol > 0) {
+    arma::mat xz_int = arma::vec(K - 1); // Need K - 1 interaction columns
+    for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
+      xz_int(k) = xd(interaction_xcol - 1) * zbar_d(k);
+    }
+    xzb_d = join_cols(xzb_d, xz_int);
+  }
+
   double muhat;
   muhat = arma::as_scalar(xzb_d.t() * eta);
 
@@ -2181,12 +2209,21 @@ arma::colvec post_pred_slda_logit(const arma::mat& zbar,
 //' @param eta A (p + K) x 1 vector of regression coefficients.
 //' @return Predictive posterior likelihood of all D observations
 arma::colvec post_pred_sldax_logit(const arma::mat& x, const arma::mat& zbar,
-                                   const arma::colvec& eta) {
+                                   const arma::colvec& eta,
+                                   int interaction_xcol) {
 
   const uint16_t D = x.n_rows;
+  const uint16_t K = zbar.n_cols;
   // Omit last topic mean due to colinearity with intercept in x
   //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
   arma::mat xzb = join_rows(x, zbar);
+  if (interaction_xcol > 0) {
+    arma::mat xz_int = arma::zeros(D, K - 1); // Need K - 1 interaction columns
+    for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
+      xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
+    }
+    xzb = join_rows(xzb, xz_int);
+  }
   arma::colvec y_pred(D); // Store set of D predictions
   arma::colvec loglike_pred(D);
   arma::colvec mu_hat(D);
@@ -2666,7 +2703,7 @@ S4 gibbs_slda_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
 //' @export
 // [[Rcpp::export]]
 S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
-                     const arma::mat& x,
+                     const arma::mat& x, int interaction_xcol,
                      const arma::mat& docs, const arma::mat& w, uint16_t K,
                      const arma::colvec& mu0, const arma::mat& sigma0,
                      arma::vec proposal_sd,
@@ -2682,8 +2719,13 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
 
   const uint32_t D = w.n_rows;
   const uint32_t V = w.n_cols;
+  uint16_t p = 0;
   //const uint16_t p = x.n_cols - 1; // p + 1 cols in x (includes intercept column)
-  const uint16_t p = x.n_cols;
+  if (interaction_xcol > 0) {
+    p = x.n_cols + K - 1; // Need K - 1 interaction columns
+  } else {
+    p = x.n_cols;
+  }
   NumericVector N(D);
   const IntegerVector topics_index = seq_len(K);
   const IntegerVector docs_index   = seq_len(D) - 1;
@@ -2696,7 +2738,13 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
 
   if (constrain_eta) {
     // Constrain starting values of eta s.t. components are in descending order
-    std::sort(eta_start.begin() + p, eta_start.end(), std::greater<float>());
+    if (interaction_xcol > 0) {
+      // Only sort topic "linear effects", not interactions
+      std::partial_sort(eta_start.begin() + p - K + 1, eta_start.end() - K + 1,
+                        eta_start.end(), std::greater<float>());
+    } else {
+      std::sort(eta_start.begin() + p, eta_start.end(), std::greater<float>());
+    }
   }
   etam.row(0) = eta_start.t();
   NumericVector loglike(m); // Store log-likelihood (up to an additive constant)
@@ -2769,6 +2817,13 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
   // Omit last topic mean (colinearity with intercept)
   //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
   arma::mat xzb = join_rows(x, zbar);
+  if (interaction_xcol > 0) {
+    arma::mat xz_int = arma::zeros(D, K - 1); // Need K - 1 interaction columns
+    for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
+      xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
+    }
+    xzb = join_rows(xzb, xz_int);
+  }
   arma::colvec muhat(D);
   muhat = xzb * etam.row(0).t();
 
@@ -2817,7 +2872,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
 
   // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
-  l_pred.row(0) = post_pred_sldax_logit(x, zbar, etam.row(0).t()).t();
+  l_pred.row(0) = post_pred_sldax_logit(x, zbar, etam.row(0).t(),
+                                        interaction_xcol).t();
 
   Progress prog(m, display_progress);
   for (uint32_t i = 1; i < m; i++) {
@@ -2849,7 +2905,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
           topic = draw_zdn_sldax_logit(y(d), x.row(d).t(), zbar.row(d).t(),
                                        etam.row(i - 1).t(), K, V,
                                        ndk_n, nkm_n.t(), nk_n,
-                                       alpha_, gamma_);
+                                       alpha_, gamma_, interaction_xcol);
         } catch(std::exception&  e) {
           Rcerr << "Runtime Error: " << e.what() <<
             " occurred while drawing topic for word " << n << " in document " <<
@@ -2887,8 +2943,6 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
       }
     }
 
-
-
     // Draw eta
     if (constrain_eta) {
       bool eta_order = false;
@@ -2900,16 +2954,25 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
         try {
           etac = draw_eta_sldax_logit(zbar, y, x, etam.row(i - 1).t(),
                                       mu0, sigma0, proposal_sd,
-                                      attempt, accept);
+                                      interaction_xcol, attempt, accept);
         } catch (std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() <<
             " while drawing eta vector\n";
         }
-        for (uint16_t k = p + 1; k < K + p; k++) {
-          // Force eta components to be in descending order (first is largest)
-          //   to resolve label switching of topics
-          eta_order = etac(k - 1) >= etac(k);
-          if (!eta_order) break;
+        if (interaction_xcol > 0) {
+          for (uint16_t k = p - K + 2; k < p + 1; k++) {
+            // Force eta components to be in descending order (first is largest)
+            //   to resolve label switching of topics
+            eta_order = etac(k - 1) >= etac(k);
+            if (!eta_order) break;
+          }
+        } else {
+          for (uint16_t k = p + 1; k < K + p; k++) {
+            // Force eta components to be in descending order (first is largest)
+            //   to resolve label switching of topics
+            eta_order = etac(k - 1) >= etac(k);
+            if (!eta_order) break;
+          }
         }
       }
       etam.row(i) = etac.t();
@@ -2917,7 +2980,7 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
       try {
         etam.row(i) = draw_eta_sldax_logit(zbar, y, x, etam.row(i - 1).t(),
                                            mu0, sigma0, proposal_sd,
-                                           attempt, accept).t();
+                                           interaction_xcol, attempt, accept).t();
       } catch (std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " while drawing eta vector\n";
@@ -2940,6 +3003,13 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
     // Omit last topic mean (colinear with intercept)
     //arma::mat xzb = join_rows(x, zbar.cols(0, K - 2));
     arma::mat xzb = join_rows(x, zbar);
+    if (interaction_xcol > 0) {
+      arma::mat xz_int = arma::zeros(D, K - 1); // Need K - 1 interaction columns
+      for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
+        xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
+      }
+      xzb = join_rows(xzb, xz_int);
+    }
     arma::colvec muhat(D);
     muhat = xzb * etam.row(i).t();
     loglike(i) = 0.0;
@@ -2979,7 +3049,8 @@ S4 gibbs_sldax_logit(uint32_t m, uint32_t burn, const arma::colvec& y,
     }
     logpost(i) += ((alpha_ - 1) * temp_thetapost);
 
-    l_pred.row(i) = post_pred_sldax_logit(x, zbar, etam.row(i).t()).t();
+    l_pred.row(i) = post_pred_sldax_logit(x, zbar, etam.row(i).t(),
+                                          interaction_xcol).t();
 
     arma::vec acc_rate(K + p);
     for (uint16_t j = 0; j < K + p; j++) {

@@ -4,9 +4,9 @@
 \alias{gibbs_sldax_logit}
 \title{Collapsed Gibbs sampler for the sLDA-X model with a binary outcome}
 \usage{
-gibbs_sldax_logit(m, burn, y, x, docs, w, K, mu0, sigma0, proposal_sd,
-  eta_start, constrain_eta = TRUE, alpha_ = 0.1, gamma_ = 1.01,
-  verbose = FALSE, display_progress = FALSE)
+gibbs_sldax_logit(m, burn, y, x, interaction_xcol, docs, w, K, mu0, sigma0,
+  proposal_sd, eta_start, constrain_eta = TRUE, alpha_ = 0.1,
+  gamma_ = 1.01, verbose = FALSE, display_progress = FALSE)
 }
 \arguments{
 \item{m}{The number of iterations to run the Gibbs sampler.}
