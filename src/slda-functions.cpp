@@ -1222,6 +1222,31 @@ NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
   return diff_waic_se;
 }
 
+//' Log-likelihood for sLDA model
+//' @export
+// [[Rcpp::export]]
+double get_ll_slda(const arma::colvec& y, const arma::mat& zbar,
+                   const arma::colvec& eta, const double sigma2,
+                   const arma::mat& zdocs, const arma::mat& docs,
+                   const arma::mat& theta, const arma::mat& beta,
+                   const IntegerVector docs_index, NumericVector N) {
+
+  double temp_prod = arma::as_scalar(
+    (y - zbar * eta).t() * (y - zbar * eta)
+  );
+  double ll_temp = -0.5 / sigma2 * temp_prod;
+  // Add likelihood of documents
+  for (uint32_t d : docs_index) {
+    for (uint32_t n = 0; n < N(d); n++) {
+      uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
+      uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
+      ll_temp += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+      ll_temp += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+    }
+  }
+  return ll_temp;
+}
+
 //' Collapsed Gibbs sampler for the sLDA model
 //'
 //' @include slda-class.R
@@ -1356,23 +1381,29 @@ S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
     }
-
   }
 
-  // Add likelihood of y
-  double temp_prod = arma::as_scalar(
-    (y - zbar * etam.row(0).t()).t() * (y - zbar * etam.row(0).t())
-  );
-  loglike(0) = -0.5 / sigma2 * temp_prod;
-  // Add likelihood of documents
-  for (uint32_t d : docs_index) {
-    for (uint32_t n = 0; n < N(d); n++) {
-      uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
-      uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-      loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
-      loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
-    }
-  }
+  // // Add likelihood of y
+  // double temp_prod = arma::as_scalar(
+  //   (y - zbar * etam.row(0).t()).t() * (y - zbar * etam.row(0).t())
+  // );
+  // loglike(0) = -0.5 / sigma2 * temp_prod;
+  // // Add likelihood of documents
+  // for (uint32_t d : docs_index) {
+  //   for (uint32_t n = 0; n < N(d); n++) {
+  //     uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
+  //     uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
+  //     loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
+  //     loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
+  //   }
+  // }
+  // Rcout << loglike(0) << " Original\n";
+  // double ll2 = get_ll(y, zbar, etam.row(0).t(), sigma2, zdocs, docs,
+  //                     theta, beta, docs_index, N);
+  // Rcout << ll2 << " get_ll()\n";
+
+  loglike(0) = get_ll_slda(y, zbar, etam.row(0).t(), sigma2, zdocs, docs,
+                           theta, beta, docs_index, N);
   logpost(0) = loglike(0);
   // Add prior on eta
   temp_prod = arma::as_scalar(
