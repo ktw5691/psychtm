@@ -1247,6 +1247,44 @@ double get_ll_slda(const arma::colvec& y, const arma::mat& zbar,
   return ll_temp;
 }
 
+double get_lpost_slda(double ll, const arma::colvec& y, const arma::mat& zbar,
+                      const arma::colvec& eta, const double sigma2,
+                      const arma::mat& zdocs, const arma::mat& docs,
+                      const arma::mat& theta, const arma::mat& beta,
+                      const arma::colvec& mu0, const arma::mat& sigma0,
+                      const double gamma_, const double alpha_,
+                      const double a0, const double b0, const uint32_t V,
+                      const IntegerVector docs_index, NumericVector N) {
+
+  uint16_t K = zbar.n_cols;
+  double lp_temp = ll;
+  // Add prior on eta
+  double temp_prod = arma::as_scalar(
+    (eta - mu0).t() * sigma0.i() * (eta - mu0)
+  );
+  lp_temp += (-0.5 * temp_prod);
+  // Add prior on sigma2
+  lp_temp += ((-0.5 * a0 - 1.0) * log(sigma2) - 0.5 * b0 / sigma2);
+  // Add prior on beta matrix
+  double temp_betapost = 0;
+  for (uint16_t k = 0; k < K; k++) {
+    for (uint32_t v = 0; v < V; v++) {
+      temp_betapost += log(beta(k, v));
+    }
+  }
+  lp_temp += ((gamma_ - 1.0) * temp_betapost);
+  // Add prior on theta matrix
+  double temp_thetapost = 0;
+  for (uint32_t d : docs_index) {
+    for (uint16_t k = 0; k < K; k++) {
+      temp_thetapost = log(theta(d, k));
+    }
+  }
+  lp_temp += ((alpha_ - 1) * temp_thetapost);
+
+  return lp_temp;
+}
+
 //' Collapsed Gibbs sampler for the sLDA model
 //'
 //' @include slda-class.R
@@ -1383,51 +1421,22 @@ S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
     }
   }
 
-  // // Add likelihood of y
-  // double temp_prod = arma::as_scalar(
-  //   (y - zbar * etam.row(0).t()).t() * (y - zbar * etam.row(0).t())
-  // );
-  // loglike(0) = -0.5 / sigma2 * temp_prod;
-  // // Add likelihood of documents
-  // for (uint32_t d : docs_index) {
-  //   for (uint32_t n = 0; n < N(d); n++) {
-  //     uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
-  //     uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-  //     loglike(0) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
-  //     loglike(0) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
-  //   }
-  // }
-  // Rcout << loglike(0) << " Original\n";
-  // double ll2 = get_ll(y, zbar, etam.row(0).t(), sigma2, zdocs, docs,
-  //                     theta, beta, docs_index, N);
-  // Rcout << ll2 << " get_ll()\n";
-
-  loglike(0) = get_ll_slda(y, zbar, etam.row(0).t(), sigma2, zdocs, docs,
-                           theta, beta, docs_index, N);
-  logpost(0) = loglike(0);
-  // Add prior on eta
-  temp_prod = arma::as_scalar(
-    (etam.row(0).t() - mu0).t() * sigma0.i() * (etam.row(0).t() - mu0)
-  );
-  logpost(0) += (-0.5 * temp_prod);
-  // Add prior on sigma2
-  logpost(0) += ((-0.5 * a0 - 1.0) * log(sigma2m(0)) - 0.5 * b0 / sigma2m(0));
-  // Add prior on beta matrix
-  double temp_betapost = 0;
-  for (uint16_t k = 0; k < K; k++) {
-    for (uint32_t v = 0; v < V; v++) {
-      temp_betapost += log(beta(k, v));
-    }
+  // Compute log-likelihood and log-posterior
+  try {
+    loglike(0) = get_ll_slda(y, zbar, etam.row(0).t(), sigma2, zdocs, docs,
+                             theta, beta, docs_index, N);
+  } catch(std::exception& e) {
+    Rcerr << "Runtime Error: " << e.what() <<
+      " computing initial log-likelihood\n ";
   }
-  logpost(0) += ((gamma_ - 1.0) * temp_betapost);
-  // Add prior on theta matrix
-  double temp_thetapost = 0;
-  for (uint32_t d : docs_index) {
-    for (uint16_t k = 0; k < K; k++) {
-      temp_thetapost = log(theta(d, k));
-    }
+  try {
+    logpost(0) = get_lpost_slda(loglike(0), y, zbar, etam.row(0).t(), sigma2,
+                                zdocs, docs, theta, beta, mu0, sigma0,
+                                gamma_, alpha_, a0, b0, V, docs_index, N);
+  } catch(std::exception& e) {
+    Rcerr << "Runtime Error: " << e.what() <<
+      " computing initial log-posterior\n ";
   }
-  logpost(0) += ((alpha_ - 1) * temp_thetapost);
 
   // Compute predictive posterior likelihood
   arma::mat l_pred(m, D);
