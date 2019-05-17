@@ -1223,8 +1223,6 @@ NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
 }
 
 //' Log-likelihood for sLDA model
-//' @export
-// [[Rcpp::export]]
 double get_ll_slda(const arma::colvec& y, const arma::mat& zbar,
                    const arma::colvec& eta, const double sigma2,
                    const arma::mat& zdocs, const arma::mat& docs,
@@ -1247,6 +1245,7 @@ double get_ll_slda(const arma::colvec& y, const arma::mat& zbar,
   return ll_temp;
 }
 
+//' Log-posterior for sLDA model
 double get_lpost_slda(double ll, const arma::colvec& y, const arma::mat& zbar,
                       const arma::colvec& eta, const double sigma2,
                       const arma::mat& zdocs, const arma::mat& docs,
@@ -1283,6 +1282,50 @@ double get_lpost_slda(double ll, const arma::colvec& y, const arma::mat& zbar,
   lp_temp += ((alpha_ - 1) * temp_thetapost);
 
   return lp_temp;
+}
+
+//' Update number of times topic was drawn in document excluding current word
+arma::vec count_topicd(uint32_t d, uint32_t n, uint32_t word, uint16_t topic,
+                       arma::vec ndk) {
+  // Exclude word n from topic counts in doc d
+  arma::vec ndk_n = ndk;
+  ndk_n(topic - 1)--;
+  if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
+  return ndk_n;
+}
+
+//' Update number of times topic was drawn in corpus excluding current word
+arma::vec count_topic_corpus(uint16_t topic, arma::vec nk) {
+  // Exclude word n from topic counts in corpus
+  arma::vec nk_n = nk;
+  nk_n(topic - 1)--;
+  if (nk_n(topic - 1) < 0) nk_n(topic - 1) = 0;
+  return nk_n;
+}
+
+//' Update number of times word and topic co-occur in corpus
+arma::mat count_word_topic(uint32_t word, uint16_t topic, arma::mat nkm) {
+  // Exclude word n from topic-word counts
+  arma::mat nkm_n = nkm;
+  nkm_n(topic - 1, word - 1)--;
+  // Fix possible negative counts
+  if (nkm_n(topic - 1, word - 1) < 0) nkm_n(topic - 1, word - 1) = 0;
+  nkm_n = nkm_n.col(word - 1).t();
+  return nkm_n;
+}
+
+//' Update all topic and topic-word counts in document and corpus
+void update_zcounts(uint32_t d, uint32_t n, uint32_t word, uint16_t topic,
+                    arma::mat& ndk, NumericVector& nk, arma::mat& nkm) {
+
+  arma::vec ndktemp = ndk.row(d).t();
+  NumericVector nktemp = nk;
+  arma::mat nkmtemp = nkm;
+
+  ndk.row(d) = count_topicd(d, n, word, topic, ndktemp).t();
+  nk = count_topic_corpus(topic, nktemp);
+  nkm.col(word - 1) = count_word_topic(word, topic, nkmtemp).t();
+
 }
 
 //' Collapsed Gibbs sampler for the sLDA model
@@ -1450,28 +1493,18 @@ S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
       for (uint32_t n = 0; n < N(d); n++) {
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
-        // Exclude word n from topic counts in doc d
-        arma::vec ndk_n = ndk.row(d).t();
-        ndk_n(topic - 1)--;
-        if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
-        ndk.row(d) = ndk_n.t();
-        // Exclude word n from topic counts in corpus
-        arma::vec nk_n = nk;
-        nk_n(topic - 1)--;
-        if (nk_n(topic - 1) < 0) nk_n(topic - 1) = 0;
-        nk = nk_n;
-        // Exclude word n from topic-word counts
-        arma::mat nkm_n = nkm;
-        nkm_n(topic - 1, word - 1)--;
-        // Fix possible negative counts
-        if (nkm_n(topic - 1, word - 1) < 0) nkm_n(topic - 1, word - 1) = 0;
-        nkm_n = nkm_n.col(word - 1).t();
-        nkm.col(word - 1) = nkm_n.t();
+
+        // ndk, nk, and nkm are updated by passing by reference!
+        update_zcounts(d, n, word, topic, ndk, nk, nkm);
+
+        // ndk.row(d) = count_topicd(d, n, word, topic, ndk.row(d).t()).t();
+        // nk = count_topic_corpus(topic, nk);
+        // nkm.col(word - 1) = count_word_topic(word, topic, nkm).t();
 
         try {
           topic = draw_zdn_slda(y(d), zbar.row(d).t(), etam.row(i - 1).t(),
-                                sigma2m(i - 1), K, V, ndk_n, nkm_n.t(), nk_n,
-                                alpha_, gamma_);
+                                sigma2m(i - 1), K, V, ndk.row(d).t(),
+                                nkm.col(word - 1), nk, alpha_, gamma_);
         } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() <<
             " occurred while drawing topic for word " << n << " in document " <<
@@ -1479,33 +1512,34 @@ S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
         }
         zdocs(d, n) = topic;
         topicsm(d, n, i) = topic;
-        // Update topic count in doc d
-        ndk(d, topic - 1)++;
-        // Update topic count in corpus
-        nk(topic - 1)++;
-        // Update topic-word counts in corpus
-        nkm(topic - 1, word - 1)++;
+        ndk(d, topic - 1)++;        // Update topic count in doc d
+        nk(topic - 1)++;            // Update topic count in corpus
+        nkm(topic - 1, word - 1)++; // Update topic-word counts in corpus
       }
     }
 
     for (uint32_t d: docs_index) {
+      // Get zbar matrix
       for (uint16_t k = 0; k < K; k++) {
-        ndk(d, k) = sum(zdocs.row(d) == (k + 1));
+        ndk(d, k) = sum(zdocs.row(d) == (k + 1)); // Redundant?
         zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
-        // Estimate beta
-        try {
-          beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
-        } catch(std::exception& e) {
-          Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
-            "of beta matrix\n";
-        }
       }
-      // Estimate theta
+      // Estimate theta for doc d
       try {
         theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
+      }
+    }
+
+    // Estimate beta
+    for (uint16_t k = 0; k < K; k++) {
+      try {
+        beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
+      } catch(std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+          "of beta matrix\n";
       }
     }
 
@@ -1547,44 +1581,23 @@ S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
       Rcerr << "Runtime Error: " << e.what() << " while drawing sigma2\n";
     }
 
-    // Add likelihood of y
-    double temp_prod = arma::as_scalar(
-      (y - zbar * etam.row(i).t()).t() * (y - zbar * etam.row(i).t())
-    );
-    loglike(i) = -0.5 / sigma2m(i) * temp_prod;
-    // Add likelihood of documents
-    for (uint32_t d : docs_index) {
-      for (uint32_t n = 0; n < N(d); n++) {
-        uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
-        uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-        loglike(i) += log(theta(d, zdn));  // f(z_{dn} | theta_d)
-        loglike(i) += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
-      }
+    // Compute log-likelihood and log-posterior
+    try {
+      loglike(i) = get_ll_slda(y, zbar, etam.row(i).t(), sigma2m(i), zdocs,
+                               docs, theta, beta, docs_index, N);
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() <<
+        " computing log-likelihood\n ";
     }
-    logpost(i) = loglike(i);
-    // Add prior on eta
-    temp_prod = arma::as_scalar(
-      (etam.row(i).t() - mu0).t() * sigma0.i() * (etam.row(i).t() - mu0)
-    );
-    logpost(i) += (-0.5 * temp_prod);
-    // Add prior on sigma2
-    logpost(i) += ((-0.5 * a0 - 1.0) * log(sigma2m(i)) - 0.5 * b0 / sigma2m(i));
-    // Add prior on beta matrix
-    double temp_betapost = 0;
-    for (uint16_t k = 0; k < K; k++) {
-      for (uint32_t v = 0; v < V; v++) {
-        temp_betapost += log(beta(k, v));
-      }
+    try {
+      logpost(i) = get_lpost_slda(loglike(i), y, zbar, etam.row(i).t(),
+                                  sigma2m(i), zdocs, docs, theta, beta, mu0,
+                                  sigma0, gamma_, alpha_, a0, b0, V,
+                                  docs_index, N);
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() <<
+        " computing initial log-posterior\n ";
     }
-    logpost(i) += ((gamma_ - 1.0) * temp_betapost);
-    // Add prior on theta matrix
-    double temp_thetapost = 0;
-    for (uint32_t d : docs_index) {
-      for (uint16_t k = 0; k < K; k++) {
-        temp_thetapost = log(theta(d, k));
-      }
-    }
-    logpost(i) += ((alpha_ - 1) * temp_thetapost);
 
     l_pred.row(i) = post_pred_slda(zbar, y, etam.row(i).t(), sigma2m(i)).t();
 
