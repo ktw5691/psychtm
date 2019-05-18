@@ -13,10 +13,6 @@ void error(std::string s) {
   throw std::runtime_error(s);
 }
 
-void testy(std::string s) {
-  throw std::runtime_error(s);
-}
-
 //' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 //'
 //' @param n The number of samples to draw.
