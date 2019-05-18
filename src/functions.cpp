@@ -129,7 +129,7 @@ double eta_logpost_logit(const arma::mat& w, const arma::vec& y,
 //' @param accept The number of accepted draws of eta by MH.
 //'
 //' @return A q x 1 draw for eta.
-arma::mat draw_eta_logit(const arma::mat& w, const arma::colvec& y,
+arma::colvec draw_eta_logit(const arma::mat& w, const arma::colvec& y,
                          const arma::colvec& eta_prev,
                          const arma::colvec& mu0, const arma::mat& sigma0,
                          const arma::vec& proposal_sd,
@@ -672,8 +672,7 @@ NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2,
 //' Log-likelihood for MLR
 //'
 //' @param y A D x 1 vector of outcomes to be predicted.
-//' @param w A D x q matrix containing a predictor model matrix of assumed form
-//'   (X, Zbar, XZbarInteractions).
+//' @param w A D x q matrix containing a predictor model matrix.
 //' @param eta A q x 1 vector of regression coefficients.
 //' @param sigma2 The current draw of the residual variance of y.
 //'
@@ -685,6 +684,31 @@ double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
     (y - w * eta).t() * (y - w * eta)
   );
   double ll_temp = -0.5 / sigma2 * temp_prod;
+
+  return ll_temp;
+}
+
+//' Log-likelihood for logistic regression
+//'
+//' @param y A D x 1 vector of outcomes to be predicted.
+//' @param w A D x q matrix containing a predictor model matrix.
+//' @param eta A q x 1 vector of regression coefficients.
+//'
+//' @return The current log-likelihood.
+double get_ll_logit(const arma::colvec& y, const arma::mat& w,
+                    const arma::colvec& eta) {
+
+  // Add likelihood of y
+  uint32_t D = w.n_rows;
+  arma::colvec muhat(D);
+  muhat = w * eta;
+
+  // Compute log-likelihood of y
+  double ll_temp = 0.0;
+  for (uint32_t d = 0; d < D; d++) {
+    ll_temp += (y(d) * log(invlogit(arma::as_scalar(muhat(d)))) +
+      (1.0 - y(d)) * log(1.0 / (1.0 + exp(arma::as_scalar(muhat(d))))));
+  }
 
   return ll_temp;
 }
@@ -772,6 +796,28 @@ double get_lpost_mlr(double ll,
   lp_temp += (-0.5 * temp_prod);
   // Add prior on sigma2
   lp_temp += ((-0.5 * a0 - 1.0) * log(sigma2) - 0.5 * b0 / sigma2);
+
+  return lp_temp;
+}
+
+//' Log-posterior for logistic regression
+//'
+//' @param ll A double of the current log-likelihood.
+//' @param eta A q x 1 vector of regression coefficients.
+//' @param mu0 A q x 1 mean vector for the prior on the regression coefficients.
+//' @param sigma0 A q x q variance-covariance matrix for the prior on the
+//'   regression coefficients.
+//'
+//' @return The current log-posterior.
+double get_lpost_logit(double ll, const arma::colvec& eta,
+                       const arma::colvec& mu0, const arma::mat& sigma0) {
+
+  double lp_temp = ll;
+  // Add prior on eta
+  double temp_prod = arma::as_scalar(
+    (eta - mu0).t() * sigma0.i() * (eta - mu0)
+  );
+  lp_temp += (-0.5 * temp_prod);
 
   return lp_temp;
 }
@@ -1046,6 +1092,131 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
   slda.slot("a0") = a0;
   slda.slot("b0") = b0;
   slda.slot("eta_start") = eta_start;
+  slda.slot("loglike") = loglike;
+  slda.slot("logpost") = logpost;
+  slda.slot("p_eff") = waic_and_se(2);
+  slda.slot("waic") = waic_and_se(0);
+  slda.slot("se_waic") = waic_and_se(1);
+  slda.slot("lpd") = l_pred;
+
+  return slda;
+}
+
+//' Collapsed Gibbs sampler for logistic regression
+//'
+//' @include slda-class.R
+//'
+//' @param m The number of iterations to run the Gibbs sampler.
+//' @param burn The number of iterations to discard as the burn-in period.
+//' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
+//' @param x A D x p matrix of additional predictors (no column of 1s for
+//'   intercept).
+//' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression coefficients.
+//' @param sigma0 A (p + 1) x (p + 1) variance-covariance matrix for the prior
+//'   on the regression coefficients.
+//' @param eta_start A (p + 1) x 1 vector of starting values for the
+//'   regression coefficients.
+//' @param proposal_sd The proposal standard deviation for drawing the
+//'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+//' @param verbose Should parameter draws be output during sampling? (default:
+//'   \code{FALSE}).
+//' @param display_progress Should percent progress of sampler be displayed
+//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+//'   \code{display_progress} be set to \code{TRUE} at any given time.
+//' @export
+// [[Rcpp::export]]
+S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
+                  const arma::mat& x,
+                  const arma::colvec& mu0, const arma::mat& sigma0,
+                  arma::colvec eta_start, arma::vec proposal_sd,
+                  bool verbose = false, bool display_progress = false) {
+
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
+
+  S4 slda("Logistic"); // Create object slda of class Logistic
+
+  const uint32_t D = y.size();
+  const uint16_t pp1 = x.n_cols;
+
+  arma::mat etam(m - burn, pp1);
+  NumericVector loglike(m - burn); // Store log-likelihood (up to an additive constant)
+  NumericVector logpost(m - burn); // Store log-posterior (up to an additive constant)
+  arma::mat l_pred(m - burn, D);
+
+  arma::vec attempt = arma::zeros(pp1);
+  arma::vec accept = arma::zeros(pp1);
+
+  arma::colvec eta(pp1);
+
+  Progress prog(m, display_progress);
+  for (uint32_t i = 1; i <= m; i++) {
+
+    // Draw eta
+    try {
+      eta = draw_eta_logit(x, y, eta,
+                           mu0, sigma0, proposal_sd,
+                           attempt, accept);
+    } catch (std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() <<
+        " while drawing eta vector\n";
+    }
+
+    // Update acceptance rates and tune proposal standard deviations
+    arma::vec acc_rate(pp1);
+    for (uint16_t j = 0; j < pp1; j++) {
+      acc_rate(j) = static_cast<float>(accept(j)) / static_cast<float>(attempt(j));
+    }
+    for (uint16_t j = 0; j < pp1; j++) {
+      if (i < (static_cast<float>(burn) / 5.0) && attempt(j) >= 50 && (i % 50 == 0)) {
+        if (acc_rate(j) < 0.159) {
+          // too low acceptance, decrease jumping width
+          proposal_sd(j) = proposal_sd(j) * 0.8;
+        }
+        if (acc_rate(j) > 0.309) {
+          // too high acceptance, increase jumping width
+          proposal_sd(j) = proposal_sd(j) * 1.2;
+        }
+        accept(j) = attempt(j) = 0;
+      }
+    }
+
+    if (i > burn) {
+      // Likelihood
+      loglike(i - burn - 1) = get_ll_logit(y, x, eta);
+      // Log-posterior
+      logpost(i - burn - 1) = get_lpost_logit(loglike(i - burn - 1), eta,
+                                              mu0, sigma0);
+
+      l_pred.row(i - burn - 1) = post_pred_logit(x, eta).t();
+
+      etam.row(i - burn - 1) = eta.t();
+    }
+    if (i % 500 == 0) {
+      if (verbose) {
+        Rcout << i << "eta: " << eta.t() << "\n" <<
+          "accept rate: " << acc_rate.t() << "\n" <<
+          "prop_sd: " << proposal_sd.t() << "\n";
+      }
+    }
+    if (display_progress) {
+      prog.increment();
+    }
+    Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
+  }
+
+  // Compute WAIC and p_eff
+  NumericVector waic_and_se(3);
+  waic_and_se = waic_all(D, m - burn, l_pred);
+
+  slda.slot("ndocs") = D;
+  slda.slot("nchain") = m - burn;
+  slda.slot("eta") = etam;
+  slda.slot("mu0") = mu0;
+  slda.slot("sigma0") = sigma0;
+  slda.slot("eta_start") = eta_start;
+  slda.slot("proposal_sd") = proposal_sd;
   slda.slot("loglike") = loglike;
   slda.slot("logpost") = logpost;
   slda.slot("p_eff") = waic_and_se(2);
