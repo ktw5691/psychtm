@@ -239,45 +239,6 @@ double eta_logpost_logitx(const arma::mat& zbar, const arma::vec& y,
   return logpost;
 }
 
-//' Compute full conditional log-posterior of eta for multiple linear regression
-//'
-//' @param y A D x 1 vector of the outcome variable for each document.
-//' @param x A D x (p + 1) matrix of additional predictors including a column of
-//'   1's for the intercept.
-//' @param eta A (p + 1) x 1 vector of regression coefficients
-//' @param sigma2 The residual variance.
-//' @param mu0 A (p + 1) x 1 vector of prior means for the regression
-//'   coefficients.
-//' @param sigma0 A (p + 1) x (p + 1) prior variance-covariance matrix
-//'   for the regression coefficients.
-double eta_logpost_mlr(const arma::vec& y, const arma::mat& x,
-                       const arma::vec& eta, double sigma2,
-                       const arma::vec& mu0, const arma::mat& sigma0) {
-
-  const uint32_t D = x.n_rows;
-  const uint16_t pp1 = x.n_cols; // x has an intercept column
-  if (x.n_rows != D) error("x must have D rows.");
-  if (y.size() != D) error("y must be of length D.");
-  if (mu0.size() != pp1) error("mu0 must be of length p + 1.");
-  if ((sigma0.n_rows != pp1) || (sigma0.n_cols != pp1))
-    error("sigma0 must be a (p + 1) x (p + 1) matrix.");
-
-  arma::colvec muhat(D);
-  muhat = x * eta;
-
-  // Compute log-likelihood of y
-  // Add likelihood of y
-  double temp_prod = arma::as_scalar((y - muhat).t() * (y - muhat));
-  double logpost = -0.5 / sigma2 * temp_prod;
-
-  // Add log-prior on eta
-  logpost += (-0.5 * arma::as_scalar(
-    (eta - mu0).t() * sigma0.i() * (eta - mu0)
-  ));
-
-  return logpost;
-}
-
 //' Compute full conditional log-posterior of eta for logistic regression
 //'
 //' @param y A D x 1 vector of the outcome variable for each document.
