@@ -1501,7 +1501,7 @@ S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
   for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
 
   // Initialize sigma^2
-  sigma2 = var(y);
+  sigma2 = var(y) / 2.0;
   sigma2m(0) = sigma2;
 
   if (constrain_eta) {
@@ -1588,7 +1588,6 @@ S4 gibbs_slda(uint32_t m, uint32_t burn, const arma::colvec& y,
     for (uint32_t d: docs_index) {
       // Get zbar matrix
       for (uint16_t k = 0; k < K; k++) {
-        ndk(d, k) = sum(zdocs.row(d) == (k + 1)); // Redundant?
         zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
       }
       // Estimate theta for doc d
