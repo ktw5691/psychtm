@@ -312,6 +312,95 @@ NULL
 #' @return Predictive posterior likelihood of all D observations
 NULL
 
+#' Log-likelihood for sLDA model
+#'
+#' @param y A D x 1 vector of outcomes to be predicted.
+#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+#'   sums to 1.
+#' @param eta A K x 1 vector of regression coefficients.
+#' @param sigma2 The current draw of the residual variance of y.
+#' @param zdocs A D x max(\eqn{N_d}) matrix of topic indicators for all documents.
+#' @param docs A D x max(\eqn{N_d}) matrix of word indicators for all documents.
+#' @param theta A D x K matrix of the current estimates of the document topic proportions.
+#' @param beta a K x V matrix of the current estimates of the word-topic probabilities.
+#' @param docs_index A vector of length D containing elements 1, 2, ..., D.
+#' @param N A vector of length D containing the number of words in each document.
+#'
+#' @return The current log-likelihood.
+NULL
+
+#' Log-posterior for sLDA model
+#'
+#' @param ll A double of the current log-likelihood.
+#' @param y A D x 1 vector of outcomes to be predicted.
+#' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
+#'   draws of topics \eqn{z_1, \ldots, z_K} in document \eqn{d} where each row
+#'   sums to 1.
+#' @param eta A K x 1 vector of regression coefficients.
+#' @param sigma2 The current draw of the residual variance of y.
+#' @param zdocs A D x max(\eqn{N_d}) matrix of topic indicators for all documents.
+#' @param docs A D x max(\eqn{N_d}) matrix of word indicators for all documents.
+#' @param theta A D x K matrix of the current estimates of the document topic proportions.
+#' @param beta a K x V matrix of the current estimates of the word-topic probabilities.
+#' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
+#' @param sigma0 A K x K variance-covariance matrix for the prior on the
+#'   regression coefficients.
+#' @param gamma_ The hyper-parameter for the prior on the topic-specific
+#'   vocabulary probabilities.
+#' @param alpha_ The hyper-parameter for the prior on the topic proportions.
+#' @param a0 The shape parameter for the prior on sigma2.
+#' @param b0 The scale parameter for the prior on sigma2.
+#' @param V The number of words in the vocabulary.
+#' @param docs_index A vector of length D containing elements 1, 2, ..., D.
+#' @param N A vector of length D containing the number of words in each document.
+#'
+#' @return The current log-posterior.
+NULL
+
+#' Update number of times topic was drawn in document excluding current word
+#'
+#' @param d The current document index.
+#' @param n The current word index in document d.
+#' @param topic The current topic index.
+#' @param ndk A vector of the current number of draws of each topic in document d.
+#'
+#' @return A vector of the current number of draws of each topic in document d
+#'   excluding word n.
+NULL
+
+#' Update number of times topic was drawn in corpus excluding current word
+#'
+#' @param topic The current topic index.
+#' @param nk A vector of the current number of draws of each topic in the corpus.
+#'
+#' @return A vector of the current number of draws of each topic in the corpus
+#'   excluding the current word.
+NULL
+
+#' Update number of times word and topic co-occur in corpus
+#'
+#' @param word The current word index.
+#' @param topic The current topic index.
+#' @param nkm A K x V matrix of the current number of co-occurences of each topic
+#'   and vocabulary term in the corpus.
+#'
+#' @return A K x V matrix of the current number of co-occurences of each topic
+#'   and vocabulary term in the corpus excluding the current word.
+NULL
+
+#' Update all topic and topic-word counts in document and corpus
+#'
+#' @param d The current document index.
+#' @param n The current word index in document d.
+#' @param word The current word index.
+#' @param topic The current topic index.
+#' @param ndk A vector of the current number of draws of each topic in document d.
+#' @param nk A vector of the current number of draws of each topic in the corpus.
+#' @param nkm A K x V matrix of the current number of co-occurences of each topic
+#'   and vocabulary term in the corpus.
+NULL
+
 #' Posterior predictive likelihood for sLDA logistic
 #'
 #' @param zbar A D x K matrix with row \eqn{d} containing the mean number of
