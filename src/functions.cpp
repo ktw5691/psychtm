@@ -79,7 +79,32 @@ double invlogit(double x) {
   return exp(x) / (1.0 + exp(x));
 }
 
-//' Log-posterior for logistic regression
+//' Log-likelihood for logistic regression
+//'
+//' @param y A D x 1 vector of outcomes to be predicted.
+//' @param w A D x q matrix containing a predictor model matrix.
+//' @param eta A q x 1 vector of regression coefficients.
+//'
+//' @return The current log-likelihood.
+double get_ll_logit(const arma::colvec& y, const arma::mat& w,
+                    const arma::colvec& eta) {
+
+  // Add likelihood of y
+  uint32_t D = w.n_rows;
+  arma::colvec muhat(D);
+  muhat = w * eta;
+
+  // Compute log-likelihood of y
+  double ll_temp = 0.0;
+  for (uint32_t d = 0; d < D; d++) {
+    ll_temp += (y(d) * log(invlogit(arma::as_scalar(muhat(d)))) +
+      (1.0 - y(d)) * log(1.0 / (1.0 + exp(arma::as_scalar(muhat(d))))));
+  }
+
+  return ll_temp;
+}
+
+//' Log-posterior for regression coefficients with normal prior
 //'
 //' @param ll A double of the current log-likelihood.
 //' @param eta A q x 1 vector of regression coefficients.
@@ -88,8 +113,8 @@ double invlogit(double x) {
 //'   regression coefficients.
 //'
 //' @return The current log-posterior.
-double get_lpost_logit(double ll, const arma::colvec& eta,
-                       const arma::colvec& mu0, const arma::mat& sigma0) {
+double get_lpost_eta(double ll, const arma::colvec& eta,
+                     const arma::colvec& mu0, const arma::mat& sigma0) {
 
   double lp_temp = ll;
   // Add prior on eta
@@ -116,18 +141,11 @@ double eta_logpost_logit(const arma::mat& w, const arma::vec& y,
                          const arma::vec& eta,
                          const arma::vec& mu0, const arma::mat& sigma0) {
 
-  const uint32_t D = w.n_rows;
-  arma::colvec muhat(D);
-  muhat = w * eta;
-
   // Compute log-likelihood of y
-  double loglike = 0.0;
-  for (uint32_t d = 0; d < D; d++) {
-    loglike += (y(d) * log(invlogit(arma::as_scalar(muhat(d)))) +
-      (1.0 - y(d)) * log(1.0 / (1.0 + exp(arma::as_scalar(muhat(d))))));
-  }
+  double loglike = get_ll_logit(y, w, eta);
+
   // Add log-prior on eta
-  double logpost = get_lpost_logit(loglike, eta, mu0, sigma0);
+  double logpost = get_lpost_eta(loglike, eta, mu0, sigma0);
 
   return logpost;
 }
@@ -707,31 +725,6 @@ double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' Log-likelihood for logistic regression
-//'
-//' @param y A D x 1 vector of outcomes to be predicted.
-//' @param w A D x q matrix containing a predictor model matrix.
-//' @param eta A q x 1 vector of regression coefficients.
-//'
-//' @return The current log-likelihood.
-double get_ll_logit(const arma::colvec& y, const arma::mat& w,
-                    const arma::colvec& eta) {
-
-  // Add likelihood of y
-  uint32_t D = w.n_rows;
-  arma::colvec muhat(D);
-  muhat = w * eta;
-
-  // Compute log-likelihood of y
-  double ll_temp = 0.0;
-  for (uint32_t d = 0; d < D; d++) {
-    ll_temp += (y(d) * log(invlogit(arma::as_scalar(muhat(d)))) +
-      (1.0 - y(d)) * log(1.0 / (1.0 + exp(arma::as_scalar(muhat(d))))));
-  }
-
-  return ll_temp;
-}
-
 //' Log-likelihood for sLDA/sLDAX model
 //'
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -753,10 +746,7 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
                         const arma::mat& theta, const arma::mat& beta,
                         const IntegerVector& docs_index, const NumericVector& N) {
 
-  double temp_prod = arma::as_scalar(
-    (y - w * eta).t() * (y - w * eta)
-  );
-  double ll_temp = -0.5 / sigma2 * temp_prod;
+  double ll_temp = get_ll_mlr(y, w, eta, sigma2);
   // Add likelihood of documents
   for (uint32_t d : docs_index) {
     for (uint32_t n = 0; n < N(d); n++) {
@@ -807,12 +797,8 @@ double get_lpost_mlr(double ll,
                      const arma::colvec& mu0, const arma::mat& sigma0,
                      double a0, double b0) {
 
-  double lp_temp = ll;
-  // Add prior on eta
-  double temp_prod = arma::as_scalar(
-    (eta - mu0).t() * sigma0.i() * (eta - mu0)
-  );
-  lp_temp += (-0.5 * temp_prod);
+  double lp_temp = get_lpost_eta(ll, eta, mu0, sigma0);
+
   // Add prior on sigma2
   lp_temp += ((-0.5 * a0 - 1.0) * log(sigma2) - 0.5 * b0 / sigma2);
 
@@ -822,7 +808,6 @@ double get_lpost_mlr(double ll,
 //' Log-posterior for sLDA/sLDAX model
 //'
 //' @param ll A double of the current log-likelihood.
-//' @param y A D x 1 vector of outcomes to be predicted.
 //' @param eta A q x 1 vector of regression coefficients.
 //' @param sigma2 The current draw of the residual variance of y.
 //' @param theta A D x K matrix of the current estimates of the document topic proportions.
@@ -872,7 +857,6 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
 //' Log-posterior for logistic sLDA/sLDAX model
 //'
 //' @param ll A double of the current log-likelihood.
-//' @param y A D x 1 vector of outcomes to be predicted.
 //' @param eta A q x 1 vector of regression coefficients.
 //' @param theta A D x K matrix of the current estimates of the document topic proportions.
 //' @param beta a K x V matrix of the current estimates of the word-topic probabilities.
@@ -886,13 +870,34 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
 //' @param docs_index A vector of length D containing elements 1, 2, ..., D.
 //'
 //' @return The current log-posterior.
-// double get_lpost_slda_logit(double ll, const arma::colvec& y,
-//                             const arma::colvec& eta, double sigma2,
-//                             const arma::mat& theta, const arma::mat& beta,
-//                             const arma::colvec& mu0, const arma::mat& sigma0,
-//                             double gamma_, double alpha_,
-//                             uint32_t V, const IntegerVector& docs_index) {
+double get_lpost_slda_logit(double ll, const arma::colvec& eta,
+                            const arma::mat& theta, const arma::mat& beta,
+                            const arma::colvec& mu0, const arma::mat& sigma0,
+                            double gamma_, double alpha_,
+                            uint32_t V, const IntegerVector& docs_index) {
 
+  uint16_t K = theta.n_cols;
+  double lp_temp = get_lpost_eta(ll, eta, mu0, sigma0);
+
+  // Add prior on beta matrix
+  double temp_betapost = 0;
+  for (uint16_t k = 0; k < K; k++) {
+    for (uint32_t v = 0; v < V; v++) {
+      temp_betapost += log(beta(k, v));
+    }
+  }
+  lp_temp += ((gamma_ - 1.0) * temp_betapost);
+  // Add prior on theta matrix
+  double temp_thetapost = 0;
+  for (uint32_t d : docs_index) {
+    for (uint16_t k = 0; k < K; k++) {
+      temp_thetapost = log(theta(d, k));
+    }
+  }
+  lp_temp += ((alpha_ - 1) * temp_thetapost);
+
+  return lp_temp;
+}
 
 //' Update number of times topic was drawn in document excluding current word
 //'
@@ -1176,8 +1181,8 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
       // Likelihood
       loglike(i - burn - 1) = get_ll_logit(y, x, eta);
       // Log-posterior
-      logpost(i - burn - 1) = get_lpost_logit(loglike(i - burn - 1), eta,
-                                              mu0, sigma0);
+      logpost(i - burn - 1) = get_lpost_eta(loglike(i - burn - 1), eta,
+                                            mu0, sigma0);
 
       l_pred.row(i - burn - 1) = post_pred_logit(x, eta).t();
 
