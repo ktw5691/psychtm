@@ -63,14 +63,6 @@ arma::mat draw_eta_norm(const arma::mat& w, const arma::vec& y,
   return rmvnorm_cpp(1, eta1, sigma1);
 }
 
-//' Compute logit
-//' @param x A double
-//'
-//' @return logit(x).
-double logit(double x) {
-  return log(x / (1.0 - x));
-}
-
 //' Compute inverse logit
 //' @param x A double
 //'
