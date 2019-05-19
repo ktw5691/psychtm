@@ -832,7 +832,7 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
                            const IntegerVector& docs_index) {
 
   uint16_t K = theta.n_cols;
-  double lp_temp = get_lpost_mlr(ll, eta, sigma2, mu0, sigma0, a0, b0)
+  double lp_temp = get_lpost_mlr(ll, eta, sigma2, mu0, sigma0, a0, b0);
 
   // Add prior on beta matrix
   double temp_betapost = 0;
