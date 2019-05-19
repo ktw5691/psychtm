@@ -79,6 +79,28 @@ double invlogit(double x) {
   return exp(x) / (1.0 + exp(x));
 }
 
+//' Log-posterior for logistic regression
+//'
+//' @param ll A double of the current log-likelihood.
+//' @param eta A q x 1 vector of regression coefficients.
+//' @param mu0 A q x 1 mean vector for the prior on the regression coefficients.
+//' @param sigma0 A q x q variance-covariance matrix for the prior on the
+//'   regression coefficients.
+//'
+//' @return The current log-posterior.
+double get_lpost_logit(double ll, const arma::colvec& eta,
+                       const arma::colvec& mu0, const arma::mat& sigma0) {
+
+  double lp_temp = ll;
+  // Add prior on eta
+  double temp_prod = arma::as_scalar(
+    (eta - mu0).t() * sigma0.i() * (eta - mu0)
+  );
+  lp_temp += (-0.5 * temp_prod);
+
+  return lp_temp;
+}
+
 //' Compute full conditional log-posterior of eta for logistic sLDA/sLDAX/regression
 //'
 //' @param w A D x q matrix containing a predictor model matrix of assumed form
@@ -105,10 +127,7 @@ double eta_logpost_logit(const arma::mat& w, const arma::vec& y,
       (1.0 - y(d)) * log(1.0 / (1.0 + exp(arma::as_scalar(muhat(d))))));
   }
   // Add log-prior on eta
-  double logpost = loglike;
-  logpost += (-0.5 * arma::as_scalar(
-    (eta - mu0).t() * sigma0.i() * (eta - mu0)
-  ));
+  double logpost = get_lpost_logit(loglike, eta, mu0, sigma0);
 
   return logpost;
 }
@@ -771,7 +790,7 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
 //                         const IntegerVector& docs_index, const NumericVector& N) {
 // }
 
-//' Log-posterior for sLDA/sLDAX model
+//' Log-posterior for normal outcome regression
 //'
 //' @param ll A double of the current log-likelihood.
 //' @param eta A q x 1 vector of regression coefficients.
@@ -800,28 +819,6 @@ double get_lpost_mlr(double ll,
   return lp_temp;
 }
 
-//' Log-posterior for logistic regression
-//'
-//' @param ll A double of the current log-likelihood.
-//' @param eta A q x 1 vector of regression coefficients.
-//' @param mu0 A q x 1 mean vector for the prior on the regression coefficients.
-//' @param sigma0 A q x q variance-covariance matrix for the prior on the
-//'   regression coefficients.
-//'
-//' @return The current log-posterior.
-double get_lpost_logit(double ll, const arma::colvec& eta,
-                       const arma::colvec& mu0, const arma::mat& sigma0) {
-
-  double lp_temp = ll;
-  // Add prior on eta
-  double temp_prod = arma::as_scalar(
-    (eta - mu0).t() * sigma0.i() * (eta - mu0)
-  );
-  lp_temp += (-0.5 * temp_prod);
-
-  return lp_temp;
-}
-
 //' Log-posterior for sLDA/sLDAX model
 //'
 //' @param ll A double of the current log-likelihood.
@@ -842,8 +839,7 @@ double get_lpost_logit(double ll, const arma::colvec& eta,
 //' @param docs_index A vector of length D containing elements 1, 2, ..., D.
 //'
 //' @return The current log-posterior.
-double get_lpost_slda_norm(double ll, const arma::colvec& y,
-                           const arma::colvec& eta, double sigma2,
+double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
                            const arma::mat& theta, const arma::mat& beta,
                            const arma::colvec& mu0, const arma::mat& sigma0,
                            double gamma_, double alpha_,
@@ -851,14 +847,8 @@ double get_lpost_slda_norm(double ll, const arma::colvec& y,
                            const IntegerVector& docs_index) {
 
   uint16_t K = theta.n_cols;
-  double lp_temp = ll;
-  // Add prior on eta
-  double temp_prod = arma::as_scalar(
-    (eta - mu0).t() * sigma0.i() * (eta - mu0)
-  );
-  lp_temp += (-0.5 * temp_prod);
-  // Add prior on sigma2
-  lp_temp += ((-0.5 * a0 - 1.0) * log(sigma2) - 0.5 * b0 / sigma2);
+  double lp_temp = get_lpost_mlr(ll, eta, sigma2, mu0, sigma0, a0, b0)
+
   // Add prior on beta matrix
   double temp_betapost = 0;
   for (uint16_t k = 0; k < K; k++) {
@@ -1226,3 +1216,5 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
 
   return slda;
 }
+
+//' gibbs_lda()/gibbs_slda()/gibbs_sldax()/gibbs_slda_logit()/gibbs_sldax_logit()
