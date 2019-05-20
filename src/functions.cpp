@@ -880,7 +880,7 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
                            const IntegerVector& docs_index) {
 
   double lp_temp = get_lpost_mlr(ll, eta, sigma2, mu0, sigma0, a0, b0);
-  lp_temp += get_lpost_lda(ltemp, theta, beta, gamma_, alpha_, V, docs_index);
+  lp_temp += get_lpost_lda(lp_temp, theta, beta, gamma_, alpha_, V, docs_index);
   return lp_temp;
 }
 
@@ -907,7 +907,7 @@ double get_lpost_slda_logit(double ll, const arma::colvec& eta,
                             uint32_t V, const IntegerVector& docs_index) {
 
   double lp_temp = get_lpost_eta(ll, eta, mu0, sigma0);
-  lp_temp += get_lpost_lda(ltemp, theta, beta, gamma_, alpha_, V, docs_index);
+  lp_temp += get_lpost_lda(lp_temp, theta, beta, gamma_, alpha_, V, docs_index);
   return lp_temp;
 }
 
