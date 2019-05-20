@@ -1023,7 +1023,7 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
     stop("Length of chain m not greater than burn-in period.");
   }
 
-  S4 slda("Mlr"); // Create object slda of class Mlr
+  S4 results("Mlr"); // Create object slda of class Mlr
 
   const uint32_t D = x.n_rows;
   const uint16_t pp1 = x.n_cols;
@@ -1041,14 +1041,13 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
     Rcout << 1 << "eta: " << eta_start.t() << " ~~~~ sigma2: " << sigma2 << "\n";
   }
 
-  arma::colvec eta(pp1);
+  arma::colvec eta = arma::zeros(pp1);
 
   Progress p(m, display_progress);
   for (uint32_t i = 1; i <= m; i++) {
 
     // Draw eta
     try {
-      // etam.row(i) = draw_eta_norm(x, y, sigma2m(i - 1), mu0, sigma0);
       eta = draw_eta_norm(x, y, sigma2, mu0, sigma0).t();
     } catch (std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
@@ -1090,23 +1089,23 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
   NumericVector waic_and_se(3);
   waic_and_se = waic_all(D, m - burn, l_pred);
 
-  slda.slot("ndocs") = D;
-  slda.slot("nchain") = m - burn;
-  slda.slot("eta") = etam;
-  slda.slot("sigma2") = sigma2m;
-  slda.slot("mu0") = mu0;
-  slda.slot("sigma0") = sigma0;
-  slda.slot("a0") = a0;
-  slda.slot("b0") = b0;
-  slda.slot("eta_start") = eta_start;
-  slda.slot("loglike") = loglike;
-  slda.slot("logpost") = logpost;
-  slda.slot("p_eff") = waic_and_se(2);
-  slda.slot("waic") = waic_and_se(0);
-  slda.slot("se_waic") = waic_and_se(1);
-  slda.slot("lpd") = l_pred;
+  results.slot("ndocs") = D;
+  results.slot("nchain") = m - burn;
+  results.slot("eta") = etam;
+  results.slot("sigma2") = sigma2m;
+  results.slot("mu0") = mu0;
+  results.slot("sigma0") = sigma0;
+  results.slot("a0") = a0;
+  results.slot("b0") = b0;
+  results.slot("eta_start") = eta_start;
+  results.slot("loglike") = loglike;
+  results.slot("logpost") = logpost;
+  results.slot("p_eff") = waic_and_se(2);
+  results.slot("waic") = waic_and_se(0);
+  results.slot("se_waic") = waic_and_se(1);
+  results.slot("lpd") = l_pred;
 
-  return slda;
+  return results;
 }
 
 //' Collapsed Gibbs sampler for logistic regression
@@ -1142,7 +1141,7 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
     stop("Length of chain m not greater than burn-in period.");
   }
 
-  S4 slda("Logistic"); // Create object slda of class Logistic
+  S4 results("Logistic"); // Create object slda of class Logistic
 
   const uint32_t D = y.size();
   const uint16_t pp1 = x.n_cols;
@@ -1155,7 +1154,7 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
   arma::vec attempt = arma::zeros(pp1);
   arma::vec accept = arma::zeros(pp1);
 
-  arma::colvec eta(pp1);
+  arma::colvec eta = arma::zeros(pp1);
 
   Progress prog(m, display_progress);
   for (uint32_t i = 1; i <= m; i++) {
@@ -1217,21 +1216,21 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
   NumericVector waic_and_se(3);
   waic_and_se = waic_all(D, m - burn, l_pred);
 
-  slda.slot("ndocs") = D;
-  slda.slot("nchain") = m - burn;
-  slda.slot("eta") = etam;
-  slda.slot("mu0") = mu0;
-  slda.slot("sigma0") = sigma0;
-  slda.slot("eta_start") = eta_start;
-  slda.slot("proposal_sd") = proposal_sd;
-  slda.slot("loglike") = loglike;
-  slda.slot("logpost") = logpost;
-  slda.slot("p_eff") = waic_and_se(2);
-  slda.slot("waic") = waic_and_se(0);
-  slda.slot("se_waic") = waic_and_se(1);
-  slda.slot("lpd") = l_pred;
+  results.slot("ndocs") = D;
+  results.slot("nchain") = m - burn;
+  results.slot("eta") = etam;
+  results.slot("mu0") = mu0;
+  results.slot("sigma0") = sigma0;
+  results.slot("eta_start") = eta_start;
+  results.slot("proposal_sd") = proposal_sd;
+  results.slot("loglike") = loglike;
+  results.slot("logpost") = logpost;
+  results.slot("p_eff") = waic_and_se(2);
+  results.slot("waic") = waic_and_se(0);
+  results.slot("se_waic") = waic_and_se(1);
+  results.slot("lpd") = l_pred;
 
-  return slda;
+  return results;
 }
 
 //' gibbs_lda()/gibbs_slda()/gibbs_sldax()/gibbs_slda_logit()/gibbs_sldax_logit()
