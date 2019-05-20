@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{est_betak_cpp}
 \alias{est_betak_cpp}
-\title{Estimate beta_k (on log-scale)}
+\title{Estimate beta_k}
 \usage{
 est_betak_cpp(k, V, wz_co, gamma_)
 }
@@ -16,6 +16,9 @@ est_betak_cpp(k, V, wz_co, gamma_)
 
 \item{gamma_}{The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.}
 }
+\value{
+A V x 1 vector of estimates for beta_k.
+}
 \description{
-Estimate beta_k (on log-scale)
+Estimate beta_k
 }

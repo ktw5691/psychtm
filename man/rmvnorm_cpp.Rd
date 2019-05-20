@@ -9,9 +9,12 @@ rmvnorm_cpp(n, mu, sigma)
 \arguments{
 \item{n}{The number of samples to draw.}
 
-\item{mu}{The mean vector of the distribution (column vector).}
+\item{mu}{The q x 1 mean vector of the distribution (column vector).}
 
-\item{sigma}{The variance-covariance matrix of the distribution.}
+\item{sigma}{The q x q variance-covariance matrix of the distribution.}
+}
+\value{
+A n x q matrix of random draws.
 }
 \description{
 Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})

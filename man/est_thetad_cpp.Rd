@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{est_thetad_cpp}
 \alias{est_thetad_cpp}
-\title{Estimate theta_d (on log scale)}
+\title{Estimate theta_d}
 \usage{
 est_thetad_cpp(z_count, alpha_, K)
 }
@@ -13,6 +13,9 @@ est_thetad_cpp(z_count, alpha_, K)
 
 \item{K}{The number of topics.}
 }
+\value{
+A K x 1 vector of estimate for theta_d.
+}
 \description{
-Estimate theta_d (on log scale)
+Estimate theta_d
 }
