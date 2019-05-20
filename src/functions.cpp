@@ -84,13 +84,13 @@ double get_ll_logit(const arma::colvec& y, const arma::mat& w,
   // Add likelihood of y
   uint32_t D = w.n_rows;
   arma::colvec muhat(D);
-  muhat = w * eta;
+  muhat = arma::as_scalar(w * eta);
 
   // Compute log-likelihood of y
   double ll_temp = 0.0;
   for (uint32_t d = 0; d < D; d++) {
-    ll_temp += (y(d) * log(invlogit(arma::as_scalar(muhat(d)))) +
-      (1.0 - y(d)) * log(1.0 / (1.0 + exp(arma::as_scalar(muhat(d))))));
+    ll_temp += (y(d) * log(invlogit(muhat(d))) +
+      (1.0 - y(d)) * log(1.0 / (1.0 + exp(muhat(d)))));
   }
 
   return ll_temp;
@@ -326,6 +326,67 @@ arma::mat count_topic_word(uint32_t D, uint16_t K, uint32_t V,
   return topic_word_freq;
 }
 
+//' Compute log-numerator vector for sampling zdn from full conditional distribution for LDA
+//'
+//' @param K The number of topics.
+//' @param V The number of terms in the corpus vocabulary.
+//' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
+//'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+//' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
+//'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+//'   counts.
+//' @param nk_n A K x 1 vector of counts of draws of topic
+//'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
+//'   from the counts.
+//' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
+//' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
+//'
+//' @return A K x 1 vector of the log-numerator from the LDA model to sample zdn.
+arma::vec get_log_numer_samplez(uint16_t K, uint32_t V, const arma::vec& ndk_n,
+                                const arma::vec& nkm_n, const arma::vec& nk_n,
+                                float alpha_, float gamma_) {
+
+  if (K < 2) error("number of topics must be at least 2");
+  if (V < 2) error("size of vocabulary V must be at least 2");
+  if (ndk_n.size() != K) error("ndk_n must be a vector of length K");
+  if (nkm_n.size() != K) error("nkm_n must be a vector of length K");
+  if (nk_n.size() != K) error("nk_n must be a vector of length K");
+  if (alpha_ < 0.0) error("alpha_ must be positive");
+  if (gamma_ < 0.0) error("gamma_ must be positive");
+
+  arma::vec log_num =
+    log(ndk_n + alpha_) +
+    log(nkm_n + gamma_) -
+    log(nk_n + static_cast<float>(V) * gamma_);
+
+  return log_num;
+}
+
+//' Draw zdn from full conditional distribution for LDA/sLDA/sLDAX
+//'
+//' @param log_num A K x 1 vector of the log-numerator for sampling from topics
+//'   1, ..., K.
+//' @param K The number of topics.
+//'
+//' @return Indicator for the topic draw from {1, 2, ..., K}.
+uint16_t draw_zdn(arma::vec& log_num, uint16_t K) {
+
+  long double denom = sum(exp(log_num));
+  arma::vec pmf = exp(log_num - log(denom));
+
+  bool good_pmf = true;
+  for (uint16_t k = 0; k < K; k++) {
+    if (std::isnan(pmf(k)) || std::isinf(pmf(k))) good_pmf = false;
+  }
+
+  if (!good_pmf) {
+    for (uint16_t k = 0; k < K; k++) pmf(k) = 1.0 / static_cast<float>(K);
+  }
+  IntegerVector topics = seq_len(K);
+  IntegerVector zdn = RcppArmadillo::sample(topics, 1, true, pmf);
+  return zdn(0);
+}
+
 //' Draw zdn from full conditional distribution for LDA
 //'
 //' @param K The number of topics.
@@ -346,34 +407,10 @@ uint16_t draw_zdn_lda(uint16_t K, uint32_t V,
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K
-
-  if (K < 2) error("number of topics must be at least 2");
-  if (V < 2) error("size of vocabulary V must be at least 2");
-  if (ndk_n.size() != K) error("ndk_n must be a vector of length K");
-  if (nkm_n.size() != K) error("nkm_n must be a vector of length K");
-  if (nk_n.size() != K) error("nk_n must be a vector of length K");
-  if (alpha_ < 0.0) error("alpha_ must be positive");
-  if (gamma_ < 0.0) error("gamma_ must be positive");
-
-  arma::vec log_num =
-    log(ndk_n + alpha_) +
-    log(nkm_n + gamma_) -
-    log(nk_n + static_cast<float>(V) * gamma_);
-
-  long double denom = sum(exp(log_num));
-  arma::vec pmf = exp(log_num - log(denom));
-
-  bool good_pmf = true;
-  for (uint16_t k = 0; k < K; k++) {
-    if (std::isnan(pmf(k)) || std::isinf(pmf(k))) good_pmf = false;
-  }
-
-  if (!good_pmf) {
-    for (uint16_t k = 0; k < K; k++) pmf(k) = 1.0 / static_cast<float>(K);
-  }
-  IntegerVector topics = seq_len(K);
-  IntegerVector zdn = RcppArmadillo::sample(topics, 1, true, pmf);
-  return zdn(0);
+  arma::vec log_num = get_log_numer_samplez(K, V, ndk_n, nkm_n, nk_n,
+                                            alpha_, gamma_);
+  uint16_t zdn = draw_zdn(log_num, K);
+  return zdn;
 }
 
 //' Draw zdn from full conditional distribution for sLDA/sLDAX
@@ -404,36 +441,13 @@ uint16_t draw_zdn_slda_norm(double yd, const arma::vec& w_d,
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K;
   //   this tends to occur if sigma^2 draw near 0
-
-  if (K < 2) error("number of topics must be at least 2");
-  if (V < 2) error("size of vocabulary V must be at least 2");
   if (sigma2 < 0.0) error("sigma2 must be positive");
-  if (ndk_n.size() != K) error("ndk_n must be a vector of length K");
-  if (nkm_n.size() != K) error("nkm_n must be a vector of length K");
-  if (nk_n.size() != K) error("nk_n must be a vector of length K");
-  if (alpha_ < 0.0) error("alpha_ must be positive");
-  if (gamma_ < 0.0) error("gamma_ must be positive");
 
-  arma::vec log_num =
-    log(ndk_n + alpha_) +
-    log(nkm_n + gamma_) -
-    log(nk_n + static_cast<float>(V) * gamma_) +
+  arma::vec log_num = get_log_numer_samplez(K, V, ndk_n, nkm_n, nk_n,
+                                            alpha_, gamma_) +
     R::dnorm(yd, sum(w_d.t() * eta), sqrt(sigma2), true);
-
-  long double denom = sum(exp(log_num));
-  arma::vec pmf = exp(log_num - log(denom));
-
-  bool good_pmf = true;
-  for (uint16_t k = 0; k < K; k++) {
-    if (std::isnan(pmf(k)) || std::isinf(pmf(k))) good_pmf = false;
-  }
-
-  if (!good_pmf) {
-    for (uint16_t k = 0; k < K; k++) pmf(k) = 1.0 / static_cast<float>(K);
-  }
-  IntegerVector topics = seq_len(K);
-  IntegerVector zdn = RcppArmadillo::sample(topics, 1, true, pmf);
-  return zdn(0);
+  uint16_t zdn = draw_zdn(log_num, K);
+  return zdn;
 }
 
 //' Draw zdn from full conditional distribution for sLDA/sLDAX with binary outcome
@@ -463,16 +477,6 @@ uint16_t draw_zdn_slda_logit(double yd, const arma::vec& w_d,
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K;
 
-  if (K < 2) error("number of topics must be at least 2");
-  if (V < 2) error("size of vocabulary V must be at least 2");
-  if (ndk_n.size() != K) error("ndk_n must be a vector of length K");
-  if (nkm_n.size() != K) error("nkm_n must be a vector of length K");
-  if (nk_n.size() != K) error("nk_n must be a vector of length K");
-  if (alpha_ < 0.0) error("alpha_ must be positive");
-  if (gamma_ < 0.0) error("gamma_ must be positive");
-
-  // Omit last topic mean; colinearity with intercept "1" in xd
-  //arma::colvec xzb_d = join_cols(xd, zbar_d.subvec(0, K - 2));
   double muhat;
   muhat = arma::as_scalar(w_d.t() * eta);
 
@@ -481,26 +485,11 @@ uint16_t draw_zdn_slda_logit(double yd, const arma::vec& w_d,
   loglike += (yd * log(invlogit(muhat) +
     (1.0 - yd) * log(1.0 / (1.0 + exp(muhat)))));
 
-  arma::vec log_num =
-    log(ndk_n + alpha_) +
-    log(nkm_n + gamma_) -
-    log(nk_n + static_cast<float>(V) * gamma_) +
+  arma::vec log_num = get_log_numer_samplez(K, V, ndk_n, nkm_n, nk_n,
+                                            alpha_, gamma_) +
     loglike;
-
-  long double denom = sum(exp(log_num));
-  arma::vec pmf = exp(log_num - log(denom));
-
-  bool good_pmf = true;
-  for (uint16_t k = 0; k < K; k++) {
-    if (std::isnan(pmf(k)) || std::isinf(pmf(k))) good_pmf = false;
-  }
-
-  if (!good_pmf) {
-    for (uint16_t k = 0; k < K; k++) pmf(k) = 1.0 / static_cast<float>(K);
-  }
-  IntegerVector topics = seq_len(K);
-  IntegerVector zdn = RcppArmadillo::sample(topics, 1, true, pmf);
-  return zdn(0);
+    uint16_t zdn = draw_zdn(log_num, K);
+    return zdn;
 }
 
 //' Posterior predictive likelihood for sLDA/sLDAX/MLR
