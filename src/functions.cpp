@@ -71,6 +71,22 @@ double invlogit(double x) {
   return exp(x) / (1.0 + exp(x));
 }
 
+//' Log-likelihood for logistic regression for observation d
+//'
+//' @param yd An integer 0/1 outcome to be predicted.
+//' @param muhatd An double 0/1 predicted outcome on logit scale.
+//'
+//' @return The current log-likelihood for observation d.
+double get_ll_logit_yd(int yd, double muhatd) {
+
+  // Compute log-likelihood of y
+  double ll_temp = yd * log(invlogit(muhatd)) +
+      (1.0 - yd) * log(1.0 / (1.0 + exp(muhatd)));
+  }
+
+  return ll_temp;
+}
+
 //' Log-likelihood for logistic regression
 //'
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -89,8 +105,7 @@ double get_ll_logit(const arma::colvec& y, const arma::mat& w,
   // Compute log-likelihood of y
   double ll_temp = 0.0;
   for (uint32_t d = 0; d < D; d++) {
-    ll_temp += (y(d) * log(invlogit(muhat(d))) +
-      (1.0 - y(d)) * log(1.0 / (1.0 + exp(muhat(d)))));
+    ll_temp += get_ll_logit_yd(y(d), muhat(d));
   }
 
   return ll_temp;
