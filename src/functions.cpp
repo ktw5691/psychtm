@@ -74,7 +74,7 @@ double invlogit(double x) {
 //' Log-likelihood for logistic regression for observation d
 //'
 //' @param yd An integer 0/1 outcome to be predicted.
-//' @param muhatd An double 0/1 predicted outcome on logit scale.
+//' @param muhatd An double predicted outcome on logit scale.
 //'
 //' @return The current log-likelihood for observation d.
 double get_ll_logit_yd(int yd, double muhatd) {
@@ -97,12 +97,12 @@ double get_ll_logit(const arma::colvec& y, const arma::mat& w,
   // Add likelihood of y
   uint32_t D = w.n_rows;
   arma::colvec muhat(D);
-  muhat = arma::as_scalar(w * eta);
+  muhat = w * eta;
 
   // Compute log-likelihood of y
   double ll_temp = 0.0;
   for (uint32_t d = 0; d < D; d++) {
-    ll_temp += get_ll_logit_yd(y(d), muhat(d));
+    ll_temp += get_ll_logit_yd(y(d), arma::as_scalar(muhat(d)));
   }
   return ll_temp;
 }
@@ -536,7 +536,7 @@ arma::colvec post_pred_logit(const arma::mat& w, const arma::colvec& eta) {
   arma::colvec mu_hat(D);
   mu_hat = w * eta;
   for (uint16_t d = 0; d < D; d++) {
-    double phat = arma::as_scalar(invlogit(mu_hat(d)));
+    double phat = invlogit(arma::as_scalar(mu_hat(d)));
     uint16_t yhat = Rcpp::rbinom(1, 1, phat)(0);
     loglike_pred(d) = get_ll_logit_yd(yhat, arma::as_scalar(mu_hat(d)));
   }
