@@ -1038,7 +1038,7 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
   double sigma2 = var(y) / 2.0;
 
   if (verbose) {
-    Rcout << 1 << "eta: " << eta_start.t() << " ~~~~ sigma2: " << sigma2 << "\n";
+    Rcout << 1 << " eta: " << eta_start.t() << " ~~~~ sigma2: " << sigma2 << "\n";
   }
 
   arma::colvec eta = arma::zeros(pp1);
@@ -1076,7 +1076,7 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
     }
     if (i % 500 == 0) {
       if (verbose) {
-        Rcout << i << "eta: " << eta.t() << " ~~~~ sigma2: " << sigma2 << "\n";
+        Rcout << i << " eta: " << eta.t() << " ~~~~ sigma2: " << sigma2 << "\n";
       }
     }
     if (display_progress) {
@@ -1201,9 +1201,9 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
     }
     if (i % 500 == 0) {
       if (verbose) {
-        Rcout << i << "eta: " << eta.t() << "\n" <<
-          "accept rate: " << acc_rate.t() << "\n" <<
-          "prop_sd: " << proposal_sd.t() << "\n";
+        Rcout << i << " eta: " << eta.t() << "\n" <<
+          "AR: " << acc_rate.t() << "\n" <<
+          "Proposal SD: " << proposal_sd.t() << "\n";
       }
     }
     if (display_progress) {
@@ -1234,3 +1234,470 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
 }
 
 //' gibbs_lda()/gibbs_slda()/gibbs_sldax()/gibbs_slda_logit()/gibbs_sldax_logit()
+
+//' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
+//'
+//' @include slda-class.R
+//'
+//' @param m The number of iterations to run the Gibbs sampler.
+//' @param burn The number of iterations to discard as the burn-in period.
+//' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
+//' @param x A D x p matrix of additional predictors (no column of 1s for
+//'   intercept).
+//' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
+//' @param w A D x V matrix of counts for all documents and vocabulary terms.
+//' @param K The number of topics.
+//' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
+//' @param sigma0 A (K + p + 1) x (K + p + 1) variance-covariance matrix for the
+//'   prior on the regression coefficients. The first p + 1 columns/rows
+//'   correspond to predictors in X, while the last K columns/rows correspond to
+//'   the K topic means.
+//' @param eta_start A (K + p) x 1 vector of starting values for the
+//'   regression coefficients. The first p elements correspond to predictors
+//'   in X, while the last K elements correspond to the K topic means.
+//' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
+//'   regression coefficients will be constrained so that they are in descending
+//'   order; if \code{FALSE}, no constraints will be applied.
+//' @param alpha_ The hyper-parameter for the prior on the topic proportions
+//'   (default: 0.1).
+//' @param gamma_ The hyper-parameter for the prior on the topic-specific
+//'   vocabulary probabilities (default: 1.01).
+//' @param proposal_sd The proposal standard deviation for drawing the
+//'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+//' @param verbose Should parameter draws be output during sampling? (default:
+//'   \code{FALSE}).
+//' @param display_progress Should percent progress of sampler be displayed
+//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+//'   \code{display_progress} be set to \code{TRUE} at any given time.
+//' @export
+// [[Rcpp::export]]
+S4 gibbs_sldax_cpp(const arma::mat& docs,
+                   const arma::mat& w,
+                   uint32_t m, uint32_t burn,
+                   uint16_t K, uint8_t model,
+                   const arma::colvec& y,
+                   const arma::mat& x,
+                   const arma::colvec& mu0,
+                   const arma::mat& sigma0,
+                   float a0, float b0,
+                   arma::colvec eta_start,
+                   arma::vec proposal_sd,
+                   int interaction_xcol = -1,
+                   float alpha_ = 0.1, float gamma_ = 1.01,
+                   bool constrain_eta = true,
+                   bool verbose = false, bool display_progress = false) {
+
+  if (m <= burn) {
+    stop("Length of chain m not greater than burn-in period.");
+  }
+
+  const uint8_t lda = 1;
+  const uint8_t slda = 2;
+  const uint8_t sldax = 3;
+  const uint8_t slda_logit = 4;
+  const uint8_t sldax_logit = 5;
+
+  S4 results("Sldax");
+
+  NumericVector sigma2m(m - burn);
+  double sigma2 = var(y) / 2.0;
+
+  const uint32_t D = docs.n_rows;
+  const uint32_t V = w.n_cols;
+  NumericVector N(D);
+  const IntegerVector topics_index = seq_len(K);
+  const IntegerVector docs_index   = seq_len(D) - 1;
+  const IntegerVector vocab_index  = seq_len(V);
+  for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
+  const uint32_t maxNd = max(N);
+  arma::mat theta(D, K);
+  arma::mat beta(K, V);
+  // Topic draw counts
+  arma::mat ndk(D, K);
+  // Topic draws for all words and docs
+  arma::mat zdocs = arma::zeros(D, maxNd);
+  arma::mat zbar = arma::zeros(D, K);
+
+  // D x max(N_d) x m array to store topic draws
+  arma::cube topicsm = arma::zeros(D, maxNd, m - burn);
+  NumericVector loglike(m - burn); // Store log-likelihood (up to an additive constant)
+  NumericVector logpost(m - burn); // Store log-posterior (up to an additive constant)
+
+  // Randomly assign topics
+  NumericVector init_topic_probs(K);
+  if (model != lda) arma::mat zbar(D, K);
+  for (uint16_t k = 0; k < K; k++)
+    init_topic_probs(k) = 1.0 / static_cast<float>(K);
+
+  for (uint32_t d : docs_index) {
+    for (uint32_t n = 0; n < N(d); n++) {
+      zdocs(d, n) = RcppArmadillo::sample(
+        topics_index, 1, true, init_topic_probs)(0);
+    }
+    for (uint16_t k = 0; k < K; k++) {
+      // Count topic draws in each document
+      ndk(d, k) = sum(zdocs.row(d) == (k + 1));
+      // Compute topic empirical proportions
+      if (model != lda)
+        zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
+    }
+  }
+  // Counts of topic-word co-occurences in corpus (K x V)
+  arma::mat nkm(K, V);
+  try {
+    nkm = count_topic_word(D, K, V, zdocs, docs);
+  } catch(std::exception& e) {
+    Rcerr << "Runtime error: " << e.what() <<
+      " while computing topic-word co-occurrences\n";
+  }
+  NumericVector nk(K);
+  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
+
+  // Estimate theta
+  for (uint32_t d : docs_index) {
+    try {
+      theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() <<
+        " when estimating theta vector for document " << d << "\n";
+    }
+  }
+
+  // Estimate beta
+  for (uint16_t k = 0; k < K; k++) {
+    try {
+      beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
+    } catch(std::exception& e) {
+      Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+        "of beta matrix\n";
+    }
+  }
+
+  // For supervised models, set number of columns in design matrix
+  uint16_t p = 0; // Num. cols. involving fixed predictors
+  uint16_t q = 0; // Total num. cols. in design matrix
+  if (model == sldax || model == sldax_logit) {
+    if (interaction_xcol > 0) {
+      p = x.n_cols + K - 1; // Need K - 1 interaction columns
+    } else {
+      p = x.n_cols;
+    }
+    q = p + K; // num. covariates + K + (K - 1) for interaction of one covariate w/ topics
+  } else if (model == slda || model == slda_logit) {
+    p = K; // Num. cols. involving fixed predictors
+    q = p; // Total num. cols. in design matrix
+  }
+
+  // Omit last topic since colinear with intercept
+  arma::mat etam(m - burn, q);
+  arma::colvec eta(q);
+  // For supervised models sLDA/sLDAX, set up regression coefficients
+  if (model == sldax || model == sldax_logit) {
+    if (constrain_eta) {
+      // Constrain starting values of eta to be in descending order
+      if (interaction_xcol > 0) {
+        // Only sort topic "linear effects", not interactions
+        std::partial_sort(eta_start.begin() + p - K + 1,
+                          eta_start.end() - K + 1,
+                          eta_start.end(), std::greater<float>());
+      } else {
+        std::sort(eta_start.begin() + p, eta_start.end(),
+                  std::greater<float>());
+      }
+    } else if (model == slda || model == slda_logit) {
+      if (constrain_eta) {
+        std::sort(eta_start.begin(), eta_start.end(), std::greater<float>());
+      }
+    }
+    if (verbose) Rcout << 1 << " eta: " << eta_start.t() << "\n";
+    eta = eta_start;
+  }
+
+  arma::vec attempt = arma::zeros(q);
+  arma::vec accept = arma::zeros(q);
+
+  arma::mat r = zbar;
+  // Predictive posterior likelihood of y
+  arma::mat l_pred(m - burn, D);
+  arma::mat xz_int = arma::zeros(D, K - 1); // Need K - 1 interaction columns
+  if (model == sldax || model == sldax_logit) {
+    // Full predictor matrix `r`
+    r = join_rows(x, zbar);
+    if (interaction_xcol > 0) {
+      for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
+        xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
+      }
+      r = join_rows(r, xz_int);
+    }
+  }
+
+  Progress prog(m, display_progress);
+  for (uint32_t i = 1; i <= m; i++) {
+
+    // Draw z
+    for (uint32_t d : docs_index) {
+      for (uint32_t n = 0; n < N(d); n++) {
+
+        uint32_t word = docs(d, n);
+        uint16_t topic = zdocs(d, n);
+
+        update_zcounts(d, n, word, topic, ndk, nk, nkm);
+        try {
+          if (model == lda) {
+            topic = draw_zdn_lda(K, V, ndk.row(d).t(), nkm.col(word - 1), nk,
+                                 alpha_, gamma_);
+          } else if (model == slda || model == sldax) {
+            topic = draw_zdn_slda_norm(y(d), r.row(d).t(), eta, sigma2, K, V,
+                                       ndk.row(d).t(), nkm.col(word - 1), nk,
+                                       alpha_, gamma_);
+          } else if (model == slda_logit || model == sldax_logit) {
+            topic = draw_zdn_slda_logit(y(d), r.row(d).t(), eta, K, V,
+                                         ndk.row(d).t(), nkm.col(word - 1), nk,
+                                         alpha_, gamma_);
+          } else {
+            Rcerr << "Invalid model specified. Exiting.\n";
+          }
+        } catch(std::exception&  e) {
+          Rcerr << "Runtime Error: " << e.what() <<
+            " occurred while drawing topic for word " << n << " in document "
+                                                      << d << "\n";
+        }
+
+        zdocs(d, n) = topic;
+        // Update topic count in doc d
+        ndk(d, topic - 1)++;
+        // Update topic count in corpus
+        nk(topic - 1)++;
+        // Update topic-word counts in corpus
+        nkm(topic - 1, word - 1)++;
+      }
+    }
+
+    for (uint32_t d: docs_index) {
+      if (model != lda) {
+        // Get zbar matrix
+        for (uint16_t k = 0; k < K; k++) {
+          zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
+        }
+      }
+      // Estimate theta for doc d
+      try {
+        theta.row(d) = est_thetad_cpp(ndk.row(d).t(), alpha_, K).t();
+      } catch(std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() <<
+          " when estimating theta vector for document " << d << "\n";
+      }
+    }
+
+    if (model == sldax || model == sldax_logit) {
+      // Full predictor matrix `r`
+      r = join_rows(x, zbar);
+      if (interaction_xcol > 0) {
+        xz_int = arma::zeros(D, K - 1); // Need K - 1 interaction columns
+        for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
+          xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
+        }
+        r = join_rows(r, xz_int);
+      }
+    } else {
+      r = zbar;
+    }
+
+    // Estimate beta
+    for (uint16_t k = 0; k < K; k++) {
+      try {
+        beta.row(k) = est_betak_cpp(k, V, nkm.row(k).t(), gamma_).t();
+      } catch(std::exception& e) {
+        Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+          "of beta matrix\n";
+      }
+    }
+
+    // Draw eta
+    if (model != lda) {
+      arma::colvec etac(q);
+      if (constrain_eta) {
+        bool eta_order = false;
+        uint16_t iter = 0;
+        constexpr uint16_t max_iter = 1000;
+        while (!eta_order & (iter < max_iter)) {
+          iter++;
+          if (model == slda || model == sldax) {
+            try {
+              etac = draw_eta_norm(r, y, sigma2, mu0, sigma0).t();
+            } catch (std::exception& e) {
+              Rcerr << "Runtime Error: " << e.what() <<
+                " while drawing eta vector\n";
+            }
+          } else if (model == slda_logit || model == sldax_logit) {
+            try {
+              etac = draw_eta_logit(r, y, eta, mu0, sigma0,
+                                    proposal_sd, attempt, accept);
+            } catch (std::exception& e) {
+              Rcerr << "Runtime Error: " << e.what() <<
+                " while drawing eta vector\n";
+            }
+          }
+          if (interaction_xcol > 0) {
+            for (uint16_t k = p - K + 2; k < p + 1; k++) {
+              // Force eta components to be in descending order (first is largest) to resolve label switching of topics
+              eta_order = etac(k - 1) >= etac(k);
+              if (!eta_order) break;
+            }
+          } else {
+            for (uint16_t k = p + 1; k < q; k++) {
+              // Force eta components to be in descending order (first is largest)
+              //   to resolve label switching of topics
+              eta_order = etac(k - 1) >= etac(k);
+              if (!eta_order) break;
+            }
+          }
+        }
+        eta = etac; // New draw
+      } else {
+        if (model == slda || model == sldax) {
+          try {
+            etac = draw_eta_norm(r, y, sigma2, mu0, sigma0).t();
+          } catch (std::exception& e) {
+            Rcerr << "Runtime Error: " << e.what() <<
+              " while drawing eta vector\n";
+          }
+        } else if (model == slda_logit || model == sldax_logit) {
+          try {
+            etac = draw_eta_logit(r, y, eta, mu0, sigma0,
+                                  proposal_sd, attempt, accept);
+          } catch (std::exception& e) {
+            Rcerr << "Runtime Error: " << e.what() <<
+              " while drawing eta vector\n";
+          }
+        }
+      }
+
+      if (model == slda || model == sldax) {
+        // Draw sigma2
+        try {
+          sigma2 = draw_sigma2(D, a0, b0, r, y, eta);
+        } catch (std::exception& e) {
+          Rcerr << "Runtime Error: " << e.what() << " while drawing sigma2\n";
+        }
+      }
+    }
+
+    if (i > burn) {
+      if (i == burn + 1 && burn > 0) Rcout << "Finished burn-in period\n";
+      topicsm.slice(i - burn - 1) = zdocs;
+      // Likelihood
+      switch(model) {
+        case lda:
+          loglike(i - burn - 1) = get_ll_lda(zdocs, docs, theta, beta,
+                                             docs_index, N);
+          logpost(i - burn - 1) = get_lpost_lda(loglike(i - burn - 1),
+            theta, beta, gamma_, alpha_, V, docs_index);
+          break;
+        case slda:
+        case sldax:
+          loglike(i - burn - 1) = get_ll_slda_norm(
+            y, r, eta, sigma2, zdocs, docs, theta, beta, docs_index, N);
+          logpost(i - burn - 1) = get_lpost_slda_norm(loglike(i - burn - 1),
+            eta, sigma2, theta, beta, mu0, sigma0, gamma_, alpha_, a0, b0, V,
+            docs_index);
+          l_pred.row(i - burn - 1) = post_pred_norm(r, y, eta, sigma2).t();
+          sigma2m(i - burn - 1) = sigma2;
+          break;
+        case slda_logit:
+        case sldax_logit:
+          loglike(i - burn - 1) = get_ll_slda_logit(
+            y, r, eta, zdocs, docs, theta, beta, docs_index, N);
+          logpost(i - burn - 1) = get_lpost_slda_logit(loglike(i - burn - 1),
+            eta, theta, beta, mu0, sigma0, gamma_, alpha_, V, docs_index);
+          l_pred.row(i - burn - 1) = post_pred_logit(r, eta).t();
+          break;
+        default: Rcerr << "Invalid model specified. Exiting.\n";
+      }
+      if (model != lda) {
+        etam.row(i - burn - 1) = eta.t();
+      }
+    }
+    arma::vec acc_rate(q);
+    if (model == slda_logit || model == sldax_logit) {
+      for (uint16_t j = 0; j < K + p; j++) {
+        acc_rate(j) = static_cast<float>(accept(j)) / static_cast<float>(attempt(j));
+      }
+      for (uint16_t j = 0; j < K + p; j++) {
+        if (i < (static_cast<float>(burn) / 5.0) && attempt(j) >= 50 && (i % 50 == 0)) {
+          if (acc_rate(j) < 0.159) {
+            // too low acceptance, decrease jumping width
+            proposal_sd(j) = proposal_sd(j) * 0.8;
+          }
+          if (acc_rate(j) > 0.309) {
+            // too high acceptance, increase jumping width
+            proposal_sd(j) = proposal_sd(j) * 1.2;
+          }
+          accept(j) = attempt(j) = 0;
+        }
+      }
+      if (i == burn / 5.0 && burn > 0) Rcout << "Finished tuning proposal distributions\n";
+    }
+
+    if (i % 500 == 0 && verbose) {
+      switch(model) {
+        case slda:
+        case sldax:
+          Rcout << i << " eta: " << eta.t() <<
+            " ~~~~ sigma2: " << sigma2 <<
+            " ~~~~ zbar d1: " << zbar.row(0) << "\n";
+          break;
+        case slda_logit:
+        case sldax_logit:
+          Rcout << i << " eta: " << eta.t() <<
+            " ~~~~ zbar d1: " << zbar.row(0) <<
+            " ~~~~ AR: " << acc_rate.t() << "\n" <<
+            " ~~~~ Proposal SD: " << proposal_sd.t() << "\n";
+          break;
+        default:
+          Rcout << i << " zbar d1: " << zbar.row(0) << "\n";
+          break;
+      }
+    }
+    if (display_progress) {
+      prog.increment();
+    }
+    Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
+  }
+
+  Rcout << "Finished sampling/n";
+
+  // Compute WAIC and p_eff
+  NumericVector waic_and_se(3);
+  waic_and_se = waic_all(D, m - burn, l_pred);
+
+  results.slot("ntopics") = K;
+  results.slot("ndocs") = D;
+  results.slot("nvocab") = V;
+  results.slot("nchain") = m - burn;
+  results.slot("topics") = topicsm;
+  results.slot("alpha") = alpha_;
+  results.slot("gamma") = gamma_;
+  results.slot("loglike") = loglike;
+  results.slot("logpost") = logpost;
+
+  if (model != lda) {
+    results.slot("eta") = etam;
+    results.slot("mu0") = mu0;
+    results.slot("sigma0") = sigma0;
+    results.slot("eta_start") = eta_start;
+    results.slot("p_eff") = waic_and_se(2);
+    results.slot("waic") = waic_and_se(0);
+    results.slot("se_waic") = waic_and_se(1);
+    results.slot("lpd") = l_pred;
+    if (model == slda || model == sldax) {
+      results.slot("sigma2") = sigma2m;
+      results.slot("a0") = a0;
+      results.slot("b0") = b0;
+    }
+    if (model == slda_logit || model == sldax_logit)
+      results.slot("proposal_sd") = proposal_sd;
+  }
+
+  return results;
+}
