@@ -57,5 +57,5 @@ order; if \code{FALSE}, no constraints will be applied.}
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
 \description{
-Collapsed Gibbs sampler for the sLDA-X model
+In general, don't use this directly. Instead, use \code{\linkS4class{gibbs_sldax}}.
 }
