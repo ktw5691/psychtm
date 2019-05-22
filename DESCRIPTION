@@ -4,11 +4,10 @@ Title: Text Mining for Psychological Research
 Version: 0.0.0.9002
 Date: 2019-03-24
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
-                  role = c("aut", "cre")) 
-Description: Supports topic modeling with supervised and unsupervised Latent
-    Dirichlet Allocation using a collapsed Gibbs sampling algorithm.
+                  role = c("aut", "cre"))
+Description: Supports Bayesian estimation of supervised (sLDAX) and unsupervised (LDA) topic models.
 License: GPL-3
-Imports: 
+Imports:
     Rcpp,
     RcppProgress,
     tibble,
@@ -22,7 +21,7 @@ LinkingTo: Rcpp,
 BugReports: https://github.com/ktw5691/psychtm/issues
 RoxygenNote: 6.1.1
 SystemRequirements: C++11
-Collate: 
+Collate:
     'slda-class.R'
     'RcppExports.R'
     'helper.R'
