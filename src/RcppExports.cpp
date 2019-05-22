@@ -19,45 +19,41 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// est_betak_cpp
-arma::vec est_betak_cpp(uint16_t k, uint32_t V, const arma::vec& wz_co, float gamma_);
-RcppExport SEXP _psychtm_est_betak_cpp(SEXP kSEXP, SEXP VSEXP, SEXP wz_coSEXP, SEXP gamma_SEXP) {
+// est_betak
+arma::vec est_betak(const arma::vec& wz_co, float gamma_);
+RcppExport SEXP _psychtm_est_betak(SEXP wz_coSEXP, SEXP gamma_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< uint16_t >::type k(kSEXP);
-    Rcpp::traits::input_parameter< uint32_t >::type V(VSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type wz_co(wz_coSEXP);
     Rcpp::traits::input_parameter< float >::type gamma_(gamma_SEXP);
-    rcpp_result_gen = Rcpp::wrap(est_betak_cpp(k, V, wz_co, gamma_));
+    rcpp_result_gen = Rcpp::wrap(est_betak(wz_co, gamma_));
     return rcpp_result_gen;
 END_RCPP
 }
-// est_thetad_cpp
-arma::vec est_thetad_cpp(const arma::vec& z_count, float alpha_, uint16_t K);
-RcppExport SEXP _psychtm_est_thetad_cpp(SEXP z_countSEXP, SEXP alpha_SEXP, SEXP KSEXP) {
+// est_thetad
+arma::vec est_thetad(const arma::vec& z_count, float alpha_);
+RcppExport SEXP _psychtm_est_thetad(SEXP z_countSEXP, SEXP alpha_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type z_count(z_countSEXP);
     Rcpp::traits::input_parameter< float >::type alpha_(alpha_SEXP);
-    Rcpp::traits::input_parameter< uint16_t >::type K(KSEXP);
-    rcpp_result_gen = Rcpp::wrap(est_thetad_cpp(z_count, alpha_, K));
+    rcpp_result_gen = Rcpp::wrap(est_thetad(z_count, alpha_));
     return rcpp_result_gen;
 END_RCPP
 }
 // count_topic_word
-arma::mat count_topic_word(uint32_t D, uint16_t K, uint32_t V, const arma::mat& doc_topic, const arma::mat& doc_word);
-RcppExport SEXP _psychtm_count_topic_word(SEXP DSEXP, SEXP KSEXP, SEXP VSEXP, SEXP doc_topicSEXP, SEXP doc_wordSEXP) {
+arma::mat count_topic_word(uint16_t K, uint32_t V, const arma::mat& doc_topic, const arma::mat& doc_word);
+RcppExport SEXP _psychtm_count_topic_word(SEXP KSEXP, SEXP VSEXP, SEXP doc_topicSEXP, SEXP doc_wordSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< uint32_t >::type D(DSEXP);
     Rcpp::traits::input_parameter< uint16_t >::type K(KSEXP);
     Rcpp::traits::input_parameter< uint32_t >::type V(VSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type doc_topic(doc_topicSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type doc_word(doc_wordSEXP);
-    rcpp_result_gen = Rcpp::wrap(count_topic_word(D, K, V, doc_topic, doc_word));
+    rcpp_result_gen = Rcpp::wrap(count_topic_word(K, V, doc_topic, doc_word));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -85,30 +81,26 @@ BEGIN_RCPP
 END_RCPP
 }
 // waic_all
-NumericVector waic_all(uint16_t D, uint32_t iter, const arma::mat& l_pred);
-RcppExport SEXP _psychtm_waic_all(SEXP DSEXP, SEXP iterSEXP, SEXP l_predSEXP) {
+NumericVector waic_all(uint32_t iter, const arma::mat& l_pred);
+RcppExport SEXP _psychtm_waic_all(SEXP iterSEXP, SEXP l_predSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< uint16_t >::type D(DSEXP);
     Rcpp::traits::input_parameter< uint32_t >::type iter(iterSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type l_pred(l_predSEXP);
-    rcpp_result_gen = Rcpp::wrap(waic_all(D, iter, l_pred));
+    rcpp_result_gen = Rcpp::wrap(waic_all(iter, l_pred));
     return rcpp_result_gen;
 END_RCPP
 }
 // waic_diff
-NumericVector waic_diff(uint16_t D, uint32_t m1, uint32_t m2, const arma::mat& l_pred1, const arma::mat& l_pred2);
-RcppExport SEXP _psychtm_waic_diff(SEXP DSEXP, SEXP m1SEXP, SEXP m2SEXP, SEXP l_pred1SEXP, SEXP l_pred2SEXP) {
+NumericVector waic_diff(const arma::mat& l_pred1, const arma::mat& l_pred2);
+RcppExport SEXP _psychtm_waic_diff(SEXP l_pred1SEXP, SEXP l_pred2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< uint16_t >::type D(DSEXP);
-    Rcpp::traits::input_parameter< uint32_t >::type m1(m1SEXP);
-    Rcpp::traits::input_parameter< uint32_t >::type m2(m2SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type l_pred1(l_pred1SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type l_pred2(l_pred2SEXP);
-    rcpp_result_gen = Rcpp::wrap(waic_diff(D, m1, m2, l_pred1, l_pred2));
+    rcpp_result_gen = Rcpp::wrap(waic_diff(l_pred1, l_pred2));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -186,13 +178,13 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_psychtm_rmvnorm_cpp", (DL_FUNC) &_psychtm_rmvnorm_cpp, 3},
-    {"_psychtm_est_betak_cpp", (DL_FUNC) &_psychtm_est_betak_cpp, 4},
-    {"_psychtm_est_thetad_cpp", (DL_FUNC) &_psychtm_est_thetad_cpp, 3},
-    {"_psychtm_count_topic_word", (DL_FUNC) &_psychtm_count_topic_word, 5},
+    {"_psychtm_est_betak", (DL_FUNC) &_psychtm_est_betak, 2},
+    {"_psychtm_est_thetad", (DL_FUNC) &_psychtm_est_thetad, 2},
+    {"_psychtm_count_topic_word", (DL_FUNC) &_psychtm_count_topic_word, 4},
     {"_psychtm_pwaic_d", (DL_FUNC) &_psychtm_pwaic_d, 1},
     {"_psychtm_waic_d", (DL_FUNC) &_psychtm_waic_d, 2},
-    {"_psychtm_waic_all", (DL_FUNC) &_psychtm_waic_all, 3},
-    {"_psychtm_waic_diff", (DL_FUNC) &_psychtm_waic_diff, 5},
+    {"_psychtm_waic_all", (DL_FUNC) &_psychtm_waic_all, 2},
+    {"_psychtm_waic_diff", (DL_FUNC) &_psychtm_waic_diff, 2},
     {"_psychtm_gibbs_mlr", (DL_FUNC) &_psychtm_gibbs_mlr, 11},
     {"_psychtm_gibbs_logistic", (DL_FUNC) &_psychtm_gibbs_logistic, 10},
     {"_psychtm_gibbs_sldax_cpp", (DL_FUNC) &_psychtm_gibbs_sldax_cpp, 20},

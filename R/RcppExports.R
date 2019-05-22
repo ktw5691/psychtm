@@ -23,14 +23,14 @@ NULL
 #' Log-likelihood for logistic regression for observation d
 #'
 #' @param yd An integer 0/1 outcome to be predicted.
-#' @param muhatd An double predicted outcome on logit scale.
+#' @param muhatd A double predicted outcome on logit scale.
 #'
 #' @return The current log-likelihood for observation d.
 NULL
 
 #' Log-likelihood for logistic regression
 #'
-#' @param y A D x 1 vector of outcomes to be predicted.
+#' @param y A D x 1 vector of 0/1 outcomes to be predicted.
 #' @param w A D x q matrix containing a predictor model matrix.
 #' @param eta A q x 1 vector of regression coefficients.
 #'
@@ -73,15 +73,14 @@ NULL
 #' @param sigma0 A q x q prior variance-covariance matrix for the regression
 #'   coefficients.
 #' @param proposal_sd A q x 1 vector of proposal distribution standard deviations.
-#' @param attempt The number of current attempted draws of eta by MH.
-#' @param accept The number of accepted draws of eta by MH.
+#' @param attempt A vector of the number of current attempted draws of eta.
+#' @param accept A vector of the number of accepted draws of eta.
 #'
-#' @return A q x 1 draw for eta.
+#' @return A q x 1 vector of draws for eta.
 NULL
 
 #' Draw sigma2 from full conditional posterior for sLDA/sLDAX/MLR
 #'
-#' @param D The number of documents.
 #' @param a0 The prior shape parameter for \eqn{\sigma^2}.
 #' @param b0 The prior scale parameter for \eqn{\sigma^2}.
 #' @param w A D x q matrix containing a predictor model matrix of assumed form
@@ -89,17 +88,16 @@ NULL
 #' @param y A D x 1 vector of the outcome variable.
 #' @param eta A q x 1 vector of regression coefficients.
 #'
-#' @return A draw for sigma2.
+#' @return A draw for \eqn{\sigma^2}.
 NULL
 
 #' Compute log-numerator vector for sampling zdn from full conditional distribution for LDA
 #'
-#' @param K The number of topics.
 #' @param V The number of terms in the corpus vocabulary.
 #' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
-#'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+#'   document d excluding the current word \eqn{w_n} from the counts.
 #' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
-#'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+#'   word m in the corpus excluding the current word \eqn{w_n} from the
 #'   counts.
 #' @param nk_n A K x 1 vector of counts of draws of topic
 #'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
@@ -114,19 +112,17 @@ NULL
 #'
 #' @param log_num A K x 1 vector of the log-numerator for sampling from topics
 #'   1, ..., K.
-#' @param K The number of topics.
 #'
 #' @return Indicator for the topic draw from {1, 2, ..., K}.
 NULL
 
 #' Draw zdn from full conditional distribution for LDA
 #'
-#' @param K The number of topics.
 #' @param V The number of terms in the corpus vocabulary.
 #' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
-#'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+#'   document d excluding the current word \eqn{w_n} from the counts.
 #' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
-#'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+#'   word m in the corpus excluding the current word \eqn{w_n} from the
 #'   counts.
 #' @param nk_n A K x 1 vector of counts of draws of topic
 #'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
@@ -137,17 +133,16 @@ NULL
 
 #' Draw zdn from full conditional distribution for sLDA/sLDAX
 #'
-#' @param yd A the outcome variable for document \eqn{d}.
+#' @param yd The outcome variable for document \eqn{d}.
 #' @param w_d A q x 1 vector containing row d of the predictor model matrix of
 #'   assumed form (X, Zbar, XZbarInteractions).
 #' @param eta A q x 1 vector of regression coefficients.
 #' @param sigma2 The residual variance.
-#' @param K The number of topics.
 #' @param V The number of terms in the corpus vocabulary.
 #' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
-#'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+#'   document d excluding the current word \eqn{w_n} from the counts.
 #' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
-#'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+#'   word m in the corpus excluding the current word \eqn{w_n} from the
 #'   counts.
 #' @param nk_n A K x 1 vector of counts of draws of topic
 #'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
@@ -158,16 +153,15 @@ NULL
 
 #' Draw zdn from full conditional distribution for sLDA/sLDAX with binary outcome
 #'
-#' @param yd A the outcome variable for document \eqn{d}.
+#' @param yd A the outcome variable for document d.
 #' @param w_d A q x 1 vector containing row d of the predictor model matrix of
 #'   assumed form (X, Zbar, XZbarInteractions).
 #' @param eta A q x 1 vector of regression coefficients.
-#' @param K The number of topics.
 #' @param V The number of terms in the corpus vocabulary.
 #' @param ndk_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} in
-#'   document \eqn{d} excluding the current word \eqn{w_n} from the counts.
+#'   document d excluding the current word \eqn{w_n} from the counts.
 #' @param nkm_n A K x 1 vector of counts of topic \eqn{k = 1, \ldots, K} and
-#'   word \eqn{m} in the corpus excluding the current word \eqn{w_n} from the
+#'   word m in the corpus excluding the current word \eqn{w_n} from the
 #'   counts.
 #' @param nk_n A K x 1 vector of counts of draws of topic
 #'   \eqn{k = 1, \ldots, K} in the corpus excluding the current word \eqn{w_n}
@@ -316,8 +310,6 @@ NULL
 
 #' Update number of times topic was drawn in document excluding current word
 #'
-#' @param d The current document index.
-#' @param n The current word index in document d.
 #' @param topic The current topic index.
 #' @param ndk A vector of the current number of draws of each topic in document d.
 #'
@@ -348,16 +340,12 @@ NULL
 #' Update all topic and topic-word counts in document and corpus
 #'
 #' @param d The current document index.
-#' @param n The current word index in document d.
 #' @param word The current word index.
 #' @param topic The current topic index.
 #' @param ndk A vector of the current number of draws of each topic in document d.
 #' @param nk A vector of the current number of draws of each topic in the corpus.
 #' @param nkm A K x V matrix of the current number of co-occurences of each topic
 #'   and vocabulary term in the corpus.
-NULL
-
-#' gibbs_lda()/gibbs_slda()/gibbs_sldax()/gibbs_slda_logit()/gibbs_sldax_logit()
 NULL
 
 #' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
@@ -372,37 +360,33 @@ rmvnorm_cpp <- function(n, mu, sigma) {
     .Call(`_psychtm_rmvnorm_cpp`, n, mu, sigma)
 }
 
-#' Estimate beta_k
+#' Estimate \eqn{\beta_k}
 #'
-#' @param k The topic label (i.e., the row of the K x V beta matrix).
-#' @param V The number of terms in the corpus vocabulary.
 #' @param wz_co A V x 1 vector of counts of the draws of each word for topic
-#'   \eqn{k} over all documents.
+#'   k over all documents.
 #' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 #'
-#' @return A V x 1 vector of estimates for beta_k.
+#' @return A V x 1 vector of estimates for \eqn{\beta_k}.
 #'
 #' @export
-est_betak_cpp <- function(k, V, wz_co, gamma_) {
-    .Call(`_psychtm_est_betak_cpp`, k, V, wz_co, gamma_)
+est_betak <- function(wz_co, gamma_) {
+    .Call(`_psychtm_est_betak`, wz_co, gamma_)
 }
 
-#' Estimate theta_d
+#' Estimate \eqn{\theta_d}
 #'
-#' @param z_count A K x 1 vector of counts of topic draw in document \eqn{d}.
+#' @param z_count A K x 1 vector of counts of topic draw in document d.
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
-#' @param K The number of topics.
 #'
-#' @return A K x 1 vector of estimate for theta_d.
+#' @return A K x 1 vector of estimate for \eqn{\theta_d}.
 #'
 #' @export
-est_thetad_cpp <- function(z_count, alpha_, K) {
-    .Call(`_psychtm_est_thetad_cpp`, z_count, alpha_, K)
+est_thetad <- function(z_count, alpha_) {
+    .Call(`_psychtm_est_thetad`, z_count, alpha_)
 }
 
 #' Count topic-word co-occurences in corpus (ntopic x nvocab)
 #'
-#' @param D The number of documents in the corpus.
 #' @param K The number of topics.
 #' @param V The number of terms in the corpus vocabulary.
 #' @param doc_topic A D x max(\eqn{N_d}) matrix of topic assignments for
@@ -412,8 +396,8 @@ est_thetad_cpp <- function(z_count, alpha_, K) {
 #' @return A K x V matrix of topic-word co-occurence counts.
 #'
 #' @export
-count_topic_word <- function(D, K, V, doc_topic, doc_word) {
-    .Call(`_psychtm_count_topic_word`, D, K, V, doc_topic, doc_word)
+count_topic_word <- function(K, V, doc_topic, doc_word) {
+    .Call(`_psychtm_count_topic_word`, K, V, doc_topic, doc_word)
 }
 
 #' Contribution to effective number of parameters for WAIC from observation y_d
@@ -439,28 +423,26 @@ waic_d <- function(like_pred, p_effd) {
 
 #' Compute WAIC for all outcomes.
 #'
-#' @param D The number of documents.
 #' @param iter The current iteration of the chain.
 #' @param l_pred A m x D matrix of predictive likelihoods (NOT log-likelihoods).
+#'
 #' @return Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
 #'   the effective number of parameters.
 #' @export
-waic_all <- function(D, iter, l_pred) {
-    .Call(`_psychtm_waic_all`, D, iter, l_pred)
+waic_all <- function(iter, l_pred) {
+    .Call(`_psychtm_waic_all`, iter, l_pred)
 }
 
 #' Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.
 #'
-#' @param D The number of documents.
-#' @param m1 The length of the chain for model 1.
-#' @param m2 The length of the chain for model 2.
-#' @param l_pred1 A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.
-#' @param l_pred2 A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 2.
+#' @param l_pred1 A m1 x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.
+#' @param l_pred2 A m2 x D matrix of predictive likelihoods (NOT log-likelihoods) from model 2.
+#'
 #' @return A vector of (1) the difference in WAIC (on the deviance scale)
 #'   between models and (2) the standard error of the difference in WAIC.
 #' @export
-waic_diff <- function(D, m1, m2, l_pred1, l_pred2) {
-    .Call(`_psychtm_waic_diff`, D, m1, m2, l_pred1, l_pred2)
+waic_diff <- function(l_pred1, l_pred2) {
+    .Call(`_psychtm_waic_diff`, l_pred1, l_pred2)
 }
 
 #' Collapsed Gibbs sampler for multiple linear regression
@@ -517,7 +499,7 @@ gibbs_logistic <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, v
     .Call(`_psychtm_gibbs_logistic`, m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
 }
 
-#' Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
+#' Collapsed Gibbs sampler for the sLDA-X model
 #'
 #' @include slda-class.R
 #'
