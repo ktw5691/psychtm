@@ -97,7 +97,6 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
 
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
-  print(mind)
   if (sum(mind) > 0) {
     mf <- mf[c(1L, mind)]
     mf$drop.unused.levels <- TRUE
@@ -111,7 +110,8 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
       x = x[, -1]
     }
     x = as.matrix(x) # If y ~ 1 supplied, x has dims D x 0
-    if (dim(x)[2] == 0) stop("Design matrix `x` has 0 columns. Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as `formula`.")
+    if (dim(x)[2] == 0)
+      stop("Design matrix `x` has 0 columns. Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as `formula`.")
     y = as.matrix(y)
   }
 
