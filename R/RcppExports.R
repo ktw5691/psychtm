@@ -501,6 +501,8 @@ gibbs_logistic <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, v
 
 #' Collapsed Gibbs sampler for the sLDA-X model
 #'
+#' In general, don't use this directly. Instead, use \code{\linkS4class{gibbs_sldax}}.
+#'
 #' @include slda-class.R
 #'
 #' @param m The number of iterations to run the Gibbs sampler.
