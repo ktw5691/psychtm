@@ -1197,6 +1197,8 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
 
 //' Collapsed Gibbs sampler for the sLDA-X model
 //'
+//' In general, don't use this directly. Instead, use \code{\linkS4class{gibbs_sldax}}.
+//'
 //' @include slda-class.R
 //'
 //' @param m The number of iterations to run the Gibbs sampler.
@@ -1558,10 +1560,10 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
     }
 
     if (model == slda_logit || model == sldax_logit) {
-      for (uint16_t j = 0; j < K + p; j++) {
+      for (uint16_t j = 0; j < q; j++) {
         acc_rate(j) = static_cast<float>(accept(j)) / static_cast<float>(attempt(j));
       }
-      for (uint16_t j = 0; j < K + p; j++) {
+      for (uint16_t j = 0; j < q; j++) {
         if (i < (static_cast<float>(burn) / 5.0) && attempt(j) >= 50 && (i % 50 == 0)) {
           if (acc_rate(j) < 0.159) {
             // too low acceptance, decrease jumping width
