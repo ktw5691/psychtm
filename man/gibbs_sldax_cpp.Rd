@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{gibbs_sldax_cpp}
 \alias{gibbs_sldax_cpp}
-\title{Collapsed Gibbs sampler for the sLDA-X model with a binary outcome}
+\title{Collapsed Gibbs sampler for the sLDA-X model}
 \usage{
 gibbs_sldax_cpp(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0,
   eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1,
@@ -57,5 +57,5 @@ order; if \code{FALSE}, no constraints will be applied.}
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
 \description{
-Collapsed Gibbs sampler for the sLDA-X model with a binary outcome
+Collapsed Gibbs sampler for the sLDA-X model
 }

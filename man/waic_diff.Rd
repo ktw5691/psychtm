@@ -4,18 +4,12 @@
 \alias{waic_diff}
 \title{Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.}
 \usage{
-waic_diff(D, m1, m2, l_pred1, l_pred2)
+waic_diff(l_pred1, l_pred2)
 }
 \arguments{
-\item{D}{The number of documents.}
+\item{l_pred1}{A m1 x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.}
 
-\item{m1}{The length of the chain for model 1.}
-
-\item{m2}{The length of the chain for model 2.}
-
-\item{l_pred1}{A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.}
-
-\item{l_pred2}{A m x D matrix of predictive likelihoods (NOT log-likelihoods) from model 2.}
+\item{l_pred2}{A m2 x D matrix of predictive likelihoods (NOT log-likelihoods) from model 2.}
 }
 \value{
 A vector of (1) the difference in WAIC (on the deviance scale)

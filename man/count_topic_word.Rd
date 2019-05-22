@@ -4,11 +4,9 @@
 \alias{count_topic_word}
 \title{Count topic-word co-occurences in corpus (ntopic x nvocab)}
 \usage{
-count_topic_word(D, K, V, doc_topic, doc_word)
+count_topic_word(K, V, doc_topic, doc_word)
 }
 \arguments{
-\item{D}{The number of documents in the corpus.}
-
 \item{K}{The number of topics.}
 
 \item{V}{The number of terms in the corpus vocabulary.}
