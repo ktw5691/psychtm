@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{waic_d}
 \alias{waic_d}
-\title{WAIC for binomial likelihood for observation y_d}
+\title{WAIC for observation y_d}
 \usage{
 waic_d(like_pred, p_effd)
 }
@@ -16,5 +16,5 @@ obs y_d.}
 WAIC contribution for observation d (on deviance scale).
 }
 \description{
-WAIC for binomial likelihood for observation y_d
+WAIC for observation y_d
 }

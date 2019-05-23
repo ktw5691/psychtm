@@ -36,6 +36,14 @@ regression coefficients.}
 (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
+\value{
+An object of class \code{Mlr}.
+}
 \description{
 Collapsed Gibbs sampler for multiple linear regression
 }
+\seealso{
+Other Gibbs sampler: \code{\link{gibbs_logistic}},
+  \code{\link{gibbs_sldax}}
+}
+\concept{Gibbs sampler}

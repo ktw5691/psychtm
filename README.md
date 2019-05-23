@@ -2,10 +2,12 @@
 
 ## Troubleshooting `C++` on Mac OS
 
-Using `R` packages that call `C++` code can be tricky on Mac OS. Common errors
-include warnings during package installation that certain files (e.g., `math.h`)
-are unavailable. This can generally be resolve by executing the following
-code in the terminal:
+**I am not responsible for what happens if you try the following:**
+
+Using `R` packages that rely on `C++` code can be tricky on Mac OS. Common
+errors include warnings during package installation that certain files (e.g.,
+`math.h`) are unavailable. This can generally be resolved by executing the
+following code in the terminal:
 
 ```{bash}
 xcode-select --install

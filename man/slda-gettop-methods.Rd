@@ -3,6 +3,7 @@
 \name{get_toptopics}
 \alias{get_toptopics}
 \alias{get_topwords}
+\alias{get_zbar}
 \alias{gg_coef}
 \alias{est_theta}
 \alias{est_beta}
@@ -11,6 +12,8 @@
 get_toptopics(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
 get_topwords(beta_, nwords, vocab, method = "termscore")
+
+get_zbar(mcmc_fit, burn = 0, thin = 1)
 
 gg_coef(mcmc_fit, beta_, nwords, vocab, varnames, burn = 0, thin = 1,
   method = "termscore", stat = "mean", errorbw = 0.5)
@@ -26,7 +29,10 @@ est_beta(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean")
 
 \item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
 
-\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
+\item{stat}{The summary statistic to use on the posterior draws. Default: \code{"mean"}.}
+
+\item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities where
+each row sums to 1.}
 
 \item{nwords}{The number of words to retrieve.}
 
@@ -34,60 +40,21 @@ est_beta(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean")
 
 \item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
 use probabilities. Default: "termscore".}
+
+\item{varnames}{A character vector of variable names for additional
+predictors (if any).}
+
+\item{errorbw}{Controls the width of the +/- 2 posterior standard error bars.}
 
 \item{docs}{A D x max(N_d) matrix of the words in all documents. Unused word
 positions should be set to 0.}
 
 \item{ntopics}{The number of topics to retrieve.}
-
-\item{mcmc_fit}{An Lda object.}
-
-\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
-
-\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
-
-\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
-
-\item{mcmc_fit}{An Lda object.}
-
-\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
-
-\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
-
-\item{nwords}{The number of words to retrieve.}
-
-\item{vocab}{A character vector containing the vocabulary.}
-
-\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
-
-\item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
-use probabilities. Default: "termscore".}
-
-\item{mcmc_fit}{An Lda object.}
-
-\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
-
-\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
-
-\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
-
-\item{mcmc_fit}{An Lda object.}
-
-\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
-
-\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
-
-\item{stat}{The summary statistic to use on the posterior draws. Default: mean.}
-}
-\value{
-A tibble containing \code{doc}, \code{topic}, and \code{prob}.
-
-A tibble containing \code{topic}, \code{word}, and \code{prob}
-
-A tibble containing \code{topic}, \code{word}, and \code{prob}
 }
 \description{
-Description of get_toptopics here.
+Functions to compute and visualize the most probable topics in a document or
+the most probable words in a topic.
 
-Description of get_topwords here.
+Compute empirical topic proportions (zbar) from \code{@topics} in a
+\code{Lda} object.
 }

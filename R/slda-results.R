@@ -3,8 +3,10 @@ NULL
 
 #' Compute term-scores for each word-topic pair (p. 75, Srivasta & Sahami, 2009)
 #'
-#' @param beta_ A K x V matrix of V vocabulary probabilities for each of K topics.
-#' @return A K x V matrix of term-scores (comparable to tf-idf).
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
+#'   for each of \eqn{K} topics.
+#'
+#' @return A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
 #' @export
 term_score = function(beta_) {
   tscore = matrix(0, nrow = nrow(beta_), ncol(beta_))
@@ -16,10 +18,6 @@ term_score = function(beta_) {
   return(tscore)
 }
 
-#' Return most probable topics for each document.
-#'
-#' @return A tibble with three columns: \code{doc}: the document number,
-#'   \code{topic}: the topic number, \code{prob}: the probability of each topic.
 setMethod("get_toptopics",
           c(mcmc_fit = "Lda"),
           function(mcmc_fit, burn, thin, stat) {
@@ -57,12 +55,6 @@ setMethod("get_toptopics",
           }
 )
 
-#' Return most probable words for each topic.
-#'
-#' @param beta_ A K x V matrix of topic-word probabilities.
-#' @return A tibble with three columns: \code{topic}: the topic number,
-#'   \code{word}: the vocabulary term, \code{prob}: the term-score or
-#'   probability of each word for a given topic.
 setMethod("get_topwords",
           c(beta_ = "matrix", nwords = "numeric", vocab = "character"),
           function(beta_, nwords, vocab, method) {
@@ -96,16 +88,6 @@ setMethod("get_topwords",
           }
 )
 
-#' Return empirical topic proportions
-#'
-#' Compute empirical topic proportions (zbar) from \code{@topics} in an Lda
-#' object
-#'
-#' @param mcmc_fit An Lda object.
-#' @param burn The burn-in period of draws to discard (default: 0).
-#' @param thin The thinning period of draws to discard (default: 1; no thinning).
-#' @return A D x K matrix of empirical topic proportions (i.e., the relative
-#'   frequency of draws for each topic in each document).
 setMethod("get_zbar",
           c(mcmc_fit = "Lda"),
           function(mcmc_fit, burn, thin) {
@@ -308,7 +290,7 @@ setMethod("est_theta",
                 z_count = numeric(K)
                 for (k in seq_len(K)) z_count[k] = sum(
                   topics[d, , i] == k, na.rm = TRUE)
-                theta[d, , i] = est_thetad_cpp(z_count, alpha_, K)
+                theta[d, , i] = est_thetad(z_count, alpha_)
               }
               if (i %% (len / 10) == 0) cat("Iteration ", i)
             }
@@ -334,9 +316,9 @@ setMethod("est_beta",
             beta_ <- array(dim = c(K, ncol = V, len))
 
             for (i in seq_len(len)) {
-              wz_co = count_topic_word_cpp(ndoc, K, V, topics[, , i], docs)
-              for (k in seq_len(K)) beta_[k, , i] = est_betak_cpp(
-                1, V, wz_co[k, ], gamma_)
+              wz_co = count_topic_word(K, V, topics[, , i], docs)
+              for (k in seq_len(K)) beta_[k, , i] = est_betak(
+                wz_co[k, ], gamma_)
               if (i %% (len / 10) == 0) cat("Iteration ", i)
             }
 

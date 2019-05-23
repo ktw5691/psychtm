@@ -4,11 +4,9 @@
 \alias{waic_all}
 \title{Compute WAIC for all outcomes.}
 \usage{
-waic_all(D, iter, l_pred)
+waic_all(iter, l_pred)
 }
 \arguments{
-\item{D}{The number of documents.}
-
 \item{iter}{The current iteration of the chain.}
 
 \item{l_pred}{A m x D matrix of predictive likelihoods (NOT log-likelihoods).}

@@ -1,14 +1,13 @@
 #' Generic function to retrieve the top topics for each document
 #'
-#' Description of get_toptopics here.
+#' Functions to compute and visualize the most probable topics in a document or
+#' the most probable words in a topic.
 #'
 #' @param mcmc_fit An Lda object.
 #' @param burn The number of draws to discard as a burn-in period. Default: 0.
 #' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
 #' @param ntopics The number of topics to retrieve.
-#' @param stat The summary statistic to use on the posterior draws. Default: mean.
-#'
-#' @return A tibble containing \code{doc}, \code{topic}, and \code{prob}.
+#' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 #'
 #' @export
 #' @rdname slda-gettop-methods
@@ -35,20 +34,14 @@ setGeneric("get_toptopics",
            }
 )
 
-#' Generic function to retrieve the top words for each topic
+#' Generic function to retrieve the most probable words for each topic
 #'
-#' Description of get_topwords here.
-#'
-#' @param mcmc_fit An Lda object.
-#' @param burn The number of draws to discard as a burn-in period. Default: 0.
-#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of word-topic probabilities where
+#'   each row sums to 1.
 #' @param nwords The number of words to retrieve.
 #' @param vocab A character vector containing the vocabulary.
-#' @param stat The summary statistic to use on the posterior draws. Default: mean.
 #' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
 #'   use probabilities. Default: "termscore".
-#'
-#' @return A tibble containing \code{topic}, \code{word}, and \code{prob}
 #'
 #' @export
 #' @rdname slda-gettop-methods
@@ -72,13 +65,9 @@ setGeneric("get_topwords",
 
 #' Generic function to retrieve the empirical topic proportions
 #'
-#' Compute empirical topic proportions (zbar) from \code{@topics} in an Lda
-#' object
-#'
-#' @param mcmc_fit An Lda object.
-#' @param burn The number of draws to discard as a burn-in period. Default: 0.
-#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-
+#' Compute empirical topic proportions (zbar) from \code{@topics} in a
+#' \code{Lda} object.
+#' @rdname slda-gettop-methods
 setGeneric("get_zbar",
            function(mcmc_fit, burn = 0, thin = 1) {
 
@@ -98,18 +87,11 @@ setGeneric("get_zbar",
            }
 )
 
-#' Generic function to plot the regression coefficients for sLDA
+#' Generic function to plot the regression coefficients for sLDAX models
 #'
-#' @param mcmc_fit An Lda object.
-#' @param burn The number of draws to discard as a burn-in period. Default: 0.
-#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-#' @param nwords The number of words to retrieve.
-#' @param vocab A character vector containing the vocabulary.
-#' @param stat The summary statistic to use on the posterior draws. Default: mean.
-#' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
-#'   use probabilities. Default: "termscore".
-#'
-#' @return A tibble containing \code{topic}, \code{word}, and \code{prob}
+#' @param varnames A character vector of variable names for additional
+#'   predictors (if any).
+#' @param errorbw Controls the width of the +/- 2 posterior standard error bars.
 #'
 #' @export
 #' @rdname slda-gettop-methods
@@ -146,11 +128,6 @@ setGeneric("gg_coef",
 
 #' Generic function to estimate mean/median theta matrix
 #'
-#' @param mcmc_fit An Lda object.
-#' @param burn The number of draws to discard as a burn-in period. Default: 0.
-#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-#' @param stat The summary statistic to use on the posterior draws. Default: mean.
-#'
 #' @export
 #' @rdname slda-gettop-methods
 setGeneric("est_theta",
@@ -175,13 +152,8 @@ setGeneric("est_theta",
 
 #' Generic function to estimate mean/median beta matrix
 #'
-#' @param mcmc_fit An Lda object.
 #' @param docs A D x max(N_d) matrix of the words in all documents. Unused word
 #'   positions should be set to 0.
-#' @param burn The number of draws to discard as a burn-in period. Default: 0.
-#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-#' @param stat The summary statistic to use on the posterior draws. Default: mean.
-#'
 #' @export
 #' @rdname slda-gettop-methods
 setGeneric("est_beta",
