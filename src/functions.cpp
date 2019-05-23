@@ -276,15 +276,22 @@ arma::vec est_thetad(const arma::vec& z_count, float alpha_) {
   return thetad;
 }
 
-//' Count topic-word co-occurences in corpus (ntopic x nvocab)
+//' Count topic-word co-occurences in corpus.
+//'
+//' Computes topic-word co-occurence matrix for a corpus of \eqn{D} documents
+//' with the maximum length of a document in the corpus equal to max(\eqn{N_d})
+//' and a vocabulary of \eqn{V} unique terms in the corpus.
+//'
+//' Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
+//' document must be set to 0.
 //'
 //' @param K The number of topics.
 //' @param V The number of terms in the corpus vocabulary.
-//' @param doc_topic A D x max(\eqn{N_d}) matrix of topic assignments for
+//' @param doc_topic A \eqn{D} x max(\eqn{N_d}) matrix of topic assignments for
 //'   the corpus.
-//' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
+//' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
 //'
-//' @return A K x V matrix of topic-word co-occurence counts.
+//' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
 //'
 //' @export
 // [[Rcpp::export]]
@@ -977,8 +984,9 @@ void update_zcounts(uint32_t d, uint32_t word, uint16_t topic,
 //'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //'
-//' @return An object of class Mlr.
+//' @return An object of class \code{Mlr}.
 //' @export
+//' @family Gibbs sampler
 // [[Rcpp::export]]
 S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
              const arma::mat& x,
@@ -1088,13 +1096,16 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
 //' @param eta_start A (p + 1) x 1 vector of starting values for the
 //'   regression coefficients.
 //' @param proposal_sd The proposal standard deviation for drawing the
-//'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+//'   regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).
 //' @param verbose Should parameter draws be output during sampling? (default:
 //'   \code{FALSE}).
 //' @param display_progress Should percent progress of sampler be displayed
 //'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
+//'
+//' @return An object of class \code{Logistic}.
 //' @export
+//' @family Gibbs sampler
 // [[Rcpp::export]]
 S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
                   const arma::mat& x,

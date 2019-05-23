@@ -98,33 +98,6 @@ Sldalogit <- setClass("Sldalogit",
                                    lpd         = "matrix"),
                       contains = "Lda")
 
-#' An S4 class to represent a sLDAX general model.
-#'
-#' @slot eta A M x K numeric matrix of draws of topic regression coefficients
-#' @slot sigma2 A M x 1 numeric vector of draws of residual variance
-#' @slot mu0 A K x 1 numeric matrix of prior means for eta
-#' @slot sigma0 A K x K numeric prior covariance matrix for eta
-#' @slot a0 A numeric prior shape hyperparameter for sigma2
-#' @slot b0 A numeric prior rate hyperparameter for sigma2
-#' @slot eta_start A K x 1 numeric matrix of starting values for eta
-#' @slot ntopics The number of topics for the LDA model (default: 2).
-#' @slot ndocs The number of documents in the corpus.
-#' @slot nvocab The number of terms in the corpus vocabulary.
-#' @slot nchain The number of iterations of the Gibbs sampler.
-#' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
-#'   unused word index (i.e., the document did not have a word at that index).
-#' @slot alpha A numeric prior hyperparameter for theta.
-#' @slot gamma A numeric prior hyperparameter for beta.
-#' @slot loglike The log-likelihood (up to an additive constant).
-#' @slot logpost The log-posterior (up to an additive constant).
-#' @slot p_eff The effective number of parameters.
-#' @slot waic WAIC (up to an additive constant) on the deviance scale.
-#' @slot se_waic Standard error of the WAIC.
-#' @slot lpd A matrix of iterations x observations of predictive posterior
-#'   likelihoods (NOT log-likelihoods).
-Sldax <- setClass("Sldax",
-                  contains = c("Lda", "Slda", "Sldalogit"))
-
 #' An S4 class to represent a sLDA logistic model.
 #'
 #' @slot eta A M x K numeric matrix of draws of topic regression coefficients
@@ -231,6 +204,33 @@ Mlr <- setClass("Mlr",
                              waic        = "numeric",
                              se_waic     = "numeric",
                              lpd         = "matrix"))
+
+#' An S4 class to represent a sLDAX general model.
+#'
+#' @slot eta A M x q numeric matrix of draws of topic regression coefficients
+#' @slot sigma2 A M x 1 numeric vector of draws of residual variance
+#' @slot mu0 A q x 1 numeric matrix of prior means for eta
+#' @slot sigma0 A q x K numeric prior covariance matrix for eta
+#' @slot a0 A numeric prior shape hyperparameter for sigma2
+#' @slot b0 A numeric prior rate hyperparameter for sigma2
+#' @slot eta_start A q x 1 numeric matrix of starting values for eta
+#' @slot ntopics The number of topics for the LDA model (default: 2).
+#' @slot ndocs The number of documents in the corpus.
+#' @slot nvocab The number of terms in the corpus vocabulary.
+#' @slot nchain The number of iterations of the Gibbs sampler.
+#' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
+#'   unused word index (i.e., the document did not have a word at that index).
+#' @slot alpha A numeric prior hyperparameter for theta.
+#' @slot gamma A numeric prior hyperparameter for beta.
+#' @slot loglike The log-likelihood (up to an additive constant).
+#' @slot logpost The log-posterior (up to an additive constant).
+#' @slot p_eff The effective number of parameters.
+#' @slot waic WAIC (up to an additive constant) on the deviance scale.
+#' @slot se_waic Standard error of the WAIC.
+#' @slot lpd A matrix of iterations x observations of predictive posterior
+#'   likelihoods (NOT log-likelihoods).
+Sldax <- setClass("Sldax",
+                 contains = c("Lda", "Slda", "Sldalogit"))
 
 setMethod("initialize", "Lda",
           function(.Object, alpha = 0.1, gamma = 1.01, a0 = 0.001, b0 = 0.001) {

@@ -7,10 +7,11 @@
 term_score(beta_)
 }
 \arguments{
-\item{beta_}{A K x V matrix of V vocabulary probabilities for each of K topics.}
+\item{beta_}{A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
+for each of \eqn{K} topics.}
 }
 \value{
-A K x V matrix of term-scores (comparable to tf-idf).
+A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
 }
 \description{
 Compute term-scores for each word-topic pair (p. 75, Srivasta & Sahami, 2009)

@@ -26,7 +26,7 @@ on the regression coefficients.}
 regression coefficients.}
 
 \item{proposal_sd}{The proposal standard deviation for drawing the
-regression coefficients, N(0, proposal_sd) (default: 0.2).}
+regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).}
 
 \item{verbose}{Should parameter draws be output during sampling? (default:
 \code{FALSE}).}
@@ -35,6 +35,14 @@ regression coefficients, N(0, proposal_sd) (default: 0.2).}
 (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
+\value{
+An object of class \code{Logistic}.
+}
 \description{
 Collapsed Gibbs sampler for logistic regression
 }
+\seealso{
+Other Gibbs sampler: \code{\link{gibbs_mlr}},
+  \code{\link{gibbs_sldax}}
+}
+\concept{Gibbs sampler}

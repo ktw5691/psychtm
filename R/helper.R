@@ -86,6 +86,7 @@
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #'
 #' @return An object of class \code{\linkS4class{Sldax}}.
+#' @family Gibbs sampler
 gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
                        model = c("lda", "slda", "sldax", "slda_logit", "sldax_logit"),
                        y = NULL, x = NULL, interaction_xcol = -1L,

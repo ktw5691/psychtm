@@ -385,15 +385,22 @@ est_thetad <- function(z_count, alpha_) {
     .Call(`_psychtm_est_thetad`, z_count, alpha_)
 }
 
-#' Count topic-word co-occurences in corpus (ntopic x nvocab)
+#' Count topic-word co-occurences in corpus.
+#'
+#' Computes topic-word co-occurence matrix for a corpus of \eqn{D} documents
+#' with the maximum length of a document in the corpus equal to max(\eqn{N_d})
+#' and a vocabulary of \eqn{V} unique terms in the corpus.
+#'
+#' Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
+#' document must be set to 0.
 #'
 #' @param K The number of topics.
 #' @param V The number of terms in the corpus vocabulary.
-#' @param doc_topic A D x max(\eqn{N_d}) matrix of topic assignments for
+#' @param doc_topic A \eqn{D} x max(\eqn{N_d}) matrix of topic assignments for
 #'   the corpus.
-#' @param doc_word A D x max(\eqn{N_d}) matrix of words for corpus.
+#' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
 #'
-#' @return A K x V matrix of topic-word co-occurence counts.
+#' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
 #'
 #' @export
 count_topic_word <- function(K, V, doc_topic, doc_word) {
@@ -467,8 +474,9 @@ waic_diff <- function(l_pred1, l_pred2) {
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #'
-#' @return An object of class Mlr.
+#' @return An object of class \code{Mlr}.
 #' @export
+#' @family Gibbs sampler
 gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_mlr`, m, burn, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
 }
@@ -488,13 +496,16 @@ gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.
 #' @param eta_start A (p + 1) x 1 vector of starting values for the
 #'   regression coefficients.
 #' @param proposal_sd The proposal standard deviation for drawing the
-#'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+#'   regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   \code{FALSE}).
 #' @param display_progress Should percent progress of sampler be displayed
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
+#'
+#' @return An object of class \code{Logistic}.
 #' @export
+#' @family Gibbs sampler
 gibbs_logistic <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_logistic`, m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
 }

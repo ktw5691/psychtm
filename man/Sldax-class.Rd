@@ -11,19 +11,19 @@ An S4 class to represent a sLDAX general model.
 \section{Slots}{
 
 \describe{
-\item{\code{eta}}{A M x K numeric matrix of draws of topic regression coefficients}
+\item{\code{eta}}{A M x q numeric matrix of draws of topic regression coefficients}
 
 \item{\code{sigma2}}{A M x 1 numeric vector of draws of residual variance}
 
-\item{\code{mu0}}{A K x 1 numeric matrix of prior means for eta}
+\item{\code{mu0}}{A q x 1 numeric matrix of prior means for eta}
 
-\item{\code{sigma0}}{A K x K numeric prior covariance matrix for eta}
+\item{\code{sigma0}}{A q x K numeric prior covariance matrix for eta}
 
 \item{\code{a0}}{A numeric prior shape hyperparameter for sigma2}
 
 \item{\code{b0}}{A numeric prior rate hyperparameter for sigma2}
 
-\item{\code{eta_start}}{A K x 1 numeric matrix of starting values for eta}
+\item{\code{eta_start}}{A q x 1 numeric matrix of starting values for eta}
 
 \item{\code{ntopics}}{The number of topics for the LDA model (default: 2).}
 

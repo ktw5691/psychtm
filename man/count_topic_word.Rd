@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{count_topic_word}
 \alias{count_topic_word}
-\title{Count topic-word co-occurences in corpus (ntopic x nvocab)}
+\title{Count topic-word co-occurences in corpus.}
 \usage{
 count_topic_word(K, V, doc_topic, doc_word)
 }
@@ -11,14 +11,20 @@ count_topic_word(K, V, doc_topic, doc_word)
 
 \item{V}{The number of terms in the corpus vocabulary.}
 
-\item{doc_topic}{A D x max(\eqn{N_d}) matrix of topic assignments for
+\item{doc_topic}{A \eqn{D} x max(\eqn{N_d}) matrix of topic assignments for
 the corpus.}
 
-\item{doc_word}{A D x max(\eqn{N_d}) matrix of words for corpus.}
+\item{doc_word}{A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.}
 }
 \value{
-A K x V matrix of topic-word co-occurence counts.
+A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
 }
 \description{
-Count topic-word co-occurences in corpus (ntopic x nvocab)
+Computes topic-word co-occurence matrix for a corpus of \eqn{D} documents
+with the maximum length of a document in the corpus equal to max(\eqn{N_d})
+and a vocabulary of \eqn{V} unique terms in the corpus.
+}
+\details{
+Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
+document must be set to 0.
 }
