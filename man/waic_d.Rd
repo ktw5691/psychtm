@@ -9,7 +9,7 @@ waic_d(like_pred, p_effd)
 \arguments{
 \item{like_pred}{A m x 1 vector of predictive likelihoods (NOT log-likelihoods) for y_d.}
 
-\item{p_eff}{The contribution to the effective number of parameters from
+\item{p_effd}{The contribution to the effective number of parameters from
 obs y_d.}
 }
 \value{

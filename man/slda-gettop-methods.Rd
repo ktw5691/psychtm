@@ -9,7 +9,7 @@
 \alias{est_beta}
 \title{Generic function to retrieve the top topics for each document}
 \usage{
-get_toptopics(mcmc_fit, burn = 0, thin = 1, stat = "mean")
+get_toptopics(mcmc_fit, ntopics, burn = 0, thin = 1, stat = "mean")
 
 get_topwords(beta_, nwords, vocab, method = "termscore")
 
@@ -24,6 +24,8 @@ est_beta(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean")
 }
 \arguments{
 \item{mcmc_fit}{An Lda object.}
+
+\item{ntopics}{The number of topics to retrieve.}
 
 \item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
 
@@ -48,8 +50,6 @@ predictors (if any).}
 
 \item{docs}{A D x max(N_d) matrix of the words in all documents. Unused word
 positions should be set to 0.}
-
-\item{ntopics}{The number of topics to retrieve.}
 }
 \description{
 Functions to compute and visualize the most probable topics in a document or

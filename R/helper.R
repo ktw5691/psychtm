@@ -70,6 +70,8 @@
 #'   coefficients. See 'Details'.
 #' @param sigma0 A q x q variance-covariance matrix for the prior on the
 #'   regression coefficients. See 'Details'.
+#' @param a0 The shape parameter for the prior on sigma2 (default: 0.001).
+#' @param b0 The scale parameter for the prior on sigma2 (default: 0.001).
 #' @param eta_start A q x 1 vector of starting values for the
 #'   regression coefficients.
 #' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the

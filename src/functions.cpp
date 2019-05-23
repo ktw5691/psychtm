@@ -555,7 +555,7 @@ double pwaic_d(const arma::colvec& like_pred) {
 //' WAIC for observation y_d
 //'
 //' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods) for y_d.
-//' @param p_eff The contribution to the effective number of parameters from
+//' @param p_effd The contribution to the effective number of parameters from
 //'   obs y_d.
 //' @return WAIC contribution for observation d (on deviance scale).
 //' @export
@@ -1208,7 +1208,7 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
 
 //' Collapsed Gibbs sampler for the sLDA-X model
 //'
-//' In general, don't use this directly. Instead, use \code{\linkS4class{gibbs_sldax}}.
+//' In general, don't use this directly. Instead, use \code{\link{gibbs_sldax}}.
 //'
 //' @include slda-class.R
 //'
@@ -1220,11 +1220,14 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
 //' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
 //' @param w A D x V matrix of counts for all documents and vocabulary terms.
 //' @param K The number of topics.
+//' @param model An integer denoting the type of model to fit.
 //' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
 //' @param sigma0 A (K + p + 1) x (K + p + 1) variance-covariance matrix for the
 //'   prior on the regression coefficients. The first p + 1 columns/rows
 //'   correspond to predictors in X, while the last K columns/rows correspond to
 //'   the K topic means.
+//' @param a0 The shape parameter for the prior on sigma2.
+//' @param b0 The scale parameter for the prior on sigma2.
 //' @param eta_start A (K + p) x 1 vector of starting values for the
 //'   regression coefficients. The first p elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
@@ -1237,6 +1240,11 @@ S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
 //'   vocabulary probabilities (default: 1.01).
 //' @param proposal_sd The proposal standard deviation for drawing the
 //'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+//' @param interaction_xcol The column number of the design matrix for the
+//' additional predictors for which an interaction with the \eqn{K} topics is
+//' desired (default: \eqn{-1L}, no interaction). Currently only supports a
+//' single continuous predictor or a two-category categorical predictor
+//' represented as a single dummy-coded column.
 //' @param verbose Should parameter draws be output during sampling? (default:
 //'   \code{FALSE}).
 //' @param display_progress Should percent progress of sampler be displayed

@@ -4,15 +4,15 @@
 #' the most probable words in a topic.
 #'
 #' @param mcmc_fit An Lda object.
+#' @param ntopics The number of topics to retrieve.
 #' @param burn The number of draws to discard as a burn-in period. Default: 0.
 #' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-#' @param ntopics The number of topics to retrieve.
 #' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 #'
 #' @export
 #' @rdname slda-gettop-methods
 setGeneric("get_toptopics",
-           function(mcmc_fit, burn = 0, thin = 1, stat = "mean") {
+           function(mcmc_fit, ntopics, burn = 0, thin = 1, stat = "mean") {
 
              if (is.null(mcmc_fit)) stop("Please supply an object to mcmc_fit.")
              if (!isClass(mcmc_fit, "Lda"))

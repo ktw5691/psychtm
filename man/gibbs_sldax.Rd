@@ -55,6 +55,10 @@ coefficients. See 'Details'.}
 \item{sigma0}{A q x q variance-covariance matrix for the prior on the
 regression coefficients. See 'Details'.}
 
+\item{a0}{The shape parameter for the prior on sigma2 (default: 0.001).}
+
+\item{b0}{The scale parameter for the prior on sigma2 (default: 0.001).}
+
 \item{eta_start}{A q x 1 vector of starting values for the
 regression coefficients.}
 

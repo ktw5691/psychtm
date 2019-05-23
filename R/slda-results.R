@@ -18,9 +18,16 @@ term_score = function(beta_) {
   return(tscore)
 }
 
+#' Compute the most probable topics in a document
+#'
+#' @param mcmc_fit An Lda object.
+#' @param ntopics The number of topics to retrieve.
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 setMethod("get_toptopics",
           c(mcmc_fit = "Lda"),
-          function(mcmc_fit, burn, thin, stat) {
+          function(mcmc_fit, ntopics, burn, thin, stat) {
 
             m <- mcmc_fit@nchain
 
@@ -55,6 +62,14 @@ setMethod("get_toptopics",
           }
 )
 
+#' Compute the most probable words in a topic
+#'
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
+#'   for each of \eqn{K} topics.
+#' @param nwords The number of words to retrieve.
+#' @param vocab A character vector containing the vocabulary.
+#' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
+#'   use probabilities. Default: "termscore".
 setMethod("get_topwords",
           c(beta_ = "matrix", nwords = "numeric", vocab = "character"),
           function(beta_, nwords, vocab, method) {
@@ -88,6 +103,11 @@ setMethod("get_topwords",
           }
 )
 
+#' Generic function to retrieve the empirical topic proportions
+#'
+#' @param mcmc_fit An Lda object.
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
 setMethod("get_zbar",
           c(mcmc_fit = "Lda"),
           function(mcmc_fit, burn, thin) {
@@ -120,6 +140,21 @@ setMethod("get_zbar",
           }
 )
 
+#' Generic function to plot the regression coefficients for sLDAX models
+#'
+#' @param mcmc_fit An Lda object.
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
+#'   for each of \eqn{K} topics.
+#' @param nwords The number of words to retrieve.
+#' @param vocab A character vector containing the vocabulary.
+#' @param varnames A character vector of variable names for additional
+#'   predictors (if any).
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
+#'   use probabilities. Default: "termscore".
+#' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
+#' @param errorbw Controls the width of the +/- 2 posterior standard error bars.
 setMethod("gg_coef",
           c(mcmc_fit = "Slda"),
           function(mcmc_fit, beta_, nwords, vocab, varnames, burn, thin, method, stat, errorbw) {
@@ -196,6 +231,21 @@ setMethod("gg_coef",
           }
 )
 
+#' Generic function to plot the regression coefficients for sLDAX models
+#'
+#' @param mcmc_fit An Sldalogit object.
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
+#'   for each of \eqn{K} topics.
+#' @param nwords The number of words to retrieve.
+#' @param vocab A character vector containing the vocabulary.
+#' @param varnames A character vector of variable names for additional
+#'   predictors (if any).
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
+#'   use probabilities. Default: "termscore".
+#' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
+#' @param errorbw Controls the width of the +/- 2 posterior standard error bars.
 setMethod("gg_coef",
           c(mcmc_fit = "Sldalogit"),
           function(mcmc_fit, beta_, nwords, vocab, varnames, burn, thin, method, stat, errorbw) {
@@ -272,6 +322,12 @@ setMethod("gg_coef",
           }
 )
 
+#' Generic function to estimate mean/median theta matrix
+#'
+#' @param mcmc_fit An Lda object.
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 setMethod("est_theta",
           c(mcmc_fit = "Lda"),
           function(mcmc_fit, burn, thin, stat) {
@@ -301,6 +357,12 @@ setMethod("est_theta",
           }
 )
 
+#' Generic function to estimate mean/median beta matrix
+#'
+#' @param mcmc_fit An Lda object.
+#' @param burn The number of draws to discard as a burn-in period. Default: 0.
+#' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
+#' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 setMethod("est_beta",
           c(mcmc_fit = "Lda"),
           function(mcmc_fit, burn, thin, stat) {

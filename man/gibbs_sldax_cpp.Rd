@@ -20,6 +20,8 @@ gibbs_sldax_cpp(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0,
 
 \item{K}{The number of topics.}
 
+\item{model}{An integer denoting the type of model to fit.}
+
 \item{y}{A D x 1 vector of binary outcomes (0/1) to be predicted.}
 
 \item{x}{A D x p matrix of additional predictors (no column of 1s for
@@ -32,12 +34,22 @@ prior on the regression coefficients. The first p + 1 columns/rows
 correspond to predictors in X, while the last K columns/rows correspond to
 the K topic means.}
 
+\item{a0}{The shape parameter for the prior on sigma2.}
+
+\item{b0}{The scale parameter for the prior on sigma2.}
+
 \item{eta_start}{A (K + p) x 1 vector of starting values for the
 regression coefficients. The first p elements correspond to predictors
 in X, while the last K elements correspond to the K topic means.}
 
 \item{proposal_sd}{The proposal standard deviation for drawing the
 regression coefficients, N(0, proposal_sd) (default: 0.2).}
+
+\item{interaction_xcol}{The column number of the design matrix for the
+additional predictors for which an interaction with the \eqn{K} topics is
+desired (default: \eqn{-1L}, no interaction). Currently only supports a
+single continuous predictor or a two-category categorical predictor
+represented as a single dummy-coded column.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
 (default: 0.1).}
@@ -57,5 +69,5 @@ order; if \code{FALSE}, no constraints will be applied.}
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
 \description{
-In general, don't use this directly. Instead, use \code{\linkS4class{gibbs_sldax}}.
+In general, don't use this directly. Instead, use \code{\link{gibbs_sldax}}.
 }
