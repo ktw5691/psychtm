@@ -167,12 +167,13 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
 
   # Default priors for supervised models
   if (model %in% c(2, 4)) {
-    if (is.null(mu0)) mu0 = rep(0, K)
+    q_ = K
+    if (is.null(mu0)) mu0 = rep(0, q_)
     if (is.null(sigma0)) {
-      if (model == 2) sigma0 = diag(1, K)
-      if (model == 4) sigma0 = diag(2.5 ^ 2, K) # Roughly equivalent to recommended Cauchy prior scales of 2.5 from Gelman paper
+      if (model == 2) sigma0 = diag(1, q_)
+      if (model == 4) sigma0 = diag(2.5 ^ 2, q_) # Roughly equivalent to recommended Cauchy prior scales of 2.5 from Gelman paper
     }
-    if (is.null(eta_start)) eta_start = seq(1, -1, length.out = K)
+    if (is.null(eta_start)) eta_start = seq(2, -2, length.out = q_)
   }
   if (model %in% c(3, 5)) {
     if (interaction_xcol <= 0) {
@@ -180,19 +181,21 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
     } else {
       p = ncol(x) + K - 1
     }
-    if (is.null(mu0)) mu0 = rep(0, p + K)
+    q_ = p + K
+    if (is.null(mu0)) mu0 = rep(0, q_)
     if (is.null(sigma0)) {
-      if (model == 3) sigma0 = diag(1, p + K)
-      if (model == 5) sigma0 = diag(2.5 ^ 2, p + K) # Roughly equivalent to recommended Cauchy prior scales of 2.5 from Gelman paper
+      if (model == 3) sigma0 = diag(1, q_)
+      if (model == 5) sigma0 = diag(2.5 ^ 2, q_) # Roughly equivalent to recommended Cauchy prior scales of 2.5 from Gelman paper
     }
-    if (is.null(eta_start)) eta_start = seq(1, -1, length.out = p + K)
+    if (is.null(eta_start)) eta_start = c(rep(0, ncol(x)), seq(2, -2, length.out = q_ - ncol(x)))
   }
   if (model %in% c(2, 3)) {
     if (is.null(a0)) a0 = 0.001
     if (is.null(b0)) b0 = 0.001
   }
   if (model == 4) {
-    if (is.null(proposal_sd)) proposal_sd = rep(2.38, K)
+    q_ = K
+    if (is.null(proposal_sd)) proposal_sd = rep(2.38, q_)
   }
   if (model == 5) {
     if (interaction_xcol <= 0) {
@@ -200,7 +203,8 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
     } else {
       p = ncol(x) + K - 1
     }
-    if (is.null(proposal_sd)) proposal_sd = rep(2.38, p + K)
+    q_ = p + K
+    if (is.null(proposal_sd)) proposal_sd = rep(2.38, q_)
   }
 
   # Set up unused defaults for C++ call
