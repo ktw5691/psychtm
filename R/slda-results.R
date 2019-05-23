@@ -308,7 +308,7 @@ setMethod("est_theta",
                 z_count = numeric(K)
                 for (k in seq_len(K)) z_count[k] = sum(
                   topics[d, , i] == k, na.rm = TRUE)
-                theta[d, , i] = est_thetad_cpp(z_count, alpha_, K)
+                theta[d, , i] = est_thetad(z_count, alpha_)
               }
               if (i %% (len / 10) == 0) cat("Iteration ", i)
             }
@@ -334,9 +334,9 @@ setMethod("est_beta",
             beta_ <- array(dim = c(K, ncol = V, len))
 
             for (i in seq_len(len)) {
-              wz_co = count_topic_word_cpp(ndoc, K, V, topics[, , i], docs)
-              for (k in seq_len(K)) beta_[k, , i] = est_betak_cpp(
-                1, V, wz_co[k, ], gamma_)
+              wz_co = count_topic_word(K, V, topics[, , i], docs)
+              for (k in seq_len(K)) beta_[k, , i] = est_betak(
+                wz_co[k, ], gamma_)
               if (i %% (len / 10) == 0) cat("Iteration ", i)
             }
 
