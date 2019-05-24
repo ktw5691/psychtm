@@ -988,11 +988,11 @@ void update_zcounts(uint32_t d, uint32_t word, uint16_t topic,
 //' @export
 //' @family Gibbs sampler
 // [[Rcpp::export]]
-S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
-             const arma::mat& x,
-             const arma::colvec& mu0, const arma::mat& sigma0,
-             arma::colvec eta_start, float a0 = 0.001, float b0 = 0.001,
-             bool verbose = false, bool display_progress = false) {
+S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
+                 const arma::mat& x,
+                 const arma::colvec& mu0, const arma::mat& sigma0,
+                 arma::colvec eta_start, float a0 = 0.001, float b0 = 0.001,
+                 bool verbose = false, bool display_progress = false) {
 
   if (m <= burn) {
     stop("Length of chain m not greater than burn-in period.");
@@ -1107,11 +1107,11 @@ S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y,
 //' @export
 //' @family Gibbs sampler
 // [[Rcpp::export]]
-S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y,
-                  const arma::mat& x,
-                  const arma::colvec& mu0, const arma::mat& sigma0,
-                  arma::colvec eta_start, arma::vec proposal_sd,
-                  bool verbose = false, bool display_progress = false) {
+S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
+                      const arma::mat& x,
+                      const arma::colvec& mu0, const arma::mat& sigma0,
+                      arma::colvec eta_start, arma::vec proposal_sd,
+                      bool verbose = false, bool display_progress = false) {
 
   if (m <= burn) {
     stop("Length of chain m not greater than burn-in period.");
