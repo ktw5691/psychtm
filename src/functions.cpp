@@ -36,6 +36,19 @@ arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
   return arma::repmat(mu, 1, n).t() + y * arma::chol(sigma);
 }
 
+// Get the top number of observations
+std::map<double, int> table_cpp(const arma::rowvec& v) {
+
+  // Create a map to store frequencies
+  std::map<double, int> Elt;
+  Elt.clear();
+
+  // Fill the map with occurrences per number.
+  for (int i = 0; i < v.size(); ++i) Elt[ v[i] ] += 1;
+
+  return Elt;
+}
+
 //' Draw eta from full conditional posterior for sLDA/sLDAX/MLR models
 //'
 //' @param w A D x q matrix containing a predictor model matrix of assumed form
@@ -296,8 +309,8 @@ arma::vec est_thetad(const arma::vec& z_count, float alpha_) {
 //' @export
 // [[Rcpp::export]]
 arma::mat count_topic_word(uint16_t K, uint32_t V,
-                           const arma::mat& doc_topic,
-                           const arma::mat& doc_word) {
+                            const arma::mat& doc_topic,
+                            const arma::mat& doc_word) {
   const uint32_t D = doc_topic.n_rows; // Number of documents
   if (K < 2) error("number of topics must be at least 2");
   if (V < 2) error("size of vocabulary V must be at least 2");
@@ -310,20 +323,16 @@ arma::mat count_topic_word(uint16_t K, uint32_t V,
   const IntegerVector docs_index = seq_len(D) - 1;
   // Matrix to store number of topic/word co-occurences
   arma::mat topic_word_freq = arma::zeros(K, V);
-  // Loop through documents
-  for (uint32_t doc : docs_index) {
-    // Loop through words in document
-    for (uint32_t pos = 0; pos < maxnd; pos++) {
-      // Loop through topics
-      for (uint16_t topic = 1; topic <= K; topic++) {
-        // Loop through vocabulary
-        for (uint32_t v = 1; v <= V; v++) {
-          topic_word_freq(topic - 1, v - 1) += ((doc_topic(doc, pos) == topic) *
-            (doc_word(doc, pos) == v));
-        }
-      }
+
+  for (uint16_t topic : topics_index) {
+    arma::uvec ids = arma::find(doc_topic == topic);
+    arma::rowvec word_ids = doc_word.elem(ids).t();
+    // Update word frequencies for topic
+    std::map<double, int> counts = table_cpp(word_ids);
+    for (const auto &p : counts) {
+      topic_word_freq(topic - 1, p.first - 1) += p.second;
     }
-  }
+  } // Topics
   return topic_word_freq;
 }
 
@@ -896,12 +905,10 @@ double get_lpost_slda_logit(double ll, const arma::colvec& eta,
 //'
 //' @return A vector of the current number of draws of each topic in document d
 //'   excluding word n.
-arma::vec count_topicd(uint16_t topic, const arma::vec& ndk) {
+void count_topicd(uint16_t topic, uint16_t doc, arma::mat& ndk) {
   // Exclude word n from topic counts in doc d
-  arma::vec ndk_n = ndk;
-  ndk_n(topic - 1)--;
-  if (ndk_n(topic - 1) < 0) ndk_n(topic - 1) = 0;
-  return ndk_n;
+  ndk(doc, topic - 1)--;
+  if (ndk(doc, topic - 1) < 0) ndk(doc, topic - 1) = 0;
 }
 
 //' Update number of times topic was drawn in corpus excluding current word
@@ -911,12 +918,10 @@ arma::vec count_topicd(uint16_t topic, const arma::vec& ndk) {
 //'
 //' @return A vector of the current number of draws of each topic in the corpus
 //'   excluding the current word.
-arma::vec count_topic_corpus(uint16_t topic, const arma::vec& nk) {
+void count_topic_corpus(uint16_t topic, NumericVector& nk) {
   // Exclude word n from topic counts in corpus
-  arma::vec nk_n = nk;
-  nk_n(topic - 1)--;
-  if (nk_n(topic - 1) < 0) nk_n(topic - 1) = 0;
-  return nk_n;
+  nk(topic - 1)--;
+  if (nk(topic - 1) < 0) nk(topic - 1) = 0;
 }
 
 //' Update number of times word and topic co-occur in corpus
@@ -928,14 +933,11 @@ arma::vec count_topic_corpus(uint16_t topic, const arma::vec& nk) {
 //'
 //' @return A K x V matrix of the current number of co-occurences of each topic
 //'   and vocabulary term in the corpus excluding the current word.
-arma::mat count_word_topic(uint32_t word, uint16_t topic, const arma::mat& nkm) {
+void count_word_topic(uint32_t word, uint16_t topic, arma::mat& nkm) {
   // Exclude word n from topic-word counts
-  arma::mat nkm_n = nkm;
-  nkm_n(topic - 1, word - 1)--;
+  nkm(topic - 1, word - 1)--;
   // Fix possible negative counts
-  if (nkm_n(topic - 1, word - 1) < 0) nkm_n(topic - 1, word - 1) = 0;
-  nkm_n = nkm_n.col(word - 1).t();
-  return nkm_n;
+  if (nkm(topic - 1, word - 1) < 0) nkm(topic - 1, word - 1) = 0;
 }
 
 //' Update all topic and topic-word counts in document and corpus
@@ -947,17 +949,12 @@ arma::mat count_word_topic(uint32_t word, uint16_t topic, const arma::mat& nkm) 
 //' @param nk A vector of the current number of draws of each topic in the corpus.
 //' @param nkm A K x V matrix of the current number of co-occurences of each topic
 //'   and vocabulary term in the corpus.
-void update_zcounts(uint32_t d, uint32_t word, uint16_t topic,
+void update_zcounts(uint32_t d, uint32_t word, uint16_t topic, uint32_t doc,
                     arma::mat& ndk, NumericVector& nk, arma::mat& nkm) {
 
-  arma::vec ndktemp = ndk.row(d).t();
-  NumericVector nktemp = nk;
-  arma::mat nkmtemp = nkm;
-
-  ndk.row(d) = count_topicd(topic, ndktemp).t();
-  nk = count_topic_corpus(topic, nktemp);
-  nkm.col(word - 1) = count_word_topic(word, topic, nkmtemp).t();
-
+  count_topicd(topic, doc, ndk);
+  count_topic_corpus(topic, nk);
+  count_word_topic(word, topic, nkm);
 }
 
 //////////////////////////////// Gibbs Samplers ////////////////////////////////
@@ -1417,7 +1414,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
       for (uint32_t n = 0; n < N(d); n++) {
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
-        update_zcounts(d, word, topic, ndk, nk, nkm);
+        update_zcounts(d, word, topic, d, ndk, nk, nkm);
         try {
           if (model == lda) {
             topic = draw_zdn_lda(V, ndk.row(d).t(), nkm.col(word - 1), nk,
