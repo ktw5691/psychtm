@@ -477,8 +477,8 @@ waic_diff <- function(l_pred1, l_pred2) {
 #' @return An object of class \code{Mlr}.
 #' @export
 #' @family Gibbs sampler
-gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_mlr`, m, burn, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
+gibbs_mlr_cpp <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_mlr_cpp`, m, burn, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for logistic regression
@@ -506,8 +506,8 @@ gibbs_mlr <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.
 #' @return An object of class \code{Logistic}.
 #' @export
 #' @family Gibbs sampler
-gibbs_logistic <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_logistic`, m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
+gibbs_logistic_cpp <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_logistic_cpp`, m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the sLDA-X model
