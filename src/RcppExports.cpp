@@ -104,9 +104,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// gibbs_mlr
-S4 gibbs_mlr(uint32_t m, uint32_t burn, const arma::colvec& y, const arma::mat& x, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, float a0, float b0, bool verbose, bool display_progress);
-RcppExport SEXP _psychtm_gibbs_mlr(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP xSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
+// gibbs_mlr_cpp
+S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, const arma::colvec& y, const arma::mat& x, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, float a0, float b0, bool verbose, bool display_progress);
+RcppExport SEXP _psychtm_gibbs_mlr_cpp(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP xSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP a0SEXP, SEXP b0SEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -121,13 +121,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< float >::type b0(b0SEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(gibbs_mlr(m, burn, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress));
+    rcpp_result_gen = Rcpp::wrap(gibbs_mlr_cpp(m, burn, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }
-// gibbs_logistic
-S4 gibbs_logistic(uint32_t m, uint32_t burn, const arma::colvec& y, const arma::mat& x, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, arma::vec proposal_sd, bool verbose, bool display_progress);
-RcppExport SEXP _psychtm_gibbs_logistic(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP xSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP proposal_sdSEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
+// gibbs_logistic_cpp
+S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, const arma::colvec& y, const arma::mat& x, const arma::colvec& mu0, const arma::mat& sigma0, arma::colvec eta_start, arma::vec proposal_sd, bool verbose, bool display_progress);
+RcppExport SEXP _psychtm_gibbs_logistic_cpp(SEXP mSEXP, SEXP burnSEXP, SEXP ySEXP, SEXP xSEXP, SEXP mu0SEXP, SEXP sigma0SEXP, SEXP eta_startSEXP, SEXP proposal_sdSEXP, SEXP verboseSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -141,7 +141,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::vec >::type proposal_sd(proposal_sdSEXP);
     Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(gibbs_logistic(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress));
+    rcpp_result_gen = Rcpp::wrap(gibbs_logistic_cpp(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -185,8 +185,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_psychtm_waic_d", (DL_FUNC) &_psychtm_waic_d, 2},
     {"_psychtm_waic_all", (DL_FUNC) &_psychtm_waic_all, 2},
     {"_psychtm_waic_diff", (DL_FUNC) &_psychtm_waic_diff, 2},
-    {"_psychtm_gibbs_mlr", (DL_FUNC) &_psychtm_gibbs_mlr, 11},
-    {"_psychtm_gibbs_logistic", (DL_FUNC) &_psychtm_gibbs_logistic, 10},
+    {"_psychtm_gibbs_mlr_cpp", (DL_FUNC) &_psychtm_gibbs_mlr_cpp, 11},
+    {"_psychtm_gibbs_logistic_cpp", (DL_FUNC) &_psychtm_gibbs_logistic_cpp, 10},
     {"_psychtm_gibbs_sldax_cpp", (DL_FUNC) &_psychtm_gibbs_sldax_cpp, 20},
     {NULL, NULL, 0}
 };

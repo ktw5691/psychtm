@@ -126,7 +126,8 @@ matrix with diagonal elements (variances) of 6.25 for
 \code{model = "slda_logit"} and \code{model = "sldax_logit"}.
 }
 \seealso{
-Other Gibbs sampler: \code{\link{gibbs_logistic}},
-  \code{\link{gibbs_mlr}}
+Other Gibbs sampler: \code{\link{gibbs_logistic_cpp}},
+  \code{\link{gibbs_logistic}},
+  \code{\link{gibbs_mlr_cpp}}, \code{\link{gibbs_mlr}}
 }
 \concept{Gibbs sampler}
