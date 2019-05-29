@@ -36,7 +36,11 @@ arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
   return arma::repmat(mu, 1, n).t() + y * arma::chol(sigma);
 }
 
-// Get the top number of observations
+//' Get the top number of observations
+//'
+//' @param v A row vector of values to be tabulated.
+//'
+//' @return A map of (values, frequencies)
 std::map<double, int> table_cpp(const arma::rowvec& v) {
 
   // Create a map to store frequencies
