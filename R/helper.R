@@ -384,10 +384,6 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
   chk_burn <- check_int(burn)
   if (!chk_burn) stop("'burn' is not an integer")
 
-  # Check constrain_eta
-  chk_constrain <- check_logical(constrain_eta)
-  if (!chk_constrain) stop("'constrain_eta' is not TRUE/FALSE")
-
   # Check verbose
   chk_verbose <- check_logical(verbose)
   if (!chk_verbose) stop("'verbose' is not an TRUE/FALSE")
