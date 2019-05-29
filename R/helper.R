@@ -1,3 +1,29 @@
+#' Check for integer argument
+#'
+#' @param arg Argument to check.
+check_int <- function(arg) {
+
+  good <- FALSE
+  if (is.numeric(arg)) {
+    if (!is.na(arg) & !is.infinite(arg)) {
+      if (arg %% 1 == 0) {
+        arg <- as.integer(arg)
+        good <- TRUE
+      }
+    }
+  }
+  return(good)
+}
+
+#' Check for logical argument
+#'
+#' @param arg Argument to check.
+check_logical <- function(arg) {
+  good <- FALSE
+  if (is.logical(arg) & !is.na(arg)) good <- TRUE
+  return(good)
+}
+
 #' Fit supervised or unsupervised topic models (sLDAX or LDA)
 #'
 #' \code{gibbs_sldax} is used to fit both supervised and unsupervised topic models.
@@ -89,14 +115,37 @@
 #'
 #' @return An object of class \code{\linkS4class{Sldax}}.
 #' @family Gibbs sampler
-gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
-                       model = c("lda", "slda", "sldax", "slda_logit", "sldax_logit"),
-                       y = NULL, x = NULL, interaction_xcol = -1L,
-                       alpha_ = 0.1, gamma_ = 1.01,
-                       mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
-                       eta_start = NULL, constrain_eta = TRUE,
-                       proposal_sd = NULL,
-                       verbose = FALSE, display_progress = FALSE) {
+gibbs_sldax <- function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
+                        model = c("lda", "slda", "sldax",
+                                  "slda_logit", "sldax_logit"),
+                        y = NULL, x = NULL, interaction_xcol = -1L,
+                        alpha_ = 0.1, gamma_ = 1.01,
+                        mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
+                        eta_start = NULL, constrain_eta = TRUE,
+                        proposal_sd = NULL,
+                        verbose = FALSE, display_progress = FALSE) {
+
+  # Check model and convert to integer codes
+  if (is.character(model)) {
+    if (length(model) == 1) {
+      model <- model
+    } else {
+      model <- model[1]
+    }
+    if (!model %in% c("lda", "slda", "sldax", "slda_logit", "sldax_logit")) {
+      print(model)
+      stop("'model' not recognized")
+    }
+  } else {
+    print(model)
+    stop("'model' not recognized")
+  }
+  model <- switch(model,
+                 lda = 1L,
+                 slda = 2L,
+                 sldax = 3L,
+                 slda_logit = 4L,
+                 sldax_logit = 5L)
 
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
@@ -110,35 +159,32 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
     x <- model.matrix(mt, mf)
     if ("(Intercept)" %in% dimnames(x)[[2]]) {
       ip <- match("(Intercept)", dimnames(x)[[2]])
-      x = x[, -1]
+      x <- x[, -ip]
     }
-    x = as.matrix(x) # If y ~ 1 supplied, x has dims D x 0
+    x <- as.matrix(x) # If y ~ 1 supplied, x has dims D x 0
     if (dim(x)[2] == 0)
-      stop("Design matrix `x` has 0 columns. Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as `formula`.")
-    y = as.matrix(y)
-  }
+      stop("Design matrix 'x' has 0 columns.
+            Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as
+            'formula'.")
 
-  # Check model and convert to integer codes
-  if (is.character(model)) {
-    if (length(model) == 1) {
-      model = model
+    if (model == 4 || model == 5) { # y should be dichotomous
+      # Check if y is factor and convert to 0/1 numeric if it is
+      if (is.factor(y)) y <- as.numeric(y) - 1
+      # Check that y is 0/1
+      if (length(unique(y)) == 2) {
+        if (sum(unique(y) %in% c(0, 1)) != 2)
+          stop("'y' has 2 unique values, but they cannot be coerced to 0/1")
+      } else {
+        stop("'y' has > 2 unique values and is not dichotomous")
+      }
+      y <- as.matrix(y)
+      attr(y, "names") <- NULL
+      if (sum(unique(y) %in% c(0, 1)) != 2)
+        stop("'y' has 2 unique values, but they cannot be coerced to 0/1")
     } else {
-      model = model[1]
+      y <- as.matrix(y) # Assume y is continuous
     }
-    if (!model %in% c("lda", "slda", "sldax", "slda_logit", "sldax_logit")) {
-      print(model)
-      stop("'model' not recognized")
-    }
-  } else {
-    print(model)
-    stop("'model' not recognized")
   }
-  model = switch(model,
-                 lda = 1L,
-                 slda = 2L,
-                 sldax = 3L,
-                 slda_logit = 4L,
-                 sldax_logit = 5L)
 
   if (model == 1) {
     if (!is.null(y) || !is.null(x) || !is.null(mu0) || !is.null(sigma0) ||
@@ -170,118 +216,98 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
 
   # Default priors for supervised models
   if (model %in% c(2, 4)) {
-    q_ = K
-    if (is.null(mu0)) mu0 = rep(0, q_)
+    q_ <- K
+    if (is.null(mu0)) mu0 <- rep(0, q_)
     if (is.null(sigma0)) {
-      if (model == 2) sigma0 = diag(1, q_)
-      if (model == 4) sigma0 = diag(2.5 ^ 2, q_) # Roughly equivalent to recommended Cauchy prior scales of 2.5 from Gelman paper
+      if (model == 2) sigma0 <- diag(1, q_)
+      if (model == 4) sigma0 <- diag(2.5 ^ 2, q_)
     }
-    if (is.null(eta_start)) eta_start = seq(2, -2, length.out = q_)
+    if (is.null(eta_start)) eta_start <- seq(2, -2, length.out = q_)
   }
   if (model %in% c(3, 5)) {
     if (interaction_xcol <= 0) {
-      p = ncol(x)
+      p <- ncol(x)
     } else {
-      p = ncol(x) + K - 1
+      p <- ncol(x) + K - 1
     }
-    q_ = p + K
-    if (is.null(mu0)) mu0 = rep(0, q_)
+    q_ <- p + K
+    if (is.null(mu0)) mu0 <- rep(0, q_)
     if (is.null(sigma0)) {
-      if (model == 3) sigma0 = diag(1, q_)
-      if (model == 5) sigma0 = diag(2.5 ^ 2, q_) # Roughly equivalent to recommended Cauchy prior scales of 2.5 from Gelman paper
+      if (model == 3) sigma0 <- diag(1, q_)
+      if (model == 5) sigma0 <- diag(2.5 ^ 2, q_)
     }
-    if (is.null(eta_start)) eta_start = c(rep(0, ncol(x)), seq(2, -2, length.out = q_ - ncol(x)))
+    if (is.null(eta_start))
+      eta_start <- c(rep(0, ncol(x)), seq(2, -2, length.out = q_ - ncol(x)))
   }
   if (model %in% c(2, 3)) {
-    if (is.null(a0)) a0 = 0.001
-    if (is.null(b0)) b0 = 0.001
+    if (is.null(a0)) a0 <- 0.001
+    if (is.null(b0)) b0 <- 0.001
   }
   if (model == 4) {
-    q_ = K
-    if (is.null(proposal_sd)) proposal_sd = rep(2.38, q_)
+    q_ <- K
+    if (is.null(proposal_sd)) proposal_sd <- rep(2.38, q_)
   }
   if (model == 5) {
     if (interaction_xcol <= 0) {
-      p = ncol(x)
+      p <- ncol(x)
     } else {
-      p = ncol(x) + K - 1
+      p <- ncol(x) + K - 1
     }
-    q_ = p + K
-    if (is.null(proposal_sd)) proposal_sd = rep(2.38, q_)
+    q_ <- p + K
+    if (is.null(proposal_sd)) proposal_sd <- rep(2.38, q_)
   }
 
   # Set up unused defaults for C++ call
   if (model == 1) {
-    y = -1L
-    x = matrix(0, 1, 1)
-    mu0 = 0
-    sigma0 = matrix(0, 1, 1)
-    a0 = -1
-    b0 = -1
-    eta_start = 0
-    proposal_sd = 0
+    y           <- -1L
+    x           <- matrix(0, 1, 1)
+    mu0         <- 0
+    sigma0      <- matrix(0, 1, 1)
+    a0          <- -1
+    b0          <- -1
+    eta_start   <- 0
+    proposal_sd <- 0
   }
   if (model == 2) {
-    x = matrix(0, 1, 1)
-    proposal_sd = 0
+    x           <- matrix(0, 1, 1)
+    proposal_sd <- 0
   }
   if (model == 3) {
-    proposal_sd = 0
+    proposal_sd <- 0
   }
   if (model == 4) {
-    x = matrix(0, 1, 1)
-    a0 = -1
-    b0 = -1
+    x  <- matrix(0, 1, 1)
+    a0 <- -1
+    b0 <- -1
   }
   if (model == 5) {
-    a0 = -1
-    b0 = -1
+    a0 <- -1
+    b0 <- -1
   }
 
   # Check m
-  if (is.numeric(m)) {
-    if (!is.na(m) & !is.infinite(m)) {
-      if (m %% 1 == 0) {
-        m = as.integer(m)
-      }
-    } else {
-      print(m)
-      stop("'m' is not an integer")
-    }
-  } else {
-    print(m)
-    stop("'m' is not an integer")
-  }
+  chk_m <- check_int(m)
+  if (!chk_m) stop("'m' is not an integer")
 
   # Check burn
-  if (is.numeric(burn)) {
-    if (!is.na(burn) & !is.infinite(burn)) {
-      if (burn %% 1 == 0) {
-        burn = as.integer(burn)
-      }
-    } else {
-      print(burn)
-      stop("'burn' is not an integer")
-    }
-  } else {
-    print(burn)
-    stop("'burn' is not an integer")
-  }
+  chk_burn <- check_int(burn)
+  if (!chk_burn) stop("'burn' is not an integer")
 
   # Check number of topics
-  if (is.numeric(K)) {
-    if (!is.na(K) & !is.infinite(K)) {
-      if (K %% 1 == 0) {
-        K = as.integer(K)
-      }
-    } else {
-      print(K)
-      stop("'K' is not an integer")
-    }
-  } else {
-    print(K)
-    stop("'K' is not an integer")
-  }
+  chk_K <- check_int(K)
+  if (!chk_K) stop("'K' is not an integer")
+
+  # Check constrain_eta
+  chk_constrain <- check_logical(constrain_eta)
+  if (!chk_constrain) stop("'constrain_eta' is not TRUE/FALSE")
+
+  # Check verbose
+  chk_verbose <- check_logical(verbose)
+  if (!chk_verbose) stop("'verbose' is not an TRUE/FALSE")
+
+  # Check display_progress
+  chk_display <- check_logical(display_progress)
+  if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
   gibbs_sldax_cpp(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0,
                   eta_start, proposal_sd, interaction_xcol, alpha_, gamma_,
@@ -324,11 +350,10 @@ gibbs_sldax = function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
 #'
 #' @return An object of class \code{\linkS4class{Mlr}}.
 #' @family Gibbs sampler
-gibbs_mlr = function(formula, data, m = 100, burn = 0,
-                     y = NULL, x = NULL,
-                     mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
-                     eta_start = NULL,
-                     verbose = FALSE, display_progress = FALSE) {
+gibbs_mlr <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
+                      mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
+                      eta_start = NULL,
+                      verbose = FALSE, display_progress = FALSE) {
 
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
@@ -340,46 +365,36 @@ gibbs_mlr = function(formula, data, m = 100, burn = 0,
     y <- model.response(mf, "numeric")
     mt <- attr(mf, "terms")
     x <- model.matrix(mt, mf)
-    y = as.matrix(y)
+    y <- as.matrix(y)
   }
 
   # Default priors
-  q_ = ncol(x)
-  if (is.null(mu0)) mu0 = rep(0, q_)
-  if (is.null(sigma0)) sigma0 = diag(1, q_)
-  if (is.null(eta_start)) eta_start = rep(0, q_)
-  if (is.null(a0)) a0 = 0.001
-  if (is.null(b0)) b0 = 0.001
+  q_ <- ncol(x)
+  if (is.null(mu0)) mu0 <- rep(0, q_)
+  if (is.null(sigma0)) sigma0 <- diag(1, q_)
+  if (is.null(eta_start)) eta_start <- rep(0, q_)
+  if (is.null(a0)) a0 <- 0.001
+  if (is.null(b0)) b0 <- 0.001
 
   # Check m
-  if (is.numeric(m)) {
-    if (!is.na(m) & !is.infinite(m)) {
-      if (m %% 1 == 0) {
-        m = as.integer(m)
-      }
-    } else {
-      print(m)
-      stop("'m' is not an integer")
-    }
-  } else {
-    print(m)
-    stop("'m' is not an integer")
-  }
+  chk_m <- check_int(m)
+  if (!chk_m) stop("'m' is not an integer")
 
   # Check burn
-  if (is.numeric(burn)) {
-    if (!is.na(burn) & !is.infinite(burn)) {
-      if (burn %% 1 == 0) {
-        burn = as.integer(burn)
-      }
-    } else {
-      print(burn)
-      stop("'burn' is not an integer")
-    }
-  } else {
-    print(burn)
-    stop("'burn' is not an integer")
-  }
+  chk_burn <- check_int(burn)
+  if (!chk_burn) stop("'burn' is not an integer")
+
+  # Check constrain_eta
+  chk_constrain <- check_logical(constrain_eta)
+  if (!chk_constrain) stop("'constrain_eta' is not TRUE/FALSE")
+
+  # Check verbose
+  chk_verbose <- check_logical(verbose)
+  if (!chk_verbose) stop("'verbose' is not an TRUE/FALSE")
+
+  # Check display_progress
+  chk_display <- check_logical(display_progress)
+  if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
   gibbs_mlr_cpp(m, burn, y, x, mu0, sigma0, eta_start, a0, b0,
                 verbose, display_progress)
@@ -423,11 +438,10 @@ gibbs_mlr = function(formula, data, m = 100, burn = 0,
 #'
 #' @return An object of class \code{\linkS4class{Logistic}}.
 #' @family Gibbs sampler
-gibbs_logistic = function(formula, data, m = 100, burn = 0,
-                          y = NULL, x = NULL,
-                          mu0 = NULL, sigma0 = NULL,
-                          eta_start = NULL, proposal_sd = NULL,
-                          verbose = FALSE, display_progress = FALSE) {
+gibbs_logistic <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
+                           mu0 = NULL, sigma0 = NULL,
+                           eta_start = NULL, proposal_sd = NULL,
+                           verbose = FALSE, display_progress = FALSE) {
 
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
@@ -436,48 +450,47 @@ gibbs_logistic = function(formula, data, m = 100, burn = 0,
     mf$drop.unused.levels <- TRUE
     mf[[1L]] <- as.name("model.frame")
     mf <- eval(mf, parent.frame())
-    y <- model.response(mf, "numeric")
+    y <- model.response(mf, "any")
     mt <- attr(mf, "terms")
     x <- model.matrix(mt, mf)
-    y = as.matrix(y)
+
+    # Check if y is factor and convert to 0/1 numeric if it is
+    if (is.factor(y)) y <- as.numeric(y) - 1
+    # Check that y is 0/1
+    if (length(unique(y)) == 2) {
+      if (sum(unique(y) %in% c(0, 1)) != 2)
+        stop("'y' has 2 unique values, but they cannot be coerced to 0/1")
+    } else {
+      stop("'y' has > 2 unique values and is not dichotomous")
+    }
+    y <- as.matrix(y)
+    attr(y, "names") <- NULL
+    if (sum(unique(y) %in% c(0, 1)) != 2)
+      stop("'y' has 2 unique values, but they cannot be coerced to 0/1")
   }
 
   # Default priors
-  q_ = ncol(x)
-  if (is.null(mu0)) mu0 = rep(0, q_)
-  if (is.null(sigma0)) sigma0 = diag(6.25, q_)
-  if (is.null(eta_start)) eta_start = rep(0, q_)
-  if (is.null(proposal_sd)) proposal_sd = rep(2.38, q_)
+  q_ <- ncol(x)
+  if (is.null(mu0)) mu0 <- rep(0, q_)
+  if (is.null(sigma0)) sigma0 <- diag(2.5 ^ 2, q_)
+  if (is.null(eta_start)) eta_start <- rep(0, q_)
+  if (is.null(proposal_sd)) proposal_sd <- rep(2.38, q_)
 
   # Check m
-  if (is.numeric(m)) {
-    if (!is.na(m) & !is.infinite(m)) {
-      if (m %% 1 == 0) {
-        m = as.integer(m)
-      }
-    } else {
-      print(m)
-      stop("'m' is not an integer")
-    }
-  } else {
-    print(m)
-    stop("'m' is not an integer")
-  }
+  chk_m <- check_int(m)
+  if (!chk_m) stop("'m' is not an integer")
 
   # Check burn
-  if (is.numeric(burn)) {
-    if (!is.na(burn) & !is.infinite(burn)) {
-      if (burn %% 1 == 0) {
-        burn = as.integer(burn)
-      }
-    } else {
-      print(burn)
-      stop("'burn' is not an integer")
-    }
-  } else {
-    print(burn)
-    stop("'burn' is not an integer")
-  }
+  chk_burn <- check_int(burn)
+  if (!chk_burn) stop("'burn' is not an integer")
+
+  # Check verbose
+  chk_verbose <- check_logical(verbose)
+  if (!chk_verbose) stop("'verbose' is not an TRUE/FALSE")
+
+  # Check display_progress
+  chk_display <- check_logical(display_progress)
+  if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
   gibbs_logistic_cpp(m, burn, y, x, mu0, sigma0,
                      eta_start, proposal_sd,
