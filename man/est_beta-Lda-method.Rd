@@ -5,10 +5,14 @@
 \alias{est_beta,Lda-method}
 \title{Generic function to estimate mean/median beta matrix}
 \usage{
-\S4method{est_beta}{Lda}(mcmc_fit, burn, thin, stat)
+\S4method{est_beta}{Lda}(mcmc_fit, docs, burn = 0, thin = 1,
+  stat = "mean")
 }
 \arguments{
 \item{mcmc_fit}{An Lda object.}
+
+\item{docs}{A D x max(N_d) matrix of the words in all documents. Unused word
+positions should be set to 0.}
 
 \item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
 
