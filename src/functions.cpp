@@ -1389,7 +1389,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
     }
   }
 
-  if (verbose) Rcout << 1 << " eta: " << eta_start.t() << "\n";
+  if (verbose && model != lda) Rcout << 1 << " eta: " << eta_start.t() << "\n";
   eta = eta_start;
 
   arma::vec attempt = arma::zeros(q);
@@ -1615,7 +1615,6 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
             " ~~~~ Proposal SD: " << proposal_sd.t() << "\n";
           break;
         default:
-          Rcout << i << " zbar d1: " << zbar.row(0) << "\n";
           break;
       }
     }
