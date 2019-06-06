@@ -94,28 +94,18 @@ setGeneric("get_zbar",
 
 #' Generic function to plot the regression coefficients for sLDAX models
 #'
-#' @param varnames A character vector of variable names for additional
-#'   predictors (if any).
 #' @param errorbw Controls the width of the +/- 2 posterior standard error bars.
 #'
 #' @export
 #' @rdname slda-gettop-methods
 setGeneric("gg_coef",
-           function(mcmc_fit, beta_, nwords, vocab, varnames, burn = 0,
-                    thin = 1, method = "termscore", stat = "mean",
+           function(mcmc_fit, burn = 0, thin = 1, stat = "mean",
                     errorbw = 0.5) {
 
              if (!isClass(mcmc_fit, "Lda"))
                stop("'mcmc_fit' must be an Lda object.")
              if (is.null(mcmc_fit))
                stop("Please supply an object to 'mcmc_fit'.")
-             if ( (nwords %% 1) != 0) stop("'nwords' must be an integer.")
-             if (nwords < 1) stop("'nwords' must be an integer greater than 0.")
-             if (length(vocab) == 0)
-               stop("'vocab' must contain at least one element.")
-             if (nwords > length(unique(vocab)))
-               stop("'n_words' cannot exceed the number of unique terms in
-                     'vocab'.")
              if ( (burn %% 1) != 0) stop("'burn' must be an integer.")
              if (burn < 0) stop("'burn' must be non-negative.")
              m <- mcmc_fit@nchain
@@ -125,11 +115,6 @@ setGeneric("gg_coef",
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'")
              if (is.null(stat)) stat <- "mean" # Default to mean
-
-             if (length(method > 1)) method <- method[1]
-             if (!(method %in% c("termscore", "prob")))
-               stop("'stat' must be either 'termscore' or 'prob'")
-             if (is.null(stat)) stat <- "termscore" # Default to termscore
 
              standardGeneric("gg_coef")
            }

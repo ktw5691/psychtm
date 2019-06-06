@@ -147,22 +147,13 @@ setMethod("get_zbar",
 #' Generic function to plot the regression coefficients for sLDAX models
 #'
 #' @param mcmc_fit An Lda object.
-#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
-#'   for each of \eqn{K} topics.
-#' @param nwords The number of words to retrieve.
-#' @param vocab A character vector containing the vocabulary.
-#' @param varnames A character vector of variable names for additional
-#'   predictors (if any).
 #' @param burn The number of draws to discard as a burn-in period. Default: 0.
 #' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-#' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
-#'   use probabilities. Default: "termscore".
 #' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 #' @param errorbw Controls the width of the +/- 2 posterior standard error bars.
 setMethod("gg_coef",
           c(mcmc_fit = "Slda"),
-          function(mcmc_fit, beta_, nwords, vocab, varnames, burn, thin,
-                   method, stat, errorbw) {
+          function(mcmc_fit, burn, thin, stat, errorbw) {
 
             if (!requireNamespace("dplyr", quietly = TRUE)) {
               stop("Package \"dplyr\" needed for this function to work.
@@ -185,24 +176,7 @@ setMethod("gg_coef",
               eta <- apply(mcmc_fit@eta[keep_index, ], 2, median)
             }
 
-            topic_dist <- get_topwords(beta_, nwords, vocab, method)
-
-            len <- ncol(mcmc_fit@eta)
-            ntopics <- mcmc_fit@ntopics
-            # Top words per topic
-            topics_top <- vector("character", len)
-            if (is.null(varnames) | length(varnames) != len - ntopics) {
-              topics_top[seq_len(len - ntopics)] <- paste0(
-                "V", seq_len(len - ntopics))
-            } else {
-              topics_top[seq_len(len - ntopics)] <- varnames
-            }
-            for (k in seq_len(ntopics)) {
-              temp <- dplyr::filter(topic_dist, topic == k)
-              temp <- dplyr::top_n(temp, nwords, prob)
-              temp <- paste(temp$word, collapse = ", ")
-              topics_top[len - ntopics + k] <- temp
-            }
+            varnames <- colnames(mcmc_fit@eta)
 
             # Regression coefficients for each topic
             coefs <- tibble::tibble(
@@ -212,19 +186,19 @@ setMethod("gg_coef",
 
             names(coefs) <- c("est", "lbcl", "ubcl")
             coefs <- cbind(
-              coefs, topics = factor(topics_top,
-                                     topics_top[order(coefs$est, coefs$lbcl)]))
+              coefs, varnames = factor(varnames,
+                                       varnames[order(coefs$est, coefs$lbcl)]))
             coefs <- coefs[order(coefs$est), ]
 
             coefs <- dplyr::mutate(
               dplyr::ungroup(
                 dplyr::mutate(
                   dplyr::rowwise(coefs),
-                  sig = dplyr::if_else(lbcl > 0 || ubcl < 0, 1, 0))),
+                  sig = dplyr::if_else(lbcl > 0 || ubcl < 0, "Yes", "No"))),
               sig = factor(sig))
 
             ggp <- ggplot2::ggplot(
-              coefs, ggplot2::aes_string(x = "topics", y = "est",
+              coefs, ggplot2::aes_string(x = "varnames", y = "est",
                                          color = "sig"))
             ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_point())
             ggp <- ggplot2::`%+%`(
@@ -247,22 +221,13 @@ setMethod("gg_coef",
 #' Generic function to plot the regression coefficients for sLDAX models
 #'
 #' @param mcmc_fit An Sldalogit object.
-#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
-#'   for each of \eqn{K} topics.
-#' @param nwords The number of words to retrieve.
-#' @param vocab A character vector containing the vocabulary.
-#' @param varnames A character vector of variable names for additional
-#'   predictors (if any).
 #' @param burn The number of draws to discard as a burn-in period. Default: 0.
 #' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-#' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
-#'   use probabilities. Default: "termscore".
 #' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 #' @param errorbw Controls the width of the +/- 2 posterior standard error bars.
 setMethod("gg_coef",
           c(mcmc_fit = "Sldalogit"),
-          function(mcmc_fit, beta_, nwords, vocab, varnames, burn, thin,
-                   method, stat, errorbw) {
+          function(mcmc_fit, burn, thin, stat, errorbw) {
 
             if (!requireNamespace("dplyr", quietly = TRUE)) {
               stop("Package \"dplyr\" needed for this function to work.
@@ -285,24 +250,7 @@ setMethod("gg_coef",
               eta <- apply(mcmc_fit@eta[keep_index, ], 2, median)
             }
 
-            topic_dist <- get_topwords(beta_, nwords, vocab, method)
-
-            len <- ncol(mcmc_fit@eta)
-            ntopics <- mcmc_fit@ntopics
-            # Top words per topic
-            topics_top <- vector("character", len)
-            if (is.null(varnames) | length(varnames) != len - ntopics) {
-              topics_top[seq_len(len - ntopics)] <- paste0(
-                "V", seq_len(len - ntopics))
-            } else {
-              topics_top[seq_len(len - ntopics)] <- varnames
-            }
-            for (k in seq_len(ntopics)) {
-              temp <- dplyr::filter(topic_dist, topic == k)
-              temp <- dplyr::top_n(temp, nwords, prob)
-              temp <- paste(temp$word, collapse = ", ")
-              topics_top[len - ntopics + k] <- temp
-            }
+            varnames <- colnames(mcmc_fit@eta)
 
             # Regression coefficients for each topic
             coefs <- tibble::tibble(
@@ -312,19 +260,19 @@ setMethod("gg_coef",
 
             names(coefs) <- c("est", "lbcl", "ubcl")
             coefs <- cbind(
-              coefs, topics = factor(topics_top,
-                                     topics_top[order(coefs$est, coefs$lbcl)]))
+              coefs, varnames = factor(varnames,
+                                       varnames[order(coefs$est, coefs$lbcl)]))
             coefs <- coefs[order(coefs$est), ]
 
             coefs <- dplyr::mutate(
               dplyr::ungroup(
                 dplyr::mutate(
                   dplyr::rowwise(coefs),
-                  sig = dplyr::if_else(lbcl > 0 || ubcl < 0, 1, 0))),
+                  sig = dplyr::if_else(lbcl > 0 || ubcl < 0, "Yes", "No"))),
               sig = factor(sig))
 
             ggp <- ggplot2::ggplot(
-              coefs, ggplot2::aes_string(x = "topics", y = "est",
+              coefs, ggplot2::aes_string(x = "varnames", y = "est",
                                          color = "sig"))
             ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_point())
             ggp <- ggplot2::`%+%`(
@@ -406,7 +354,8 @@ setMethod("est_beta",
               wz_co <- count_topic_word(K, V, topics[, , i], docs)
               for (k in seq_len(K)) beta_[k, , i] <- est_betak(
                 wz_co[k, ], gamma_)
-              if (i %% (len / 10) == 0) cat("Iteration ", i)
+              if (i %% floor(len / 10) == 0)
+                cat("Iteration", i, "of", len, "\n")
             }
 
             if (stat == "mean") beta_mean <- apply(beta_, c(1, 2), mean)
