@@ -15,8 +15,7 @@ get_topwords(beta_, nwords, vocab, method = "termscore")
 
 get_zbar(mcmc_fit, burn = 0, thin = 1)
 
-gg_coef(mcmc_fit, beta_, nwords, vocab, varnames, burn = 0, thin = 1,
-  method = "termscore", stat = "mean", errorbw = 0.5)
+gg_coef(mcmc_fit, burn = 0, thin = 1, stat = "mean", errorbw = 0.5)
 
 est_theta(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
@@ -42,9 +41,6 @@ each row sums to 1.}
 
 \item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
 use probabilities. Default: "termscore".}
-
-\item{varnames}{A character vector of variable names for additional
-predictors (if any).}
 
 \item{errorbw}{Controls the width of the +/- 2 posterior standard error bars.}
 
