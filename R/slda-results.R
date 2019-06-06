@@ -366,11 +366,12 @@ setMethod("est_theta",
             for (i in seq_len(len)) {
               for (d in seq_len(ndoc)) {
                 z_count <- numeric(K)
-                for (k in seq_len(K)) z_count[k] <- sum(
-                  topics[d, , i] == k, na.rm = TRUE)
+                for (k in seq_len(K))
+                  z_count[k] <- sum(topics[d, , i] == k, na.rm = TRUE)
                 theta[d, , i] <- est_thetad(z_count, alpha_)
               }
-              if (i %% (len / 10) == 0) cat("Iteration ", i)
+              if (i %% floor(len / 10) == 0)
+                cat("Iteration", i, "of", len, "\n")
             }
 
             if (stat == "mean") theta_mean <- apply(theta, c(1, 2), mean)
