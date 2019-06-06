@@ -309,9 +309,22 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  gibbs_sldax_cpp(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0,
-                  eta_start, proposal_sd, interaction_xcol, alpha_, gamma_,
-                  constrain_eta, verbose, display_progress)
+  res <- gibbs_sldax_cpp(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0,
+                         eta_start, proposal_sd, interaction_xcol,
+                         alpha_, gamma_,
+                         constrain_eta, verbose, display_progress)
+  if (model %in% c(3, 5) & !is.null(colnames(x))) {
+    if (interaction_xcol < 1) {
+      colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)))
+    }
+    else {
+      colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)),
+                             paste0(colnames(x)[interaction_xcol], ":topic",  seq_len(K - 1)))
+    }
+  } else if (model %in% c(2, 4)) {
+    colnames(res@eta) <- paste0("topic", seq_len(K))
+  }
+  return(res)
 }
 
 #' Fit linear regression model
@@ -392,8 +405,10 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  gibbs_mlr_cpp(m, burn, y, x, mu0, sigma0, eta_start, a0, b0,
-                verbose, display_progress)
+  res <- gibbs_mlr_cpp(m, burn, y, x, mu0, sigma0, eta_start, a0, b0,
+                       verbose, display_progress)
+  colnames(res@eta) <- colnames(x)
+  return(res)
 }
 
 #' Fit logistic regression model
@@ -488,7 +503,9 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  gibbs_logistic_cpp(m, burn, y, x, mu0, sigma0,
-                     eta_start, proposal_sd,
-                     verbose, display_progress)
+  res <- gibbs_logistic_cpp(m, burn, y, x, mu0, sigma0,
+                            eta_start, proposal_sd,
+                            verbose, display_progress)
+  colnames(res@eta) <- colnames(x)
+  return(res)
 }
