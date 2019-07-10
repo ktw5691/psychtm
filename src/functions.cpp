@@ -996,9 +996,9 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
                  arma::colvec eta_start, float a0 = 0.001, float b0 = 0.001,
                  bool verbose = false, bool display_progress = false) {
 
-  if (m <= burn) {
-    stop("Length of chain m not greater than burn-in period.");
-  }
+  if (m <= burn) stop("Length of chain m not greater than burn-in period.");
+  if ( (thin == 0) || (thin > (m - burn)) )
+    stop("Thinning period thin must be at least 1 and must be less than length of chain after burn-in period (m - burn).");
 
   S4 results("Mlr"); // Create object slda of class Mlr
 
@@ -1119,9 +1119,9 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
                       arma::colvec eta_start, arma::vec proposal_sd,
                       bool verbose = false, bool display_progress = false) {
 
-  if (m <= burn) {
-    stop("Length of chain m not greater than burn-in period.");
-  }
+  if (m <= burn) stop("Length of chain m not greater than burn-in period.");
+  if ( (thin == 0) || (thin > (m - burn)) )
+    stop("Thinning period thin must be at least 1 and must be less than length of chain after burn-in period (m - burn).");
 
   S4 results("Logistic"); // Create object slda of class Logistic
 
@@ -1276,9 +1276,9 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
                    bool constrain_eta = true,
                    bool verbose = false, bool display_progress = false) {
 
-  if (m <= burn) {
-    stop("Length of chain m not greater than burn-in period.");
-  }
+  if (m <= burn) stop("Length of chain m not greater than burn-in period.");
+  if ( (thin == 0) || (thin > (m - burn)) )
+    stop("Thinning period thin must be at least 1 and must be less than length of chain after burn-in period (m - burn).");
 
   const uint8_t lda = 1;
   const uint8_t slda = 2;
