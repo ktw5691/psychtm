@@ -4,8 +4,8 @@
 \alias{gibbs_mlr}
 \title{Fit linear regression model}
 \usage{
-gibbs_mlr(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
-  mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
+gibbs_mlr(formula, data, m = 100, burn = 0, thin = 1, y = NULL,
+  x = NULL, mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
   eta_start = NULL, verbose = FALSE, display_progress = FALSE)
 }
 \arguments{
@@ -18,6 +18,9 @@ description of the model to be fitted.}
 
 \item{burn}{The number of iterations to discard as the burn-in period
 (default: 0).}
+
+\item{thin}{The period of iterations to keep after the burn-in period
+(default: 1).}
 
 \item{y}{An optional D x 1 vector of binary outcomes (0/1) to be predicted.
 Not needed if \code{data} is supplied.}

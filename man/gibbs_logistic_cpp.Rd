@@ -4,8 +4,8 @@
 \alias{gibbs_logistic_cpp}
 \title{Collapsed Gibbs sampler for logistic regression}
 \usage{
-gibbs_logistic_cpp(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd,
-  verbose = FALSE, display_progress = FALSE)
+gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start,
+  proposal_sd, verbose = FALSE, display_progress = FALSE)
 }
 \arguments{
 \item{m}{The number of iterations to run the Gibbs sampler.}

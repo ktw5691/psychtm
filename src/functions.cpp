@@ -315,6 +315,7 @@ arma::vec est_thetad(const arma::vec& z_count, float alpha_) {
 arma::mat count_topic_word(uint16_t K, uint32_t V,
                             const arma::mat& doc_topic,
                             const arma::mat& doc_word) {
+
   const uint32_t D = doc_topic.n_rows; // Number of documents
   if (K < 2) error("number of topics must be at least 2");
   if (V < 2) error("size of vocabulary V must be at least 2");
@@ -989,8 +990,8 @@ void update_zcounts(uint32_t d, uint32_t word, uint16_t topic, uint32_t doc,
 //' @export
 //' @family Gibbs sampler
 // [[Rcpp::export]]
-S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
-                 const arma::mat& x,
+S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
+                 const arma::colvec& y, const arma::mat& x,
                  const arma::colvec& mu0, const arma::mat& sigma0,
                  arma::colvec eta_start, float a0 = 0.001, float b0 = 0.001,
                  bool verbose = false, bool display_progress = false) {
@@ -1003,12 +1004,13 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
 
   const uint32_t D = x.n_rows;
   const uint16_t pp1 = x.n_cols;
+  const uint32_t chain_outlength = (m - burn) / thin; // Truncates remainder
 
-  arma::mat etam(m - burn, pp1);
-  NumericVector sigma2m(m - burn);
-  NumericVector loglike(m - burn); // Store log-likelihood (up to an additive constant)
-  NumericVector logpost(m - burn); // Store log-posterior (up to an additive constant)
-  arma::mat l_pred(m - burn, D);
+  arma::mat etam(chain_outlength, pp1);
+  NumericVector sigma2m(chain_outlength);
+  NumericVector loglike(chain_outlength); // Store log-likelihood (up to an additive constant)
+  NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
+  arma::mat l_pred(chain_outlength, D);
 
   // Initialize sigma^2
   double sigma2 = var(y) / 2.0;
@@ -1037,17 +1039,20 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
       Rcerr << "Runtime Error: " << e.what() << " while drawing sigma2\n";
     }
 
-    if (i > burn) {
+    if ( (i > burn) && (i % thin == 0) ) {
       // Likelihood
-      loglike(i - burn - 1) = get_ll_mlr(y, x, eta, sigma2);
+      uint32_t temp_pos = (i - burn - 1) / thin;
+      if (temp_pos == chain_outlength) break; // Invalid index
+      Rcout << "temp_pos: " << temp_pos << "\n";
+      loglike(temp_pos) = get_ll_mlr(y, x, eta, sigma2);
       // Log-posterior
-      logpost(i - burn - 1) = get_lpost_mlr(loglike(i - burn - 1), eta, sigma2,
+      logpost(temp_pos) = get_lpost_mlr(loglike(temp_pos), eta, sigma2,
                                             mu0, sigma0, a0, b0);
 
-      l_pred.row(i - burn - 1) = post_pred_norm(x, y, eta, sigma2).t();
+      l_pred.row(temp_pos) = post_pred_norm(x, y, eta, sigma2).t();
 
-      etam.row(i - burn - 1) = eta.t();
-      sigma2m(i - burn - 1) = sigma2;
+      etam.row(temp_pos) = eta.t();
+      sigma2m(temp_pos) = sigma2;
     }
     if (i % 500 == 0) {
       if (verbose) {
@@ -1061,10 +1066,10 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
   }
 
   // Compute WAIC and p_eff
-  NumericVector waic_and_se = waic_all(m - burn, l_pred);
+  NumericVector waic_and_se = waic_all(chain_outlength, l_pred);
 
   results.slot("ndocs") = D;
-  results.slot("nchain") = m - burn;
+  results.slot("nchain") = chain_outlength;
   results.slot("eta") = etam;
   results.slot("sigma2") = sigma2m;
   results.slot("mu0") = mu0;
@@ -1108,8 +1113,8 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
 //' @export
 //' @family Gibbs sampler
 // [[Rcpp::export]]
-S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
-                      const arma::mat& x,
+S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
+                      const arma::colvec& y, const arma::mat& x,
                       const arma::colvec& mu0, const arma::mat& sigma0,
                       arma::colvec eta_start, arma::vec proposal_sd,
                       bool verbose = false, bool display_progress = false) {
@@ -1122,11 +1127,12 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
 
   const uint32_t D = y.size();
   const uint16_t pp1 = x.n_cols;
+  const uint32_t chain_outlength = (m - burn) / thin; // Truncates remainder
 
-  arma::mat etam(m - burn, pp1);
-  NumericVector loglike(m - burn); // Store log-likelihood (up to an additive constant)
-  NumericVector logpost(m - burn); // Store log-posterior (up to an additive constant)
-  arma::mat l_pred(m - burn, D);
+  arma::mat etam(chain_outlength, pp1);
+  NumericVector loglike(chain_outlength); // Store log-likelihood (up to an additive constant)
+  NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
+  arma::mat l_pred(chain_outlength, D);
 
   arma::vec attempt = arma::zeros(pp1);
   arma::vec accept = arma::zeros(pp1);
@@ -1165,14 +1171,15 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
       }
     }
 
-    if (i > burn) {
+    if ( (i > burn) && (i % thin == 0) ) {
+      uint32_t temp_pos = (i - burn - 1) / thin;
+      if (temp_pos == chain_outlength) break; // Invalid index
       // Likelihood
-      loglike(i - burn - 1) = get_ll_logit(y, x, eta);
+      loglike(temp_pos) = get_ll_logit(y, x, eta);
       // Log-posterior
-      logpost(i - burn - 1) = get_lpost_eta(loglike(i - burn - 1), eta,
-                                            mu0, sigma0);
-      l_pred.row(i - burn - 1) = post_pred_logit(x, eta).t();
-      etam.row(i - burn - 1) = eta.t();
+      logpost(temp_pos) = get_lpost_eta(loglike(temp_pos), eta, mu0, sigma0);
+      l_pred.row(temp_pos) = post_pred_logit(x, eta).t();
+      etam.row(temp_pos) = eta.t();
     }
     if (i % 500 == 0) {
       if (verbose) {
@@ -1188,10 +1195,10 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
   }
 
   // Compute WAIC and p_eff
-  NumericVector waic_and_se = waic_all(m - burn, l_pred);
+  NumericVector waic_and_se = waic_all(chain_outlength, l_pred);
 
   results.slot("ndocs") = D;
-  results.slot("nchain") = m - burn;
+  results.slot("nchain") = chain_outlength;
   results.slot("eta") = etam;
   results.slot("mu0") = mu0;
   results.slot("sigma0") = sigma0;
@@ -1255,7 +1262,7 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, const arma::colvec& y,
 // [[Rcpp::export]]
 S4 gibbs_sldax_cpp(const arma::mat& docs,
                    const arma::mat& w,
-                   uint32_t m, uint32_t burn,
+                   uint32_t m, uint32_t burn, uint32_t thin,
                    uint16_t K, uint8_t model,
                    const arma::colvec& y,
                    const arma::mat& x,
@@ -1281,7 +1288,8 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
 
   S4 results("Sldax");
 
-  NumericVector sigma2m(m - burn);
+  const uint32_t chain_outlength = (m - burn) / thin; // Truncates remainder
+  NumericVector sigma2m(chain_outlength);
   double sigma2 = var(y) / 2.0;
 
   const uint32_t D = docs.n_rows;
@@ -1303,9 +1311,9 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   arma::mat zbar(D, K);
 
   // D x max(N_d) x m array to store topic draws
-  arma::cube topicsm = arma::zeros(D, maxNd, m - burn);
-  NumericVector loglike(m - burn); // Store log-likelihood (up to an additive constant)
-  NumericVector logpost(m - burn); // Store log-posterior (up to an additive constant)
+  arma::cube topicsm = arma::zeros(D, maxNd, chain_outlength);
+  NumericVector loglike(chain_outlength); // Store log-likelihood (up to an additive constant)
+  NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
 
   // Randomly assign topics
   NumericVector init_topic_probs(K);
@@ -1367,7 +1375,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
     p = K; // Num. cols. involving fixed predictors
     q = p; // Total num. cols. in design matrix
   }
-  arma::mat etam(m - burn, q);
+  arma::mat etam(chain_outlength, q);
   arma::colvec eta(q);
   arma::colvec etac(q);
 
@@ -1398,7 +1406,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
 
   arma::mat r = zbar;
   // Predictive posterior likelihood of y
-  arma::mat l_pred(m - burn, D);
+  arma::mat l_pred(chain_outlength, D);
   arma::mat xz_int(D, K - 1); // Need K - 1 interaction columns
   if (model == sldax || model == sldax_logit) {
     r = join_rows(x, zbar); // Full predictor matrix `r`
@@ -1543,39 +1551,43 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
       }
     }
 
-    if (i > burn) {
+    if ( (i > burn) && (i % thin == 0) ) {
       if (i == burn + 1 && burn > 0) Rcout << "Finished burn-in period\n";
-      topicsm.slice(i - burn - 1) = zdocs;
+
+      uint32_t temp_pos = (i - burn - 1) / thin;
+      if (temp_pos == chain_outlength) break; // Invalid index
+
+      topicsm.slice(temp_pos) = zdocs;
       // Likelihood
       switch(model) {
         case lda:
-          loglike(i - burn - 1) = get_ll_lda(zdocs, docs, theta, beta,
+          loglike(temp_pos) = get_ll_lda(zdocs, docs, theta, beta,
                                              docs_index, N);
-          logpost(i - burn - 1) = get_lpost_lda(loglike(i - burn - 1),
+          logpost(temp_pos) = get_lpost_lda(loglike(temp_pos),
             theta, beta, gamma_, alpha_, V, docs_index);
           break;
         case slda: // Fall through
         case sldax:
-          loglike(i - burn - 1) = get_ll_slda_norm(
+          loglike(temp_pos) = get_ll_slda_norm(
             y, r, eta, sigma2, zdocs, docs, theta, beta, docs_index, N);
-          logpost(i - burn - 1) = get_lpost_slda_norm(loglike(i - burn - 1),
+          logpost(temp_pos) = get_lpost_slda_norm(loglike(temp_pos),
             eta, sigma2, theta, beta, mu0, sigma0, gamma_, alpha_, a0, b0, V,
             docs_index);
-          l_pred.row(i - burn - 1) = post_pred_norm(r, y, eta, sigma2).t();
-          sigma2m(i - burn - 1) = sigma2;
+          l_pred.row(temp_pos) = post_pred_norm(r, y, eta, sigma2).t();
+          sigma2m(temp_pos) = sigma2;
           break;
         case slda_logit: // Fall through
         case sldax_logit:
-          loglike(i - burn - 1) = get_ll_slda_logit(
+          loglike(temp_pos) = get_ll_slda_logit(
             y, r, eta, zdocs, docs, theta, beta, docs_index, N);
-          logpost(i - burn - 1) = get_lpost_slda_logit(loglike(i - burn - 1),
+          logpost(temp_pos) = get_lpost_slda_logit(loglike(temp_pos),
             eta, theta, beta, mu0, sigma0, gamma_, alpha_, V, docs_index);
-          l_pred.row(i - burn - 1) = post_pred_logit(r, eta).t();
+          l_pred.row(temp_pos) = post_pred_logit(r, eta).t();
           break;
         default: Rcerr << "Invalid model specified. Exiting.\n";
       }
       if (model != lda) {
-        etam.row(i - burn - 1) = eta.t();
+        etam.row(temp_pos) = eta.t();
       }
     }
 
@@ -1625,12 +1637,12 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   }
 
   // Compute WAIC and p_eff
-  NumericVector waic_and_se = waic_all(m - burn, l_pred);
+  NumericVector waic_and_se = waic_all(chain_outlength, l_pred);
 
   results.slot("ntopics") = K;
   results.slot("ndocs") = D;
   results.slot("nvocab") = V;
-  results.slot("nchain") = m - burn;
+  results.slot("nchain") = chain_outlength;
   results.slot("topics") = topicsm;
   results.slot("alpha") = alpha_;
   results.slot("gamma") = gamma_;

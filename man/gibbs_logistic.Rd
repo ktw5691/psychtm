@@ -4,9 +4,10 @@
 \alias{gibbs_logistic}
 \title{Fit logistic regression model}
 \usage{
-gibbs_logistic(formula, data, m = 100, burn = 0, y = NULL,
-  x = NULL, mu0 = NULL, sigma0 = NULL, eta_start = NULL,
-  proposal_sd = NULL, verbose = FALSE, display_progress = FALSE)
+gibbs_logistic(formula, data, m = 100, burn = 0, thin = 1,
+  y = NULL, x = NULL, mu0 = NULL, sigma0 = NULL,
+  eta_start = NULL, proposal_sd = NULL, verbose = FALSE,
+  display_progress = FALSE)
 }
 \arguments{
 \item{formula}{An object of class \code{\link[stats]{formula}}: a symbolic
@@ -18,6 +19,9 @@ description of the model to be fitted.}
 
 \item{burn}{The number of iterations to discard as the burn-in period
 (default: 0).}
+
+\item{thin}{The period of iterations to keep after the burn-in period
+(default: 1).}
 
 \item{y}{An optional D x 1 vector of binary outcomes (0/1) to be predicted.
 Not needed if \code{data} is supplied.}

@@ -4,8 +4,8 @@
 \alias{gibbs_sldax_cpp}
 \title{Collapsed Gibbs sampler for the sLDA-X model}
 \usage{
-gibbs_sldax_cpp(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0,
-  eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1,
+gibbs_sldax_cpp(docs, w, m, burn, thin, K, model, y, x, mu0, sigma0, a0,
+  b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1,
   gamma_ = 1.01, constrain_eta = TRUE, verbose = FALSE,
   display_progress = FALSE)
 }
