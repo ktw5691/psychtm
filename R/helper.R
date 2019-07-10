@@ -74,6 +74,8 @@ check_logical <- function(arg) {
 #' @param m The number of iterations to run the Gibbs sampler (default: 100).
 #' @param burn The number of iterations to discard as the burn-in period
 #'   (default: 0).
+#' @param thin The period of iterations to keep after the burn-in period
+#'   (default: 1).
 #' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
 #' @param w A D x V matrix of counts for all documents and vocabulary terms.
 #' @param K The number of topics.
@@ -115,7 +117,8 @@ check_logical <- function(arg) {
 #'
 #' @return An object of class \code{\linkS4class{Sldax}}.
 #' @family Gibbs sampler
-gibbs_sldax <- function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
+gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
+                        docs, w, K = 2L,
                         model = c("lda", "slda", "sldax",
                                   "slda_logit", "sldax_logit"),
                         y = NULL, x = NULL, interaction_xcol = -1L,
@@ -309,7 +312,8 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_sldax_cpp(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0,
+  res <- gibbs_sldax_cpp(docs, w, m, burn, thin, K, model, y, x,
+                         mu0, sigma0, a0, b0,
                          eta_start, proposal_sd, interaction_xcol,
                          alpha_, gamma_,
                          constrain_eta, verbose, display_progress)
@@ -343,6 +347,8 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
 #' @param m The number of iterations to run the Gibbs sampler (default: 100).
 #' @param burn The number of iterations to discard as the burn-in period
 #'   (default: 0).
+#' @param thin The period of iterations to keep after the burn-in period
+#'   (default: 1).
 #' @param y An optional D x 1 vector of binary outcomes (0/1) to be predicted.
 #'   Not needed if \code{data} is supplied.
 #' @param x An optional D x p design matrix of additional predictors (do NOT
@@ -363,7 +369,8 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, docs, w, K = 2L,
 #'
 #' @return An object of class \code{\linkS4class{Mlr}}.
 #' @family Gibbs sampler
-gibbs_mlr <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
+gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
+                      y = NULL, x = NULL,
                       mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
                       eta_start = NULL,
                       verbose = FALSE, display_progress = FALSE) {
@@ -405,7 +412,7 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_mlr_cpp(m, burn, y, x, mu0, sigma0, eta_start, a0, b0,
+  res <- gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
                        verbose, display_progress)
   colnames(res@eta) <- colnames(x)
   return(res)
@@ -428,6 +435,8 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
 #' @param m The number of iterations to run the Gibbs sampler (default: 100).
 #' @param burn The number of iterations to discard as the burn-in period
 #'   (default: 0).
+#' @param thin The period of iterations to keep after the burn-in period
+#'   (default: 1).
 #' @param y An optional D x 1 vector of binary outcomes (0/1) to be predicted.
 #'   Not needed if \code{data} is supplied.
 #' @param x An optional D x p design matrix of additional predictors (do NOT
@@ -449,7 +458,8 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
 #'
 #' @return An object of class \code{\linkS4class{Logistic}}.
 #' @family Gibbs sampler
-gibbs_logistic <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
+gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
+                           y = NULL, x = NULL,
                            mu0 = NULL, sigma0 = NULL,
                            eta_start = NULL, proposal_sd = NULL,
                            verbose = FALSE, display_progress = FALSE) {
@@ -503,7 +513,7 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, y = NULL, x = NULL,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_logistic_cpp(m, burn, y, x, mu0, sigma0,
+  res <- gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
                             eta_start, proposal_sd,
                             verbose, display_progress)
   colnames(res@eta) <- colnames(x)

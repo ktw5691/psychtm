@@ -484,8 +484,8 @@ waic_diff <- function(l_pred1, l_pred2) {
 #' @return An object of class \code{Mlr}.
 #' @export
 #' @family Gibbs sampler
-gibbs_mlr_cpp <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_mlr_cpp`, m, burn, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
+gibbs_mlr_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_mlr_cpp`, m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for logistic regression
@@ -513,8 +513,8 @@ gibbs_mlr_cpp <- function(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 
 #' @return An object of class \code{Logistic}.
 #' @export
 #' @family Gibbs sampler
-gibbs_logistic_cpp <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_logistic_cpp`, m, burn, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
+gibbs_logistic_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_logistic_cpp`, m, burn, thin, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
 }
 
 #' Collapsed Gibbs sampler for the sLDA-X model
@@ -562,7 +562,7 @@ gibbs_logistic_cpp <- function(m, burn, y, x, mu0, sigma0, eta_start, proposal_s
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_sldax_cpp <- function(docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = TRUE, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_sldax_cpp`, docs, w, m, burn, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, verbose, display_progress)
+gibbs_sldax_cpp <- function(docs, w, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = TRUE, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_sldax_cpp`, docs, w, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, verbose, display_progress)
 }
 

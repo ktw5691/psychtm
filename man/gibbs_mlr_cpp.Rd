@@ -4,7 +4,7 @@
 \alias{gibbs_mlr_cpp}
 \title{Collapsed Gibbs sampler for multiple linear regression}
 \usage{
-gibbs_mlr_cpp(m, burn, y, x, mu0, sigma0, eta_start, a0 = 0.001,
+gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0 = 0.001,
   b0 = 0.001, verbose = FALSE, display_progress = FALSE)
 }
 \arguments{
