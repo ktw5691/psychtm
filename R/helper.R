@@ -77,7 +77,7 @@ check_logical <- function(arg) {
 #' @param thin The period of iterations to keep after the burn-in period
 #'   (default: 1).
 #' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
-#' @param w A D x V matrix of counts for all documents and vocabulary terms.
+#' @param V The number of unique terms in the vocabulary.
 #' @param K The number of topics.
 #' @param model A string denoting the type of model to fit. See 'Details'.
 #'   (default: \code{"lda"}).
@@ -118,7 +118,7 @@ check_logical <- function(arg) {
 #' @return An object of class \code{\linkS4class{Sldax}}.
 #' @family Gibbs sampler
 gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
-                        docs, w, K = 2L,
+                        docs, V, K = 2L,
                         model = c("lda", "slda", "sldax",
                                   "slda_logit", "sldax_logit"),
                         y = NULL, x = NULL, interaction_xcol = -1L,
@@ -312,7 +312,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_sldax_cpp(docs, w, m, burn, thin, K, model, y, x,
+  res <- gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
                          mu0, sigma0, a0, b0,
                          eta_start, proposal_sd, interaction_xcol,
                          alpha_, gamma_,

@@ -529,7 +529,7 @@ gibbs_logistic_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, prop
 #' @param x A D x p matrix of additional predictors (no column of 1s for
 #'   intercept).
 #' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
-#' @param w A D x V matrix of counts for all documents and vocabulary terms.
+#' @param V The number of unique terms in the vocabulary.
 #' @param K The number of topics.
 #' @param model An integer denoting the type of model to fit.
 #' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
@@ -562,7 +562,7 @@ gibbs_logistic_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, prop
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-gibbs_sldax_cpp <- function(docs, w, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = TRUE, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_sldax_cpp`, docs, w, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, verbose, display_progress)
+gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = TRUE, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, verbose, display_progress)
 }
 

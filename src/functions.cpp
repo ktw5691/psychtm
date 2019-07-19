@@ -41,14 +41,14 @@ arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
 //' @param v A row vector of values to be tabulated.
 //'
 //' @return A map of (values, frequencies)
-std::map<double, int> table_cpp(const arma::rowvec& v) {
+std::map<uint32_t, uint32_t> table_cpp(const arma::urowvec& v) {
 
   // Create a map to store frequencies
-  std::map<double, int> Elt;
+  std::map<uint32_t, uint32_t> Elt;
   Elt.clear();
 
   // Fill the map with occurrences per number.
-  for (int i = 0; i < v.size(); ++i) Elt[ v[i] ] += 1;
+  for (int i = 0; i < v.size(); ++i) Elt[ v(i) ] += 1;
 
   return Elt;
 }
@@ -64,16 +64,16 @@ std::map<double, int> table_cpp(const arma::rowvec& v) {
 //'   coefficients.
 //'
 //' @return A q x 1 vector of draws of eta.
-arma::mat draw_eta_norm(const arma::mat& w, const arma::vec& y,
-                        long double sigma2, const arma::vec& mu0,
-                        const arma::mat& sigma0) {
+arma::colvec draw_eta_norm(const arma::mat& w, const arma::vec& y,
+                           long double sigma2, const arma::vec& mu0,
+                           const arma::mat& sigma0) {
 
   arma::mat wtw = w.t() * w;
-  arma::mat sigma0_inv = sigma0.i();
-  arma::mat sigma1 = (sigma0_inv + wtw / sigma2).i();
+  arma::mat sigma0_inv = arma::inv_sympd(sigma0);
+  arma::mat sigma1 = arma::inv_sympd(sigma0_inv + wtw / sigma2);
   arma::colvec eta1 = sigma1 * (sigma0_inv * mu0 + w.t() * y / sigma2);
 
-  return rmvnorm_cpp(1, eta1, sigma1);
+  return rmvnorm_cpp(1, eta1, sigma1).t();
 }
 
 //' Compute inverse logit
@@ -91,7 +91,7 @@ double invlogit(double x) {
 //' @param muhatd A double predicted outcome on logit scale.
 //'
 //' @return The current log-likelihood for observation d.
-double get_ll_logit_yd(int yd, double muhatd) {
+double get_ll_logit_yd(bool yd, double muhatd) {
 
   // Compute log-likelihood of y
   double ll_temp = yd * muhatd - log(1.0 + exp(muhatd));
@@ -135,7 +135,7 @@ double get_lpost_eta(double ll, const arma::colvec& eta,
   double lp_temp = ll;
   // Add prior on eta
   double temp_prod = arma::as_scalar(
-    (eta - mu0).t() * sigma0.i() * (eta - mu0)
+    (eta - mu0).t() * arma::inv_sympd(sigma0) * (eta - mu0)
   );
   lp_temp += (-0.5 * temp_prod);
 
@@ -153,7 +153,7 @@ double get_lpost_eta(double ll, const arma::colvec& eta,
 //'   coefficients.
 //'
 //' @return The full conditional log-posterior density of eta.
-double eta_logpost_logit(const arma::mat& w, const arma::vec& y,
+double eta_logpost_logit(const arma::mat& w, const arma::colvec& y,
                          const arma::vec& eta,
                          const arma::vec& mu0, const arma::mat& sigma0) {
 
@@ -188,7 +188,7 @@ arma::colvec draw_eta_logit(const arma::mat& w, const arma::colvec& y,
 
   const uint16_t q = w.n_cols;
   arma::colvec cand_eta = eta_prev; // Candidate draws of eta
-  arma::vec eta = eta_prev;
+  arma::colvec eta = eta_prev;
   double cur_logpost = eta_logpost_logit(w, y, eta_prev, mu0, sigma0);
 
   for (uint16_t j = 0; j < q; j++) {
@@ -200,11 +200,11 @@ arma::colvec draw_eta_logit(const arma::mat& w, const arma::colvec& y,
     double log_r = cand_logpost - cur_logpost; // Symmetric proposals
     double log_u = log(runif(1)(0));
     if (log_r > log_u) {
-      eta(j) = cand_eta(j);
+      eta(j)      = cand_eta(j);
       cur_logpost = cand_logpost;
       accept(j)++; // Passed by reference to update outside function
     } else {
-      eta(j) = eta_prev(j);
+      eta(j)      = eta_prev(j);
       cand_eta(j) = eta_prev(j);
     }
   }
@@ -252,7 +252,7 @@ long double draw_sigma2(float a0, float b0,
 //'
 //' @export
 // [[Rcpp::export]]
-arma::vec est_betak(const arma::vec& wz_co, float gamma_) {
+arma::rowvec est_betak(const arma::rowvec& wz_co, float gamma_) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic word to 0.0;
@@ -260,10 +260,17 @@ arma::vec est_betak(const arma::vec& wz_co, float gamma_) {
   const uint32_t V = wz_co.size(); // Vocabulary size
   if (V < 2) error("vocabulary size V must be at least 2");
 
-  arma::vec betak = exp(log(wz_co + gamma_) - log(sum(wz_co) + V * gamma_));
-  for (uint32_t v = 0; v < V; v++) {
-    if ((betak[v] > 1.0) | (std::isnan(betak[v]))) betak[v] = 0.0;
-  }
+  arma::rowvec betak = exp(log(wz_co + gamma_) - log(sum(wz_co) + V * gamma_));
+
+  // Check for impossible estimates and replace with 0
+  betak.transform( [](double val) {
+                       if ((val > 1.0) | (std::isnan(val))) {
+                         return(0.0);
+                       } else {
+                         return val;
+                       }
+  });
+
   return betak;
 }
 
@@ -276,7 +283,7 @@ arma::vec est_betak(const arma::vec& wz_co, float gamma_) {
 //'
 //' @export
 // [[Rcpp::export]]
-arma::vec est_thetad(const arma::vec& z_count, float alpha_) {
+arma::rowvec est_thetad(const arma::rowvec& z_count, float alpha_) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 0.0;
@@ -284,11 +291,17 @@ arma::vec est_thetad(const arma::vec& z_count, float alpha_) {
   if (alpha_ < 0.0) error("alpha_ must be positive");
   if (K < 2) error("number of topics must be at least 2");
 
-  arma::vec thetad = exp(log(z_count + alpha_) - log(sum(z_count) +
+  arma::rowvec thetad = exp(log(z_count + alpha_) - log(sum(z_count) +
     static_cast<float>(K) * alpha_));
-  for (uint32_t k = 0; k < K; k++) {
-    if ((thetad[k] > 1.0) | (std::isnan(thetad[k]))) thetad[k] = 0.0;
-  }
+
+  // Check for impossible estimates and replace with 0
+  thetad.transform( [](double val) {
+                        if ((val > 1.0) | (std::isnan(val))) {
+                          return(0.0);
+                        } else {
+                          return val;
+                        }
+  });
 
   return thetad;
 }
@@ -313,8 +326,8 @@ arma::vec est_thetad(const arma::vec& z_count, float alpha_) {
 //' @export
 // [[Rcpp::export]]
 arma::mat count_topic_word(uint16_t K, uint32_t V,
-                            const arma::mat& doc_topic,
-                            const arma::mat& doc_word) {
+                           const arma::umat& doc_topic,
+                           const arma::umat& doc_word) {
 
   const uint32_t D = doc_topic.n_rows; // Number of documents
   if (K < 2) error("number of topics must be at least 2");
@@ -324,16 +337,16 @@ arma::mat count_topic_word(uint16_t K, uint32_t V,
   if (doc_topic.n_cols != maxnd)
     error("'doc_topic' and 'doc_word' must have the same number of columns");
 
-  const IntegerVector topics_index = seq_len(K);
-  const IntegerVector docs_index = seq_len(D) - 1;
+  const arma::ucolvec topics_index = arma::linspace<arma::ucolvec>(1, K, K);
+  const arma::ucolvec docs_index = arma::linspace<arma::ucolvec>(0, D - 1, D);
   // Matrix to store number of topic/word co-occurences
-  arma::mat topic_word_freq = arma::zeros(K, V);
+  arma::mat topic_word_freq = arma::mat(K, V, arma::fill::zeros);
 
   for (uint16_t topic : topics_index) {
     arma::uvec ids = arma::find(doc_topic == topic);
-    arma::rowvec word_ids = doc_word.elem(ids).t();
+    arma::urowvec word_ids = doc_word.elem(ids).t();
     // Update word frequencies for topic
-    std::map<double, int> counts = table_cpp(word_ids);
+    std::map<uint32_t, uint32_t> counts = table_cpp(word_ids);
     for (const auto &p : counts) {
       topic_word_freq(topic - 1, p.first - 1) += p.second;
     }
@@ -394,9 +407,7 @@ uint16_t draw_zdn(arma::vec& log_num) {
     if (std::isnan(pmf(k)) || std::isinf(pmf(k))) good_pmf = false;
   }
 
-  if (!good_pmf) {
-    for (uint16_t k = 0; k < K; k++) pmf(k) = 1.0 / static_cast<float>(K);
-  }
+  if (!good_pmf) pmf = 1.0 / static_cast<float>(K);
   IntegerVector topics = seq_len(K);
   IntegerVector zdn = RcppArmadillo::sample(topics, 1, true, pmf);
   return zdn(0);
@@ -445,7 +456,7 @@ uint16_t draw_zdn_lda(uint32_t V,
 //'   from the counts.
 //'
 //' @return Indicator for the topic draw from {1, 2, ..., K}.
-uint16_t draw_zdn_slda_norm(double yd, const arma::vec& w_d,
+uint16_t draw_zdn_slda_norm(double yd, const arma::rowvec& w_d,
                             const arma::vec& eta, double sigma2,
                             uint32_t V, const arma::vec& ndk_n,
                             const arma::vec& nkm_n, const arma::vec& nk_n,
@@ -457,7 +468,7 @@ uint16_t draw_zdn_slda_norm(double yd, const arma::vec& w_d,
   if (sigma2 < 0.0) error("sigma2 must be positive");
   arma::vec log_num = get_log_numer_samplez(V, ndk_n, nkm_n, nk_n,
                                             alpha_, gamma_) +
-    R::dnorm(yd, sum(w_d.t() * eta), sqrt(sigma2), true);
+    R::dnorm(yd, dot(w_d, eta), sqrt(sigma2), true);
   uint16_t zdn = draw_zdn(log_num);
   return zdn;
 }
@@ -479,7 +490,7 @@ uint16_t draw_zdn_slda_norm(double yd, const arma::vec& w_d,
 //'   from the counts.
 //'
 //' @return Indicator for the topic draw from {1, 2, ..., K}.
-uint16_t draw_zdn_slda_logit(double yd, const arma::vec& w_d,
+uint16_t draw_zdn_slda_logit(double yd, const arma::rowvec& w_d,
                              const arma::vec& eta,
                              uint32_t V, const arma::vec& ndk_n,
                              const arma::vec& nkm_n, const arma::vec& nk_n,
@@ -487,7 +498,7 @@ uint16_t draw_zdn_slda_logit(double yd, const arma::vec& w_d,
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
   //   probability for the problematic topic to 1 / K;
-  double muhat = arma::as_scalar(w_d.t() * eta);
+  double muhat = dot(w_d, eta);
   // Compute log-likelihood of y_d
   double loglike = get_ll_logit_yd(yd, muhat);
 
@@ -505,19 +516,18 @@ uint16_t draw_zdn_slda_logit(double yd, const arma::vec& w_d,
 //' @param sigma2 The residual variance.
 //'
 //' @return Posterior predictive likelihood.
-arma::colvec post_pred_norm(const arma::mat& w, const arma::colvec& y,
+arma::rowvec post_pred_norm(const arma::mat& w,
                             const arma::colvec& eta, double sigma2) {
 
   const uint16_t D = w.n_rows;
-  arma::colvec loglike_pred = arma::zeros(D);
   arma::colvec mu_hat = w * eta;
 
-  for (uint16_t d = 0; d < D; d++) {
-    double yhat = Rcpp::rnorm(1, arma::as_scalar(mu_hat(d)), sigma2)(0);
-    double temp_prod = (yhat - mu_hat(d)) * (yhat - mu_hat(d));
-    loglike_pred(d) = -0.5 / sigma2 * temp_prod;
-  }
-  return exp(loglike_pred);
+  arma::mat sigma(D, D, arma::fill::eye); // D x D identity matrix
+  // Draw D new observations
+  arma::colvec yhat = rmvnorm_cpp(1, mu_hat, sigma2 * sigma).t();
+  arma::colvec loglike_pred = -0.5 / sigma2 * arma::square(yhat - mu_hat);
+
+  return exp(loglike_pred.t());
 }
 
 //' Posterior predictive likelihood for logistic sLDA/sLDAX/regression
@@ -525,10 +535,10 @@ arma::colvec post_pred_norm(const arma::mat& w, const arma::colvec& y,
 //' @param w A D x q matrix of additional predictors.
 //' @param eta A q x 1 vector of regression coefficients.
 //' @return Predictive posterior likelihood of all D observations.
-arma::colvec post_pred_logit(const arma::mat& w, const arma::colvec& eta) {
+arma::rowvec post_pred_logit(const arma::mat& w, const arma::colvec& eta) {
 
   const uint16_t D = w.n_rows;
-  arma::colvec loglike_pred(D);
+  arma::rowvec loglike_pred(D);
   arma::colvec mu_hat = w * eta;
   for (uint16_t d = 0; d < D; d++) {
     double phat = invlogit(arma::as_scalar(mu_hat(d)));
@@ -547,22 +557,8 @@ arma::colvec post_pred_logit(const arma::mat& w, const arma::colvec& eta) {
 // [[Rcpp::export]]
 double pwaic_d(const arma::colvec& like_pred) {
 
-  const uint32_t m = like_pred.size();
-  double mcmc_meany = 0.0;
-  double mcmc_vary = 0.0;
-  // Get mean log-predictive likelihood
-  for (uint32_t i = 0; i < m; i++) {
-    mcmc_meany += log(like_pred(i));
-  }
-  mcmc_meany /= static_cast<float>(m);
-
   // Get variance of log-predictive likelihood
-  for (uint32_t i = 0; i < m; i++) {
-    mcmc_vary += ((log(like_pred(i)) - mcmc_meany) *
-      (log(like_pred(i)) - mcmc_meany));
-  }
-  mcmc_vary /= static_cast<float>(m - 1);
-
+  double mcmc_vary = arma::var(log(like_pred)); // Denominator of m - 1
   return mcmc_vary;
 }
 
@@ -576,17 +572,8 @@ double pwaic_d(const arma::colvec& like_pred) {
 // [[Rcpp::export]]
 double waic_d(const arma::colvec& like_pred, double p_effd) {
 
-  const uint32_t m = like_pred.n_rows;
-  double likeyd = 0;
-
-  // Get mean predictive likelihood for y_d
-  for (uint32_t i = 0; i < m; i++) {
-    likeyd += like_pred(i);
-  }
-  likeyd /= static_cast<float>(m);
-
-  // Log of mean post. pred. density for y_d
-  double lppd = log(likeyd);
+  // Log of mean posterior predictive density for y_d
+  double lppd = log(arma::mean(like_pred));
 
   // Contribution to WAIC (on deviance scale, i.e., -2ll) for y_d
   return (-2.0 * (lppd - p_effd)); // See Gelman, Hwang, Vehtari (2014, p. 1003)
@@ -604,29 +591,22 @@ double waic_d(const arma::colvec& like_pred, double p_effd) {
 NumericVector waic_all(uint32_t iter, const arma::mat& l_pred) {
 
   NumericVector full_waic_se(3);
-  double peff_sum = 0.0;
-  double waic_sum = 0.0;
   const uint16_t D = l_pred.n_cols; // Number of observations
   arma::colvec waic(D);
   arma::colvec peff(D);
-  double se_waic = 0.0;
 
   // Compute WAIC and p_eff for entire data set
   for (uint16_t d = 0; d < D; d++) {
     peff(d) = pwaic_d(l_pred.submat(0, d, iter - 1, d));
-    peff_sum += peff(d);
     waic(d) = waic_d(l_pred.submat(0, d, iter - 1, d), peff(d));
-    waic_sum += waic(d);
   }
+  double peff_sum = arma::sum(peff);  // p_eff
+  double waic_sum = arma::sum(waic);  // WAIC
 
   // Compute SE(WAIC)
-  double mean_waic = waic_sum / static_cast<float>(D); // Mean WAIC over all docs
-  for (uint16_t d = 0; d < D; d++) {
-    se_waic += ((waic(d) - mean_waic) * (waic(d) - mean_waic));
-  }
-  se_waic /= static_cast<float>(D - 1); // Variance of WAIC over all docs
-  se_waic *= static_cast<float>(D); // Variance of WAIC times D
-  se_waic = sqrt(se_waic); // SE(WAIC)
+  double se_waic = arma::var(waic);   // Denominator of D - 1
+  se_waic *= static_cast<float>(D);   // Variance of WAIC times D
+  se_waic = sqrt(se_waic);            // SE(WAIC)
 
   full_waic_se(0) = waic_sum;
   full_waic_se(1) = se_waic;
@@ -647,7 +627,6 @@ NumericVector waic_all(uint32_t iter, const arma::mat& l_pred) {
 NumericVector waic_diff(const arma::mat& l_pred1, const arma::mat& l_pred2) {
 
   NumericVector diff_waic_se(2);
-  double waic_diff_sum = 0.0;
   const uint32_t m1 = l_pred1.n_rows; // Length of first chain
   const uint32_t m2 = l_pred2.n_rows; // Length of second chain
   const uint16_t D = l_pred1.n_cols;  // Number of observations
@@ -656,7 +635,6 @@ NumericVector waic_diff(const arma::mat& l_pred1, const arma::mat& l_pred2) {
   arma::colvec peff1(D);
   arma::colvec peff2(D);
   arma::colvec waic_diff(D);
-  double se_waic_diff = 0.0;
 
   // Compute WAIC and p_eff for entire data set
   for (uint16_t d = 0; d < D; d++) {
@@ -664,19 +642,14 @@ NumericVector waic_diff(const arma::mat& l_pred1, const arma::mat& l_pred2) {
     peff2(d) = pwaic_d(l_pred2.submat(0, d, m2 - 1, d));
     waic1(d) = waic_d(l_pred1.submat(0, d, m1 - 1, d), peff1(d));
     waic2(d) = waic_d(l_pred2.submat(0, d, m2 - 1, d), peff2(d));
-    waic_diff(d) = waic1(d) - waic2(d); // Difference for doc d
-    waic_diff_sum += waic_diff(d); // Sum of differences
   }
+  waic_diff = waic1 - waic2;
+  double waic_diff_sum = arma::sum(waic_diff); // WAIC1 - WAIC2
 
   // Compute SE(WAIC1 - WAIC2)
-  double mean_diff_waic = waic_diff_sum / static_cast<float>(D); // Mean difference
-  for (uint16_t d = 0; d < D; d++) {
-    se_waic_diff += ((waic_diff(d) - mean_diff_waic) *
-      (waic_diff(d) - mean_diff_waic));
-  }
-  se_waic_diff /= static_cast<float>(D - 1); // Variance of difference
-  se_waic_diff *= static_cast<float>(D);     // Multiply variance of diff by D
-  se_waic_diff = sqrt(se_waic_diff);         // SE(WAIC1 - WAIC2)
+  double se_waic_diff = arma::var(waic_diff);  // Denominator of D - 1
+  se_waic_diff *= static_cast<float>(D);       // Multiply variance of diff by D
+  se_waic_diff = sqrt(se_waic_diff);           // SE(WAIC1 - WAIC2)
 
   diff_waic_se(0) = waic_diff_sum; // Difference
   diff_waic_se(1) = se_waic_diff; // SE(WAIC1 - WAIC2)
@@ -713,9 +686,9 @@ double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
 //' @param N A vector of length D containing the number of words in each document.
 //'
 //' @return The current log-likelihood.
-double get_ll_lda(const arma::mat& zdocs, const arma::mat& docs,
+double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
                   const arma::mat& theta, const arma::mat& beta,
-                  const IntegerVector& docs_index, const NumericVector& N) {
+                  const IntegerVector& docs_index, const arma::colvec& N) {
 
   double ll_temp = 0.0;
   // Add likelihood of documents
@@ -747,9 +720,9 @@ double get_ll_lda(const arma::mat& zdocs, const arma::mat& docs,
 //' @return The current log-likelihood.
 double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
                         const arma::colvec& eta, double sigma2,
-                        const arma::mat& zdocs, const arma::mat& docs,
+                        const arma::umat& zdocs, const arma::umat& docs,
                         const arma::mat& theta, const arma::mat& beta,
-                        const IntegerVector& docs_index, const NumericVector& N) {
+                        const IntegerVector& docs_index, const arma::colvec& N) {
 
   double ll_temp = get_ll_mlr(y, w, eta, sigma2) +
     get_ll_lda(zdocs, docs, theta, beta, docs_index, N);
@@ -772,9 +745,9 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
 //' @return The current log-likelihood.
 double get_ll_slda_logit(const arma::colvec& y, const arma::mat& w,
                          const arma::colvec& eta,
-                         const arma::mat& zdocs, const arma::mat& docs,
+                         const arma::umat& zdocs, const arma::umat& docs,
                          const arma::mat& theta, const arma::mat& beta,
-                         const IntegerVector& docs_index, const NumericVector& N) {
+                         const IntegerVector& docs_index, const arma::colvec& N) {
 
  double ll_temp = get_ll_logit(y, w, eta) +
    get_ll_lda(zdocs, docs, theta, beta, docs_index, N);
@@ -822,24 +795,12 @@ double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
                      double gamma_, double alpha_,
                      uint32_t V, const IntegerVector& docs_index) {
 
-  uint16_t K = theta.n_cols;
-
   // Add prior on beta matrix
-  double temp_betapost = 0;
-  for (uint16_t k = 0; k < K; k++) {
-    for (uint32_t v = 0; v < V; v++) {
-      temp_betapost += log(beta(k, v));
-    }
-  }
+  double temp_betapost = arma::accu(log(beta));
   double lp_temp = ll + ((gamma_ - 1.0) * temp_betapost);
 
   // Add prior on theta matrix
-  double temp_thetapost = 0;
-  for (uint32_t d : docs_index) {
-    for (uint16_t k = 0; k < K; k++) {
-      temp_thetapost = log(theta(d, k));
-    }
-  }
+  double temp_thetapost = arma::accu(log(theta));
   lp_temp += ((alpha_ - 1) * temp_thetapost);
 
   return lp_temp;
@@ -923,7 +884,7 @@ void count_topicd(uint16_t topic, uint16_t doc, arma::mat& ndk) {
 //'
 //' @return A vector of the current number of draws of each topic in the corpus
 //'   excluding the current word.
-void count_topic_corpus(uint16_t topic, NumericVector& nk) {
+void count_topic_corpus(uint16_t topic, arma::vec& nk) {
   // Exclude word n from topic counts in corpus
   nk(topic - 1)--;
   if (nk(topic - 1) < 0) nk(topic - 1) = 0;
@@ -955,7 +916,7 @@ void count_word_topic(uint32_t word, uint16_t topic, arma::mat& nkm) {
 //' @param nkm A K x V matrix of the current number of co-occurences of each topic
 //'   and vocabulary term in the corpus.
 void update_zcounts(uint32_t d, uint32_t word, uint16_t topic, uint32_t doc,
-                    arma::mat& ndk, NumericVector& nk, arma::mat& nkm) {
+                    arma::mat& ndk, arma::vec& nk, arma::mat& nkm) {
 
   count_topicd(topic, doc, ndk);
   count_topic_corpus(topic, nk);
@@ -1026,7 +987,7 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
 
     // Draw eta
     try {
-      eta = draw_eta_norm(x, y, sigma2, mu0, sigma0).t();
+      eta = draw_eta_norm(x, y, sigma2, mu0, sigma0);
     } catch (std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " while drawing eta vector\n";
@@ -1043,13 +1004,12 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
       // Likelihood
       uint32_t temp_pos = (i - burn - 1) / thin;
       if (temp_pos == chain_outlength) break; // Invalid index
-      Rcout << "temp_pos: " << temp_pos << "\n";
       loglike(temp_pos) = get_ll_mlr(y, x, eta, sigma2);
       // Log-posterior
       logpost(temp_pos) = get_lpost_mlr(loglike(temp_pos), eta, sigma2,
                                             mu0, sigma0, a0, b0);
 
-      l_pred.row(temp_pos) = post_pred_norm(x, y, eta, sigma2).t();
+      l_pred.row(temp_pos) = post_pred_norm(x, eta, sigma2);
 
       etam.row(temp_pos) = eta.t();
       sigma2m(temp_pos) = sigma2;
@@ -1134,8 +1094,8 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
   NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
   arma::mat l_pred(chain_outlength, D);
 
-  arma::vec attempt = arma::zeros(pp1);
-  arma::vec accept = arma::zeros(pp1);
+  arma::vec attempt = arma::vec(pp1, arma::fill::zeros);
+  arma::vec accept  = arma::vec(pp1, arma::fill::zeros);
   arma::vec acc_rate(pp1);
 
   arma::colvec eta(pp1);
@@ -1154,11 +1114,11 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
     }
 
     // Update acceptance rates and tune proposal standard deviations
+    acc_rate = accept / attempt;
     for (uint16_t j = 0; j < pp1; j++) {
-      acc_rate(j) = static_cast<float>(accept(j)) / static_cast<float>(attempt(j));
-    }
-    for (uint16_t j = 0; j < pp1; j++) {
-      if (i < (static_cast<float>(burn) / 5.0) && attempt(j) >= 50 && (i % 50 == 0)) {
+      if (i < (static_cast<float>(burn) / 5.0) &&
+          attempt(j) >= 50 &&
+          (i % 50 == 0)) {
         if (acc_rate(j) < 0.159) {
           // too low acceptance, decrease jumping width
           proposal_sd(j) = proposal_sd(j) * 0.8;
@@ -1178,7 +1138,7 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
       loglike(temp_pos) = get_ll_logit(y, x, eta);
       // Log-posterior
       logpost(temp_pos) = get_lpost_eta(loglike(temp_pos), eta, mu0, sigma0);
-      l_pred.row(temp_pos) = post_pred_logit(x, eta).t();
+      l_pred.row(temp_pos) = post_pred_logit(x, eta);
       etam.row(temp_pos) = eta.t();
     }
     if (i % 500 == 0) {
@@ -1226,7 +1186,7 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
 //' @param x A D x p matrix of additional predictors (no column of 1s for
 //'   intercept).
 //' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
-//' @param w A D x V matrix of counts for all documents and vocabulary terms.
+//' @param V The number of unique terms in the vocabulary.
 //' @param K The number of topics.
 //' @param model An integer denoting the type of model to fit.
 //' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
@@ -1260,8 +1220,7 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
 //'   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
 // [[Rcpp::export]]
-S4 gibbs_sldax_cpp(const arma::mat& docs,
-                   const arma::mat& w,
+S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    uint32_t m, uint32_t burn, uint32_t thin,
                    uint16_t K, uint8_t model,
                    const arma::colvec& y,
@@ -1293,8 +1252,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   double sigma2 = var(y) / 2.0;
 
   const uint32_t D = docs.n_rows;
-  const uint32_t V = w.n_cols;
-  NumericVector N(D);
+  arma::colvec N(D);
   const IntegerVector topics_index = seq_len(K);
   const IntegerVector docs_index   = seq_len(D) - 1;
   for (uint32_t d : docs_index) N(d) = sum(docs.row(d) > 0);
@@ -1306,45 +1264,42 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   // Counts of topic-word co-occurences in corpus (K x V)
   arma::mat nkm(K, V);
   // Topic draws for all words and docs
-  NumericVector nk(K);
-  arma::mat zdocs = arma::zeros(D, maxNd);
+  arma::vec nk(K);
+  arma::umat zdocs = arma::umat(D, maxNd, arma::fill::zeros);
   arma::mat zbar(D, K);
 
   // D x max(N_d) x m array to store topic draws
-  arma::cube topicsm = arma::zeros(D, maxNd, chain_outlength);
+  arma::ucube topicsm = arma::ucube(D, maxNd, chain_outlength, arma::fill::zeros);
   NumericVector loglike(chain_outlength); // Store log-likelihood (up to an additive constant)
   NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
 
-  // Randomly assign topics
-  NumericVector init_topic_probs(K);
-  for (uint16_t k = 0; k < K; k++)
-    init_topic_probs(k) = 1.0 / static_cast<float>(K);
-
   for (uint32_t d : docs_index) {
-    for (uint32_t n = 0; n < N(d); n++) {
-      zdocs(d, n) = RcppArmadillo::sample(
-        topics_index, 1, true, init_topic_probs)(0);
-    }
+    // Randomly initialize topic draws from Uniform(1, K)
+    zdocs.row(d).subvec(0, N(d) - 1) = arma::randi<arma::urowvec>( N(d), arma::distr_param(1, K) );
     for (uint16_t k = 0; k < K; k++) {
       // Count topic draws in each document
       ndk(d, k) = sum(zdocs.row(d) == (k + 1));
-      // Compute topic empirical proportions
-      if (model != lda)
-        zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
     }
   }
+
+  if (model != lda) {
+    // Get zbar matrix
+    zbar = ndk.each_col() / N;
+  }
+
   try {
     nkm = count_topic_word(K, V, zdocs, docs);
   } catch(std::exception& e) {
     Rcerr << "Runtime error: " << e.what() <<
       " while computing topic-word co-occurrences\n";
   }
-  for (uint16_t k = 0; k < K; k++) nk(k) = sum(ndk.col(k));
+
+  nk = arma::sum(ndk, 0).t(); // Column sums
 
   // Estimate theta
   for (uint32_t d : docs_index) {
     try {
-      theta.row(d) = est_thetad(ndk.row(d).t(), alpha_).t();
+      theta.row(d) = est_thetad(ndk.row(d), alpha_);
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " when estimating theta vector for document " << d << "\n";
@@ -1354,7 +1309,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   // Estimate beta
   for (uint16_t k = 0; k < K; k++) {
     try {
-      beta.row(k) = est_betak(nkm.row(k).t(), gamma_).t();
+      beta.row(k) = est_betak(nkm.row(k), gamma_);
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
@@ -1389,7 +1344,8 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
                           eta_start.end() - K + 1,
                           eta_start.end(), std::greater<float>());
       } else {
-        std::sort(eta_start.begin() + p, eta_start.end(),
+        std::sort(eta_start.begin() + p,
+                  eta_start.end(),
                   std::greater<float>());
       }
     } else if (model == slda || model == slda_logit) {
@@ -1400,8 +1356,8 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   if (verbose && model != lda) Rcout << 1 << " eta: " << eta_start.t() << "\n";
   eta = eta_start;
 
-  arma::vec attempt = arma::zeros(q);
-  arma::vec accept = arma::zeros(q);
+  arma::vec attempt = arma::vec(q, arma::fill::zeros);
+  arma::vec accept  = arma::vec(q, arma::fill::zeros);
   arma::vec acc_rate(q);
 
   arma::mat r = zbar;
@@ -1411,9 +1367,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   if (model == sldax || model == sldax_logit) {
     r = join_rows(x, zbar); // Full predictor matrix `r`
     if (interaction_xcol > 0) {
-      for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
-        xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
-      }
+      xz_int = zbar.cols(0, K - 2).each_col() % x.col(interaction_xcol - 1);
       r = join_rows(r, xz_int);
     }
   }
@@ -1426,17 +1380,18 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
       for (uint32_t n = 0; n < N(d); n++) {
         uint32_t word = docs(d, n);
         uint16_t topic = zdocs(d, n);
+        // Draw topic z_{dn} excluding current z_{dn} value
         update_zcounts(d, word, topic, d, ndk, nk, nkm);
         try {
           if (model == lda) {
             topic = draw_zdn_lda(V, ndk.row(d).t(), nkm.col(word - 1), nk,
                                  alpha_, gamma_);
           } else if (model == slda || model == sldax) {
-            topic = draw_zdn_slda_norm(y(d), r.row(d).t(), eta, sigma2, V,
+            topic = draw_zdn_slda_norm(y(d), r.row(d), eta, sigma2, V,
                                        ndk.row(d).t(), nkm.col(word - 1), nk,
                                        alpha_, gamma_);
           } else if (model == slda_logit || model == sldax_logit) {
-            topic = draw_zdn_slda_logit(y(d), r.row(d).t(), eta, V,
+            topic = draw_zdn_slda_logit(y(d), r.row(d), eta, V,
                                         ndk.row(d).t(), nkm.col(word - 1), nk,
                                         alpha_, gamma_);
           } else {
@@ -1458,28 +1413,25 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
       }
     }
 
+    // Estimate theta for doc d
     for (uint32_t d: docs_index) {
-      if (model != lda) {
-        // Get zbar matrix
-        for (uint16_t k = 0; k < K; k++) {
-          zbar(d, k) = static_cast<double>(ndk(d, k)) / static_cast<double>(N(d));
-        }
-      }
-      // Estimate theta for doc d
       try {
-        theta.row(d) = est_thetad(ndk.row(d).t(), alpha_).t();
+        theta.row(d) = est_thetad(ndk.row(d), alpha_);
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
       }
     }
 
+    if (model != lda) {
+      // Get zbar matrix
+      zbar = ndk.each_col() / N;
+    }
+
     if (model == sldax || model == sldax_logit) {
       r = join_rows(x, zbar); // Full predictor matrix `r`
       if (interaction_xcol > 0) {
-        for (int k = 0; k < (K - 1); k++) { // Need K - 1 interaction columns
-          xz_int.col(k) = x.col(interaction_xcol - 1) % zbar.col(k);
-        }
+        xz_int = zbar.cols(0, K - 2).each_col() % x.col(interaction_xcol - 1);
         r = join_rows(r, xz_int);
       }
     } else {
@@ -1489,7 +1441,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
     // Estimate beta
     for (uint16_t k = 0; k < K; k++) {
       try {
-        beta.row(k) = est_betak(nkm.row(k).t(), gamma_).t();
+        beta.row(k) = est_betak(nkm.row(k), gamma_);
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
           "of beta matrix\n";
@@ -1508,7 +1460,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
         iter++;
         if (model == slda || model == sldax) {
           try {
-            etac = draw_eta_norm(r, y, sigma2, mu0, sigma0).t();
+            etac = draw_eta_norm(r, y, sigma2, mu0, sigma0);
           } catch (std::exception& e) {
             Rcerr << "Runtime Error: " << e.what() <<
               " while drawing eta vector\n";
@@ -1526,14 +1478,14 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
           if (interaction_xcol > 0) {
             for (uint16_t k = p - K + 2; k < p + 1; k++) {
               // Force eta components to be in descending order (first is largest) to resolve label switching of topics
-              eta_order = etac(k - 1) >= etac(k);
+              eta_order = (etac(k - 1) > etac(k)) || (abs(etac(k - 1) - etac(k)) < .000001);
               if (!eta_order) break;
             }
           } else {
             for (uint16_t k = p + 1; k < q; k++) {
               // Force eta components to be in descending order (first is largest)
               //   to resolve label switching of topics
-              eta_order = etac(k - 1) >= etac(k);
+              eta_order = (etac(k - 1) > etac(k)) || (abs(etac(k - 1) - etac(k)) < .000001);
               if (!eta_order) break;
             }
           }
@@ -1563,17 +1515,17 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
         case lda:
           loglike(temp_pos) = get_ll_lda(zdocs, docs, theta, beta,
                                              docs_index, N);
-          logpost(temp_pos) = get_lpost_lda(loglike(temp_pos),
-            theta, beta, gamma_, alpha_, V, docs_index);
+          logpost(temp_pos) = get_lpost_lda(
+            loglike(temp_pos), theta, beta, gamma_, alpha_, V, docs_index);
           break;
         case slda: // Fall through
         case sldax:
           loglike(temp_pos) = get_ll_slda_norm(
             y, r, eta, sigma2, zdocs, docs, theta, beta, docs_index, N);
-          logpost(temp_pos) = get_lpost_slda_norm(loglike(temp_pos),
-            eta, sigma2, theta, beta, mu0, sigma0, gamma_, alpha_, a0, b0, V,
-            docs_index);
-          l_pred.row(temp_pos) = post_pred_norm(r, y, eta, sigma2).t();
+          logpost(temp_pos) = get_lpost_slda_norm(
+            loglike(temp_pos), eta, sigma2, theta, beta, mu0, sigma0, gamma_,
+            alpha_, a0, b0, V, docs_index);
+          l_pred.row(temp_pos) = post_pred_norm(r, eta, sigma2);
           sigma2m(temp_pos) = sigma2;
           break;
         case slda_logit: // Fall through
@@ -1582,7 +1534,7 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
             y, r, eta, zdocs, docs, theta, beta, docs_index, N);
           logpost(temp_pos) = get_lpost_slda_logit(loglike(temp_pos),
             eta, theta, beta, mu0, sigma0, gamma_, alpha_, V, docs_index);
-          l_pred.row(temp_pos) = post_pred_logit(r, eta).t();
+          l_pred.row(temp_pos) = post_pred_logit(r, eta);
           break;
         default: Rcerr << "Invalid model specified. Exiting.\n";
       }
@@ -1592,11 +1544,11 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
     }
 
     if (model == slda_logit || model == sldax_logit) {
+      acc_rate = accept / attempt;
       for (uint16_t j = 0; j < q; j++) {
-        acc_rate(j) = static_cast<float>(accept(j)) / static_cast<float>(attempt(j));
-      }
-      for (uint16_t j = 0; j < q; j++) {
-        if (i < (static_cast<float>(burn) / 5.0) && attempt(j) >= 50 && (i % 50 == 0)) {
+        if (i < (static_cast<float>(burn) / 5.0) &&
+            attempt(j) >= 50 &&
+            (i % 50 == 0)) {
           if (acc_rate(j) < 0.159) {
             // too low acceptance, decrease jumping width
             proposal_sd(j) = proposal_sd(j) * 0.8;
@@ -1640,29 +1592,29 @@ S4 gibbs_sldax_cpp(const arma::mat& docs,
   NumericVector waic_and_se = waic_all(chain_outlength, l_pred);
 
   results.slot("ntopics") = K;
-  results.slot("ndocs") = D;
-  results.slot("nvocab") = V;
-  results.slot("nchain") = chain_outlength;
-  results.slot("topics") = topicsm;
-  results.slot("alpha") = alpha_;
-  results.slot("gamma") = gamma_;
+  results.slot("ndocs")   = D;
+  results.slot("nvocab")  = V;
+  results.slot("nchain")  = chain_outlength;
+  results.slot("topics")  = topicsm;
+  results.slot("alpha")   = alpha_;
+  results.slot("gamma")   = gamma_;
   results.slot("loglike") = loglike;
   results.slot("logpost") = logpost;
 
   if (model != lda) {
-    results.slot("eta") = etam;
-    results.slot("mu0") = mu0;
-    results.slot("sigma0") = sigma0;
+    results.slot("eta")       = etam;
+    results.slot("mu0")       = mu0;
+    results.slot("sigma0")    = sigma0;
     results.slot("eta_start") = eta_start;
-    results.slot("waic") = waic_and_se(0);
-    results.slot("se_waic") = waic_and_se(1);
-    results.slot("p_eff") = waic_and_se(2);
-    results.slot("lpd") = l_pred;
+    results.slot("waic")      = waic_and_se(0);
+    results.slot("se_waic")   = waic_and_se(1);
+    results.slot("p_eff")     = waic_and_se(2);
+    results.slot("lpd")       = l_pred;
 
     if (model == slda || model == sldax) {
       results.slot("sigma2") = sigma2m;
-      results.slot("a0") = a0;
-      results.slot("b0") = b0;
+      results.slot("a0")     = a0;
+      results.slot("b0")     = b0;
     }
 
     if (model == slda_logit || model == sldax_logit)

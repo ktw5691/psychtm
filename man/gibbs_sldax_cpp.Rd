@@ -4,7 +4,7 @@
 \alias{gibbs_sldax_cpp}
 \title{Collapsed Gibbs sampler for the sLDA-X model}
 \usage{
-gibbs_sldax_cpp(docs, w, m, burn, thin, K, model, y, x, mu0, sigma0, a0,
+gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0,
   b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1,
   gamma_ = 1.01, constrain_eta = TRUE, verbose = FALSE,
   display_progress = FALSE)
@@ -12,7 +12,7 @@ gibbs_sldax_cpp(docs, w, m, burn, thin, K, model, y, x, mu0, sigma0, a0,
 \arguments{
 \item{docs}{A D x max(\eqn{N_d}) matrix of word indices for all documents.}
 
-\item{w}{A D x V matrix of counts for all documents and vocabulary terms.}
+\item{V}{The number of unique terms in the vocabulary.}
 
 \item{m}{The number of iterations to run the Gibbs sampler.}
 

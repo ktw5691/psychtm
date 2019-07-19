@@ -4,7 +4,7 @@
 \alias{gibbs_sldax}
 \title{Fit supervised or unsupervised topic models (sLDAX or LDA)}
 \usage{
-gibbs_sldax(formula, data, m = 100, burn = 0, thin = 1, docs, w,
+gibbs_sldax(formula, data, m = 100, burn = 0, thin = 1, docs, V,
   K = 2L, model = c("lda", "slda", "sldax", "slda_logit",
   "sldax_logit"), y = NULL, x = NULL, interaction_xcol = -1L,
   alpha_ = 0.1, gamma_ = 1.01, mu0 = NULL, sigma0 = NULL,
@@ -27,7 +27,7 @@ description of the model to be fitted.}
 
 \item{docs}{A D x max(\eqn{N_d}) matrix of word indices for all documents.}
 
-\item{w}{A D x V matrix of counts for all documents and vocabulary terms.}
+\item{V}{The number of unique terms in the vocabulary.}
 
 \item{K}{The number of topics.}
 
