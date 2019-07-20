@@ -7,7 +7,7 @@ Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
 Description: Supports Bayesian estimation of supervised (sLDAX) and unsupervised (LDA) topic models.
 License: GPL-3
-Depends: R (>= 3.2.0)
+Depends: R (>= 3.3.0)
 Imports:
     Rcpp,
     RcppProgress,
