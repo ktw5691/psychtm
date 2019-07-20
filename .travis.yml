@@ -9,15 +9,15 @@ fortran: true
 
 jobs:
   include:
-  - r: devel
   - os: osx
+  - r: devel
   - r: release
-    after_success:
+  - r: 3.4
+  - r: 3.3
+  after_success:
     - Rscript -e 'covr::codecov()'
     deploy:
       skip_cleanup: true
-  - r: 3.4
-  - r: 3.3
     warnings_are_errors: true
     env:
       - DEVEL_PACKAGES=true
