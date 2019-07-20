@@ -12,6 +12,9 @@ gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start,
 
 \item{burn}{The number of iterations to discard as the burn-in period.}
 
+\item{thin}{The period of iterations to keep after the burn-in period
+(default: 1).}
+
 \item{y}{A D x 1 vector of binary outcomes (0/1) to be predicted.}
 
 \item{x}{A D x p matrix of additional predictors (no column of 1s for

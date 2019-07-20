@@ -12,6 +12,9 @@ gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0 = 0.001,
 
 \item{burn}{The number of iterations to discard as the burn-in period.}
 
+\item{thin}{The period of iterations to keep after the burn-in period
+(default: 1).}
+
 \item{y}{A D x 1 vector of outcomes to be predicted.}
 
 \item{x}{A D x (p + 1) matrix of additional predictors.}

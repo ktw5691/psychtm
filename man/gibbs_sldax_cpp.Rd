@@ -18,6 +18,9 @@ gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0,
 
 \item{burn}{The number of iterations to discard as the burn-in period.}
 
+\item{thin}{The period of iterations to keep after the burn-in period
+(default: 1).}
+
 \item{K}{The number of topics.}
 
 \item{model}{An integer denoting the type of model to fit.}

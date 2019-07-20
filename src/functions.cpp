@@ -931,6 +931,8 @@ void update_zcounts(uint32_t d, uint32_t word, uint16_t topic, uint32_t doc,
 //'
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
+//' @param thin The period of iterations to keep after the burn-in period
+//'   (default: 1).
 //' @param y A D x 1 vector of outcomes to be predicted.
 //' @param x A D x (p + 1) matrix of additional predictors.
 //' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression
@@ -1053,6 +1055,8 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
 //'
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
+//' @param thin The period of iterations to keep after the burn-in period
+//'   (default: 1).
 //' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 //' @param x A D x p matrix of additional predictors (no column of 1s for
 //'   intercept).
@@ -1182,6 +1186,8 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
 //'
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
+//' @param thin The period of iterations to keep after the burn-in period
+//'   (default: 1).
 //' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 //' @param x A D x p matrix of additional predictors (no column of 1s for
 //'   intercept).

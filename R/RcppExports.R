@@ -465,6 +465,8 @@ waic_diff <- function(l_pred1, l_pred2) {
 #'
 #' @param m The number of iterations to run the Gibbs sampler.
 #' @param burn The number of iterations to discard as the burn-in period.
+#' @param thin The period of iterations to keep after the burn-in period
+#'   (default: 1).
 #' @param y A D x 1 vector of outcomes to be predicted.
 #' @param x A D x (p + 1) matrix of additional predictors.
 #' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression
@@ -494,6 +496,8 @@ gibbs_mlr_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, a0 = 0.00
 #'
 #' @param m The number of iterations to run the Gibbs sampler.
 #' @param burn The number of iterations to discard as the burn-in period.
+#' @param thin The period of iterations to keep after the burn-in period
+#'   (default: 1).
 #' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 #' @param x A D x p matrix of additional predictors (no column of 1s for
 #'   intercept).
@@ -525,6 +529,8 @@ gibbs_logistic_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, prop
 #'
 #' @param m The number of iterations to run the Gibbs sampler.
 #' @param burn The number of iterations to discard as the burn-in period.
+#' @param thin The period of iterations to keep after the burn-in period
+#'   (default: 1).
 #' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 #' @param x A D x p matrix of additional predictors (no column of 1s for
 #'   intercept).
