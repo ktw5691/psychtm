@@ -53,8 +53,8 @@ regression coefficients, N(0, proposal_sd(j)), \eqn{j = 1, \ldots, p}
 An object of class \code{\linkS4class{Logistic}}.
 }
 \description{
-\code{gibbs_logistic} is used to fit a Bayesian linear regression model using
-Gibbs sampling.
+\code{gibbs_logistic} is used to fit a Bayesian logistic regression model
+using Gibbs sampling.
 }
 \details{
 For \code{mu0}, by default, we use a vector of \eqn{p} 0s for \eqn{p}
@@ -64,8 +64,7 @@ For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} diagonal matrix
 with diagonal elements (variances) of 6.25.
 }
 \seealso{
-Other Gibbs sampler: \code{\link{gibbs_logistic_cpp}},
-  \code{\link{gibbs_mlr_cpp}}, \code{\link{gibbs_mlr}},
+Other Gibbs sampler: \code{\link{gibbs_mlr}},
   \code{\link{gibbs_sldax}}
 }
 \concept{Gibbs sampler}

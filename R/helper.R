@@ -312,7 +312,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
+  res <- .gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
                          mu0, sigma0, a0, b0,
                          eta_start, proposal_sd, interaction_xcol,
                          alpha_, gamma_,
@@ -412,7 +412,7 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
+  res <- .gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
                        verbose, display_progress)
   colnames(res@eta) <- colnames(x)
   return(res)
@@ -420,8 +420,8 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 
 #' Fit logistic regression model
 #'
-#' \code{gibbs_logistic} is used to fit a Bayesian linear regression model using
-#' Gibbs sampling.
+#' \code{gibbs_logistic} is used to fit a Bayesian logistic regression model
+#' using Gibbs sampling.
 #'
 #' For \code{mu0}, by default, we use a vector of \eqn{p} 0s for \eqn{p}
 #' regression coefficients.
@@ -513,7 +513,7 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
+  res <- .gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
                             eta_start, proposal_sd,
                             verbose, display_progress)
   colnames(res@eta) <- colnames(x)

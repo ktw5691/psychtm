@@ -7,9 +7,10 @@
 \alias{gg_coef}
 \alias{est_theta}
 \alias{est_beta}
-\title{Generic function to retrieve the top topics for each document}
+\title{Functions to compute and visualize the most probable topics in a document or
+the most probable words in a topic.}
 \usage{
-get_toptopics(mcmc_fit, ntopics, burn = 0, thin = 1, stat = "mean")
+get_toptopics(theta, ntopics)
 
 get_topwords(beta_, nwords, vocab, method = "termscore")
 
@@ -22,18 +23,10 @@ est_theta(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 est_beta(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean")
 }
 \arguments{
-\item{mcmc_fit}{An Lda object.}
-
 \item{ntopics}{The number of topics to retrieve.}
 
-\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
-
-\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
-
-\item{stat}{The summary statistic to use on the posterior draws. Default: \code{"mean"}.}
-
-\item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities where
-each row sums to 1.}
+\item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities; each row
+sums to 1.}
 
 \item{nwords}{The number of words to retrieve.}
 
@@ -42,15 +35,25 @@ each row sums to 1.}
 \item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
 use probabilities. Default: "termscore".}
 
+\item{mcmc_fit}{An object of class \code{\link{Sldax}}.}
+
+\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
+
+\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
+
+\item{stat}{The summary statistic to use on the posterior draws. Default: \code{"mean"}.}
+
 \item{errorbw}{Controls the width of the +/- 2 posterior standard error bars.}
 
 \item{docs}{A D x max(N_d) matrix of the words in all documents. Unused word
 positions should be set to 0.}
 }
 \description{
-Functions to compute and visualize the most probable topics in a document or
-the most probable words in a topic.
-
-Compute empirical topic proportions (zbar) from \code{@topics} in a
-\code{Lda} object.
+\code{get_toptopics()} creates a \code{tibble} of topics and the top
+\code{nwords} words per topic sorted by probability or term score.
+\code{get_zbar()} computes empirical topic proportions from slot
+\code{@topics} in an object of class \code{\link{Sldax}}.
+\code{gg_coef()} plots regression coefficients for \code{\link{Sldax}} models.
+\code{est_theta()} estimates the mean or median theta matrix.
+\code{est_beta()} estimates the mean or median beta matrix.
 }
