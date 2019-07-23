@@ -81,13 +81,12 @@ setGeneric("get_topwords",
              if (nwords > length(unique(vocab)))
                stop("'nwords' cannot exceed the number of unique terms in 'vocab'.")
 
-             if (!"method" %in% passed_args) method <- "termscore" # Default
              if (length(method) > 1) {
                method <- method[1]
                message("Multiple arguments were supplied to 'method'. Only using the first argument.")
              }
              if (!(method %in% c("termscore", "prob")))
-               stop("'stat' must be either 'termscore' or 'prob'")
+               stop("'method' must be either 'termscore' or 'prob'.")
 
              standardGeneric("get_topwords")
            }
@@ -105,7 +104,7 @@ setGeneric("get_zbar",
 
              if (!"mcmc_fit" %in% passed_args)
                stop("Please supply an object to 'mcmc_fit'.")
-             if (!isClass(mcmc_fit, "Sldax"))
+             if (!is(mcmc_fit, "Sldax"))
                stop("'mcmc_fit' must be an Sldax object.")
 
              if ( !check_int(burn) ) stop("'burn' must be an integer.")
@@ -138,7 +137,7 @@ setGeneric("gg_coef",
 
              if (!"mcmc_fit" %in% passed_args)
                stop("Please supply an object to 'mcmc_fit'.")
-             if (!isClass(mcmc_fit, "Sldax"))
+             if (!is(mcmc_fit, "Sldax"))
                stop("'mcmc_fit' must be an Sldax object.")
 
              if ( !check_int(burn) ) stop("'burn' must be an integer.")
@@ -153,7 +152,6 @@ setGeneric("gg_coef",
              if (thin >= (m - burn))
                stop("'thin' cannot exceed length of chain less 'burn'.")
 
-             if (!"stat" %in% passed_args) stat <- "mean" # Default
              if (length(stat) > 1) {
                stat <- stat[1]
                message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
@@ -177,7 +175,7 @@ setGeneric("est_theta",
 
              if (!"mcmc_fit" %in% passed_args)
                stop("Please supply an object to 'mcmc_fit'.")
-             if (!isClass(mcmc_fit, "Sldax"))
+             if (!is(mcmc_fit, "Sldax"))
                stop("'mcmc_fit' must be an Sldax object.")
 
              if ( !check_int(burn) ) stop("'burn' must be an integer.")
@@ -191,7 +189,6 @@ setGeneric("est_theta",
              if (thin >= (m - burn))
                stop("'thin' cannot exceed length of chain less 'burn'.")
 
-             if (!"stat" %in% passed_args) stat <- "mean" # Default
              if (length(stat) > 1) {
                stat <- stat[1]
                message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
@@ -215,7 +212,7 @@ setGeneric("est_beta",
 
              if (!"mcmc_fit" %in% passed_args)
                stop("Please supply an object to 'mcmc_fit'.")
-             if (!isClass(mcmc_fit, "Sldax"))
+             if (!is(mcmc_fit, "Sldax"))
                stop("'mcmc_fit' must be an Sldax object.")
 
              if (!"docs" %in% passed_args)
@@ -238,13 +235,12 @@ setGeneric("est_beta",
              if (thin >= (m - burn))
                stop("'thin' cannot exceed length of chain less 'burn'.")
 
-             if (!"stat" %in% passed_args) stat <- "mean" # Default
              if (length(stat) > 1) {
                stat <- stat[1]
                message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
-               stop("'stat' must be either 'mean' or 'median'")
+               stop("'stat' must be either 'mean' or 'median'.")
 
              standardGeneric("est_beta")
            }
