@@ -9,7 +9,7 @@
 \alias{gg_coef}
 \alias{est_theta}
 \alias{est_beta}
-\alias{get_toptopics,matrix,numeric-method}
+\alias{get_toptopics,matrix-method}
 \alias{get_topwords,matrix,numeric,character-method}
 \alias{get_zbar,Sldax-method}
 \alias{gg_coef,Sldax-method}
@@ -30,7 +30,7 @@ est_theta(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
 est_beta(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean")
 
-\S4method{get_toptopics}{matrix,numeric}(theta, ntopics)
+\S4method{get_toptopics}{matrix}(theta, ntopics)
 
 \S4method{get_topwords}{matrix,numeric,character}(beta_, nwords, vocab,
   method = "termscore")
@@ -49,27 +49,28 @@ est_beta(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean")
 \arguments{
 \item{theta}{A D x K matrix of K topic proportions for all D documents.}
 
-\item{ntopics}{The number of topics to retrieve.}
+\item{ntopics}{The number of topics to retrieve (default: all topics).}
 
 \item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities; each row
 sums to 1.}
 
-\item{nwords}{The number of words to retrieve.}
+\item{nwords}{The number of words to retrieve (default: V).}
 
-\item{vocab}{A character vector containing the vocabulary.}
+\item{vocab}{A character vector of length V containing the vocabulary.}
 
 \item{method}{If "termscore", use term scores (similar to tf-idf). If "prob",
-use probabilities. Default: "termscore".}
+use probabilities (default: "termscore").}
 
 \item{mcmc_fit}{An object of class \code{\link{Sldax}}.}
 
-\item{burn}{The number of draws to discard as a burn-in period. Default: 0.}
+\item{burn}{The number of draws to discard as a burn-in period (default: 0).}
 
-\item{thin}{The number of draws to skip as a thinning period. Default: 1 (no thinning).}
+\item{thin}{The number of draws to skip as a thinning period (default: 1; i.e., no thinning).}
 
-\item{stat}{The summary statistic to use on the posterior draws. Default: \code{"mean"}.}
+\item{stat}{The summary statistic to use on the posterior draws (default: \code{"mean"}).}
 
-\item{errorbw}{Controls the width of the +/- 2 posterior standard error bars.}
+\item{errorbw}{Positive control parameter for the width of the +/- 2
+posterior standard error bars (default: 0.5).}
 
 \item{docs}{A D x max(N_d) matrix of the words in all documents. Unused word
 positions should be set to 0.}

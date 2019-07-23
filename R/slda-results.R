@@ -25,11 +25,10 @@ term_score <- function(beta_) {
 
 #' @rdname sldax-gettop-methods
 setMethod("get_toptopics",
-          c(theta = "matrix", ntopics = "numeric"),
+          c(theta = "matrix"),
           function(theta, ntopics) {
 
             ndocs   <- nrow(theta)
-            ntopics <- ncol(theta)
 
             doc_toptopics <- matrix(0, ndocs * ntopics, 3)
 
