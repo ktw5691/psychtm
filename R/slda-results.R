@@ -1,7 +1,11 @@
 #' @include slda-class.R slda-generic-functions.R
 NULL
 
-#' Compute term-scores for each word-topic pair (p. 75, Srivasta & Sahami, 2009)
+#' Compute term-scores for each word-topic pair
+#'
+#' For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
+#' A. N. Srivastava & M. Sahami (Eds.), Text mining: Classification, clustering,
+#' and applications. Chapman and Hall/CRC.
 #'
 #' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
 #'   for each of \eqn{K} topics.
@@ -19,6 +23,7 @@ term_score <- function(beta_) {
   return(tscore)
 }
 
+#' @rdname sldax-gettop-methods
 setMethod("get_toptopics",
           c(theta = "matrix", ntopics = "numeric"),
           function(theta, ntopics) {
@@ -48,6 +53,7 @@ setMethod("get_toptopics",
           }
 )
 
+#' @rdname sldax-gettop-methods
 setMethod("get_topwords",
           c(beta_ = "matrix", nwords = "numeric", vocab = "character"),
           function(beta_, nwords, vocab, method) {
@@ -82,6 +88,7 @@ setMethod("get_topwords",
           }
 )
 
+#' @rdname sldax-gettop-methods
 setMethod("get_zbar",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin) {
@@ -106,6 +113,7 @@ setMethod("get_zbar",
           }
 )
 
+#' @rdname sldax-gettop-methods
 setMethod("gg_coef",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat, errorbw) {
@@ -173,6 +181,7 @@ setMethod("gg_coef",
           }
 )
 
+#' @rdname sldax-gettop-methods
 setMethod("est_theta",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat) {
@@ -204,6 +213,7 @@ setMethod("est_theta",
           }
 )
 
+#' @rdname sldax-gettop-methods
 setMethod("est_beta",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, docs, burn, thin, stat) {

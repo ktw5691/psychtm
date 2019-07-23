@@ -1,4 +1,4 @@
-#' Functions to compute and visualize the most probable topics in a document or
+#' Compute and visualize the most probable topics in a document or
 #' the most probable words in a topic.
 #'
 #' \code{get_toptopics()} creates a \code{tibble} of topics and the top
@@ -9,10 +9,13 @@
 #' \code{est_theta()} estimates the mean or median theta matrix.
 #' \code{est_beta()} estimates the mean or median beta matrix.
 #'
+#' @param theta A D x K matrix of K topic proportions for all D documents.
 #' @param ntopics The number of topics to retrieve.
-#'
+#' @name sldax-gettop-methods
+NULL
+
+#' @rdname sldax-gettop-methods
 #' @export
-#' @rdname slda-gettop-methods
 setGeneric("get_toptopics",
            function(theta, ntopics) {
 
@@ -36,8 +39,9 @@ setGeneric("get_toptopics",
 #' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
 #'   use probabilities. Default: "termscore".
 #'
+#' @return A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
+#' @rdname sldax-gettop-methods
 #' @export
-#' @rdname slda-gettop-methods
 setGeneric("get_topwords",
            function(beta_, nwords, vocab, method = "termscore") {
 
@@ -65,7 +69,8 @@ setGeneric("get_topwords",
 #' @param mcmc_fit An object of class \code{\link{Sldax}}.
 #' @param burn The number of draws to discard as a burn-in period. Default: 0.
 #' @param thin The number of draws to skip as a thinning period. Default: 1 (no thinning).
-#' @rdname slda-gettop-methods
+#' @rdname sldax-gettop-methods
+#' @export
 setGeneric("get_zbar",
            function(mcmc_fit, burn = 0, thin = 1) {
 
@@ -92,8 +97,8 @@ setGeneric("get_zbar",
 #' @param stat The summary statistic to use on the posterior draws. Default: \code{"mean"}.
 #' @param errorbw Controls the width of the +/- 2 posterior standard error bars.
 #'
+#' @rdname sldax-gettop-methods
 #' @export
-#' @rdname slda-gettop-methods
 setGeneric("gg_coef",
            function(mcmc_fit, burn = 0, thin = 1, stat = "mean",
                     errorbw = 0.5) {
@@ -125,8 +130,8 @@ setGeneric("gg_coef",
            }
 )
 
+#' @rdname sldax-gettop-methods
 #' @export
-#' @rdname slda-gettop-methods
 setGeneric("est_theta",
            function(mcmc_fit, burn = 0, thin = 1, stat = "mean") {
 
@@ -159,8 +164,9 @@ setGeneric("est_theta",
 
 #' @param docs A D x max(N_d) matrix of the words in all documents. Unused word
 #'   positions should be set to 0.
+#'
+#' @rdname sldax-gettop-methods
 #' @export
-#' @rdname slda-gettop-methods
 setGeneric("est_beta",
            function(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean") {
 
