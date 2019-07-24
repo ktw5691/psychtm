@@ -176,7 +176,7 @@ setMethod("gg_coef",
             ggp <- ggplot2::`%+%`(
               ggp, ggplot2::theme(axis.text.x = ggplot2::element_text(
                 size = 10, angle = 57.5, hjust = 1), legend.position = "left"))
-            print(ggp)
+            return(ggp)
           }
 )
 
@@ -193,7 +193,7 @@ setMethod("est_theta",
             topics <- mcmc_fit@topics[, , keep]
             len <- dim(topics)[3]
             topics[topics == 0] <- NA
-            theta <- array(dim = c(ndoc, ncol = K, len))
+            theta <- array(dim = c(ndoc, K, len))
 
             for (i in seq_len(len)) {
               for (d in seq_len(ndoc)) {
@@ -202,7 +202,7 @@ setMethod("est_theta",
                   z_count[k] <- sum(topics[d, , i] == k, na.rm = TRUE)
                 theta[d, , i] <- .est_thetad(z_count, alpha_)
               }
-              if (i %% floor(len / 10) == 0)
+              if (!is.nan(i %% floor(len / 10)) && (i %% floor(len / 10) == 0))
                 cat("Iteration", i, "of", len, "\n")
             }
 
