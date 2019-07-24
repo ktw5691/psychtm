@@ -14,6 +14,19 @@ NULL
 #' @export
 term_score <- function(beta_) {
 
+  passed_args <- names(as.list(match.call())[-1])
+
+  if (!"beta_" %in% passed_args)
+    stop("Please supply a matrix to 'beta_'.")
+  if (!is.matrix(beta_))
+    stop("Please supply a matrix to 'beta_'.")
+  if (sum(beta_ < 0.0 || beta_ > 1.0) > 0)
+    stop("Entries of 'beta_' must be between 0.0 and 1.0.")
+  sum_rowsum_beta <- sum(rowSums(beta_))
+  K <- nrow(beta_)
+  if (sum_rowsum_beta > K + 0.001 || sum_rowsum_beta < K - 0.001)
+    stop("Rows of 'beta_' must each sum to 1.0.")
+
   tscore <- matrix(0, nrow = nrow(beta_), ncol(beta_))
   for (v in 1:ncol(beta_)) {
     tscore[, v] <- beta_[, v] * log(
