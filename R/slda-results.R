@@ -27,11 +27,10 @@ term_score <- function(beta_) {
   if (sum_rowsum_beta > K + 0.001 || sum_rowsum_beta < K - 0.001)
     stop("Rows of 'beta_' must each sum to 1.0.")
 
-  tscore <- matrix(0, nrow = nrow(beta_), ncol(beta_))
-  for (v in 1:ncol(beta_)) {
-    tscore[, v] <- beta_[, v] * log(
-      exp(log(beta_[, v]) - sum(log(beta_[, v])) / nrow(beta_)))
-  }
+  ntopic <- nrow(beta_)
+  ldenom <- apply(log(beta_), 2, sum) / ntopic # Sum logs over topics (rows)
+  mdenom <- matrix(ldenom, nrow = ntopic, ncol = ncol(beta_), byrow = TRUE)
+  tscore <- beta_ * (log(beta_) - mdenom)
 
   return(tscore)
 }
