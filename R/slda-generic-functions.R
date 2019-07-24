@@ -157,7 +157,7 @@ setGeneric("gg_coef",
                message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
-               stop("'stat' must be either 'mean' or 'median'")
+               stop("'stat' must be either 'mean' or 'median'.")
 
              if ( !is.numeric(errorbw) ) stop("'errorbw' must be numeric.")
              if ( errorbw <= 0) stop("'errorbw' must be positive.")
@@ -194,7 +194,7 @@ setGeneric("est_theta",
                message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
-               stop("'stat' must be either 'mean' or 'median'")
+               stop("'stat' must be either 'mean' or 'median'.")
 
              standardGeneric("est_theta")
            }
