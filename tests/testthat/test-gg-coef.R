@@ -142,3 +142,21 @@ test_that("gg_coef() correctly computes median estimate of eta", {
     c(0, 0)
   )
 })
+
+test_that("'errorbw' is numeric", {
+  fit <- Sldax()
+  fit@nchain <- 2L
+  expect_error(
+    gg_coef(fit, errorbw = "a"),
+    "'errorbw' must be numeric."
+  )
+})
+
+test_that("'errorbw' is positive", {
+  fit <- Sldax()
+  fit@nchain <- 2L
+  expect_error(
+    gg_coef(fit, errorbw = -1),
+    "'errorbw' must be positive."
+  )
+})
