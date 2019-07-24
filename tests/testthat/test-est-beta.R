@@ -214,17 +214,60 @@ test_that("est_beta() handles missing 'stat' by defaulting to mean", {
                  nrow = 2, byrow = TRUE)
   fit <- Sldax()
   fit@ndocs  <- 2L
-  fit@nchain <- 2L
+  fit@nchain <- 3L
   fit@nvocab <- 2L
   fit@topics <- array(c(1, 2, 1, 0, 0, 0,
-                        1, 2, 1, 0, 0, 0),
-                      dim = c(2, 3, 2))
-  fit@alpha <- 0.0
+                        1, 2, 1, 0, 0, 0,
+                        2, 1, 2, 0, 0, 0),
+                      dim = c(2, 3, 3))
   fit@gamma <- 0.0
+  t1 <- t2 <- t3 <- matrix(NaN, nrow = 2, ncol = 2)
+  for (iter in seq_len(fit@nchain)) {
+    for (topic in seq_len(fit@ntopics)) {
+      for (word in seq_len(fit@nvocab)) {
+        if (iter == 1) t1[topic, word] <- sum(fit@topics[, , iter] == topic & docs == word)
+        if (iter == 2) t2[topic, word] <- sum(fit@topics[, , iter] == topic & docs == word)
+        if (iter == 3) t3[topic, word] <- sum(fit@topics[, , iter] == topic & docs == word)
+      }
+    }
+  }
+  t1 <- t1 / rowSums(t1)
+  t2 <- t2 / rowSums(t2)
+  t3 <- t3 / rowSums(t3)
   expect_equal(
     est_beta(mcmc_fit = fit, docs = docs),
-    matrix(c(0.5, 0.5,
-             0.0, 1.0),
-           nrow = 2, byrow = TRUE)
+    apply(array(c(t1, t2, t3), c(2, 2, 3)), c(1, 2), mean)
+  )
+})
+
+test_that("est_beta() computes median estimate correctly", {
+  docs <- matrix(c(1, 2, 0,
+                   1, 0, 0),
+                 nrow = 2, byrow = TRUE)
+  fit <- Sldax()
+  fit@ndocs  <- 2L
+  fit@nchain <- 3L
+  fit@nvocab <- 2L
+  fit@topics <- array(c(1, 2, 1, 0, 0, 0,
+                        1, 2, 1, 0, 0, 0,
+                        2, 1, 2, 0, 0, 0),
+                      dim = c(2, 3, 3))
+  fit@gamma <- 0.0
+  t1 <- t2 <- t3 <- matrix(NaN, nrow = 2, ncol = 2)
+  for (iter in seq_len(fit@nchain)) {
+    for (topic in seq_len(fit@ntopics)) {
+      for (word in seq_len(fit@nvocab)) {
+        if (iter == 1) t1[topic, word] <- sum(fit@topics[, , iter] == topic & docs == word)
+        if (iter == 2) t2[topic, word] <- sum(fit@topics[, , iter] == topic & docs == word)
+        if (iter == 3) t3[topic, word] <- sum(fit@topics[, , iter] == topic & docs == word)
+      }
+    }
+  }
+  t1 <- t1 / rowSums(t1)
+  t2 <- t2 / rowSums(t2)
+  t3 <- t3 / rowSums(t3)
+  expect_equal(
+    est_beta(mcmc_fit = fit, docs = docs, stat = "median"),
+    apply(array(c(t1, t2, t3), c(2, 2, 3)), c(1, 2), median)
   )
 })
