@@ -23,11 +23,11 @@ setGeneric("get_toptopics",
 
              if (!"theta" %in% passed_args) stop("Please supply a matrix to 'theta'.")
              if (!is.matrix(theta)) stop("Please supply a matrix to 'theta'.")
-             if (sum(theta < 0.0 || theta > 1.0) > 0) stop("Entries of 'theta' must be between 0.0 and 1.0.")
+             if (sum(theta < 0.0 | theta > 1.0) > 0) stop("Entries of 'theta' must be between 0.0 and 1.0.")
              sum_rowsum_theta <- sum(rowSums(theta))
              d <- nrow(theta)
              K <- ncol(theta)
-             if (sum_rowsum_theta > d + 0.001 || sum_rowsum_theta < d - 0.001)
+             if (sum_rowsum_theta > d + 0.001 | sum_rowsum_theta < d - 0.001)
                stop("Rows of 'theta' must each sum to 1.0.")
 
              if (!"ntopics" %in% passed_args) ntopics <- K # Default
@@ -57,12 +57,12 @@ setGeneric("get_topwords",
                stop("Please supply a matrix to 'beta_'.")
              if (!is.matrix(beta_))
                stop("Please supply a matrix to 'beta_'.")
-             if (sum(beta_ < 0.0 || beta_ > 1.0) > 0)
+             if (sum(beta_ < 0.0 | beta_ > 1.0) > 0)
                stop("Entries of 'beta_' must be between 0.0 and 1.0.")
              sum_rowsum_beta <- sum(rowSums(beta_))
              K <- nrow(beta_)
              V <- ncol(beta_)
-             if (sum_rowsum_beta > K + 0.001 || sum_rowsum_beta < K - 0.001)
+             if (sum_rowsum_beta > K + 0.001 | sum_rowsum_beta < K - 0.001)
                stop("Rows of 'beta_' must each sum to 1.0.")
 
              if (!"nwords" %in% passed_args) nwords <- V # Default

@@ -20,11 +20,11 @@ term_score <- function(beta_) {
     stop("Please supply a matrix to 'beta_'.")
   if (!is.matrix(beta_))
     stop("Please supply a matrix to 'beta_'.")
-  if (sum(beta_ < 0.0 || beta_ > 1.0) > 0)
+  if (sum(beta_ < 0.0 | beta_ > 1.0) > 0)
     stop("Entries of 'beta_' must be between 0.0 and 1.0.")
   sum_rowsum_beta <- sum(rowSums(beta_))
   K <- nrow(beta_)
-  if (sum_rowsum_beta > K + 0.001 || sum_rowsum_beta < K - 0.001)
+  if (sum_rowsum_beta > K + 0.001 | sum_rowsum_beta < K - 0.001)
     stop("Rows of 'beta_' must each sum to 1.0.")
 
   ntopic <- nrow(beta_)
@@ -168,7 +168,7 @@ setMethod("gg_coef",
               dplyr::ungroup(
                 dplyr::mutate(
                   dplyr::rowwise(coefs),
-                  sig = dplyr::if_else(lbcl > 0 || ubcl < 0, "Yes", "No"))),
+                  sig = dplyr::if_else(lbcl > 0 | ubcl < 0, "Yes", "No"))),
               sig = factor(sig))
 
             ggp <- ggplot2::ggplot(
@@ -214,7 +214,7 @@ setMethod("est_theta",
                   z_count[k] <- sum(topics[d, , i] == k, na.rm = TRUE)
                 theta[d, , i] <- .est_thetad(z_count, alpha_)
               }
-              if (!is.nan(i %% floor(len / 10)) && (i %% floor(len / 10) == 0))
+              if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
                 cat("Iteration", i, "of", len, "\n")
             }
 
@@ -244,7 +244,7 @@ setMethod("est_beta",
               wz_co <- .count_topic_word(K, V, topics[, , i], docs)
               for (k in seq_len(K)) beta_[k, , i] <- .est_betak(
                 wz_co[k, ], gamma_)
-              if (!is.nan(i %% floor(len / 10)) && (i %% floor(len / 10) == 0))
+              if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
                 cat("Iteration", i, "of", len, "\n")
             }
 
