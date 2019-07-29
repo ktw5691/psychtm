@@ -6,19 +6,6 @@
 
 using namespace Rcpp;
 
-// rmvnorm_cpp
-arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu, const arma::mat& sigma);
-RcppExport SEXP _psychtm_rmvnorm_cpp(SEXP nSEXP, SEXP muSEXP, SEXP sigmaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< uint32_t >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const arma::colvec& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type sigma(sigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(rmvnorm_cpp(n, mu, sigma));
-    return rcpp_result_gen;
-END_RCPP
-}
 // est_betak
 arma::rowvec est_betak(const arma::rowvec& wz_co, float gamma_);
 RcppExport SEXP _psychtm_est_betak(SEXP wz_coSEXP, SEXP gamma_SEXP) {
@@ -54,29 +41,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::umat& >::type doc_topic(doc_topicSEXP);
     Rcpp::traits::input_parameter< const arma::umat& >::type doc_word(doc_wordSEXP);
     rcpp_result_gen = Rcpp::wrap(count_topic_word(K, V, doc_topic, doc_word));
-    return rcpp_result_gen;
-END_RCPP
-}
-// pwaic_d
-double pwaic_d(const arma::colvec& like_pred);
-RcppExport SEXP _psychtm_pwaic_d(SEXP like_predSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type like_pred(like_predSEXP);
-    rcpp_result_gen = Rcpp::wrap(pwaic_d(like_pred));
-    return rcpp_result_gen;
-END_RCPP
-}
-// waic_d
-double waic_d(const arma::colvec& like_pred, double p_effd);
-RcppExport SEXP _psychtm_waic_d(SEXP like_predSEXP, SEXP p_effdSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::colvec& >::type like_pred(like_predSEXP);
-    Rcpp::traits::input_parameter< double >::type p_effd(p_effdSEXP);
-    rcpp_result_gen = Rcpp::wrap(waic_d(like_pred, p_effd));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -180,12 +144,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_psychtm_rmvnorm_cpp", (DL_FUNC) &_psychtm_rmvnorm_cpp, 3},
     {"_psychtm_est_betak", (DL_FUNC) &_psychtm_est_betak, 2},
     {"_psychtm_est_thetad", (DL_FUNC) &_psychtm_est_thetad, 2},
     {"_psychtm_count_topic_word", (DL_FUNC) &_psychtm_count_topic_word, 4},
-    {"_psychtm_pwaic_d", (DL_FUNC) &_psychtm_pwaic_d, 1},
-    {"_psychtm_waic_d", (DL_FUNC) &_psychtm_waic_d, 2},
     {"_psychtm_waic_all", (DL_FUNC) &_psychtm_waic_all, 2},
     {"_psychtm_waic_diff", (DL_FUNC) &_psychtm_waic_diff, 2},
     {"_psychtm_gibbs_mlr_cpp", (DL_FUNC) &_psychtm_gibbs_mlr_cpp, 12},

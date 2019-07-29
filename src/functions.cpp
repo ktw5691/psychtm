@@ -20,8 +20,6 @@ void error(std::string s) {
 //' @param sigma The q x q variance-covariance matrix of the distribution.
 //'
 //' @return A n x q matrix of random draws.
-//' @export
-// [[Rcpp::export]]
 arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
                       const arma::mat& sigma) {
 
@@ -242,16 +240,15 @@ long double draw_sigma2(float a0, float b0,
   return 1.0 / sigma2inv;
 }
 
-//' Estimate \eqn{\beta_k}
-//'
-//' @param wz_co A V x 1 vector of counts of the draws of each word for topic
-//'   k over all documents.
-//' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
-//'
-//' @return A V x 1 vector of estimates for \eqn{\beta_k}.
-//'
+// Estimate \eqn{\beta_k}
+//
+// @param wz_co A V x 1 vector of counts of the draws of each word for topic
+//   k over all documents.
+// @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
+//
+// @return A V x 1 vector of estimates for \eqn{\beta_k}.
 //' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(.est_betak)]]
 arma::rowvec est_betak(const arma::rowvec& wz_co, float gamma_) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
@@ -274,15 +271,14 @@ arma::rowvec est_betak(const arma::rowvec& wz_co, float gamma_) {
   return betak;
 }
 
-//' Estimate \eqn{\theta_d}
-//'
-//' @param z_count A K x 1 vector of counts of topic draw in document d.
-//' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
-//'
-//' @return A K x 1 vector of estimate for \eqn{\theta_d}.
-//'
+// Estimate \eqn{\theta_d}
+//
+// @param z_count A K x 1 vector of counts of topic draw in document d.
+// @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
+//
+// @return A K x 1 vector of estimate for \eqn{\theta_d}.
 //' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(.est_thetad)]]
 arma::rowvec est_thetad(const arma::rowvec& z_count, float alpha_) {
 
   // Warning: Overflow caused by probabilities near 0 handled by setting
@@ -306,25 +302,24 @@ arma::rowvec est_thetad(const arma::rowvec& z_count, float alpha_) {
   return thetad;
 }
 
-//' Count topic-word co-occurences in corpus.
-//'
-//' Computes topic-word co-occurence matrix for a corpus of \eqn{D} documents
-//' with the maximum length of a document in the corpus equal to max(\eqn{N_d})
-//' and a vocabulary of \eqn{V} unique terms in the corpus.
-//'
-//' Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
-//' document must be set to 0.
-//'
-//' @param K The number of topics.
-//' @param V The number of terms in the corpus vocabulary.
-//' @param doc_topic A \eqn{D} x max(\eqn{N_d}) matrix of topic assignments for
-//'   the corpus.
-//' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
-//'
-//' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
-//'
+// Count topic-word co-occurences in corpus.
+//
+// Computes topic-word co-occurence matrix for a corpus of \eqn{D} documents
+// with the maximum length of a document in the corpus equal to max(\eqn{N_d})
+// and a vocabulary of \eqn{V} unique terms in the corpus.
+//
+// Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
+// document must be set to 0.
+//
+// @param K The number of topics.
+// @param V The number of terms in the corpus vocabulary.
+// @param doc_topic A \eqn{D} x max(\eqn{N_d}) matrix of topic assignments for
+//   the corpus.
+// @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
+//
+// @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
 //' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(.count_topic_word)]]
 arma::mat count_topic_word(uint16_t K, uint32_t V,
                            const arma::umat& doc_topic,
                            const arma::umat& doc_word) {
@@ -554,7 +549,6 @@ arma::rowvec post_pred_logit(const arma::mat& w, const arma::colvec& eta) {
 //' @export
 //' @return The contribution of y_d (its predictive posterior likelihood variance)
 //'   to the effective number of parameters.
-// [[Rcpp::export]]
 double pwaic_d(const arma::colvec& like_pred) {
 
   // Get variance of log-predictive likelihood
@@ -568,8 +562,6 @@ double pwaic_d(const arma::colvec& like_pred) {
 //' @param p_effd The contribution to the effective number of parameters from
 //'   obs y_d.
 //' @return WAIC contribution for observation d (on deviance scale).
-//' @export
-// [[Rcpp::export]]
 double waic_d(const arma::colvec& like_pred, double p_effd) {
 
   // Log of mean posterior predictive density for y_d
@@ -925,34 +917,31 @@ void update_zcounts(uint32_t d, uint32_t word, uint16_t topic, uint32_t doc,
 
 //////////////////////////////// Gibbs Samplers ////////////////////////////////
 
-//' Collapsed Gibbs sampler for multiple linear regression
-//'
-//' @include slda-class.R
-//'
-//' @param m The number of iterations to run the Gibbs sampler.
-//' @param burn The number of iterations to discard as the burn-in period.
-//' @param thin The period of iterations to keep after the burn-in period
-//'   (default: 1).
-//' @param y A D x 1 vector of outcomes to be predicted.
-//' @param x A D x (p + 1) matrix of additional predictors.
-//' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression
-//'   coefficients.
-//' @param sigma0 A (p + 1) x (p + 1) variance-covariance matrix for the
-//'   prior on the regression coefficients.
-//' @param eta_start A (p + 1) x 1 vector of starting values for the
-//'   regression coefficients.
-//' @param a0 The shape parameter for the prior on sigma2 (default: 0.001)
-//' @param b0 The scale parameter for the prior on sigma2 (default: 0.001)
-//' @param verbose Should parameter draws be output during sampling? (default:
-//'   \code{FALSE}).
-//' @param display_progress Should percent progress of sampler be displayed
-//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-//'   \code{display_progress} be set to \code{TRUE} at any given time.
-//'
-//' @return An object of class \code{Mlr}.
+// Collapsed Gibbs sampler for multiple linear regression
+//
+// @param m The number of iterations to run the Gibbs sampler.
+// @param burn The number of iterations to discard as the burn-in period.
+// @param thin The period of iterations to keep after the burn-in period
+//   (default: 1).
+// @param y A D x 1 vector of outcomes to be predicted.
+// @param x A D x (p + 1) matrix of additional predictors.
+// @param mu0 A (p + 1) x 1 mean vector for the prior on the regression
+//   coefficients.
+// @param sigma0 A (p + 1) x (p + 1) variance-covariance matrix for the
+//   prior on the regression coefficients.
+// @param eta_start A (p + 1) x 1 vector of starting values for the
+//   regression coefficients.
+// @param a0 The shape parameter for the prior on sigma2 (default: 0.001)
+// @param b0 The scale parameter for the prior on sigma2 (default: 0.001)
+// @param verbose Should parameter draws be output during sampling? (default:
+//   \code{FALSE}).
+// @param display_progress Should percent progress of sampler be displayed
+//   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+//   \code{display_progress} be set to \code{TRUE} at any given time.
+//
+// @return An object of class \code{Mlr}.
 //' @export
-//' @family Gibbs sampler
-// [[Rcpp::export]]
+// [[Rcpp::export(.gibbs_mlr_cpp)]]
 S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
                  const arma::colvec& y, const arma::mat& x,
                  const arma::colvec& mu0, const arma::mat& sigma0,
@@ -1049,34 +1038,31 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
   return results;
 }
 
-//' Collapsed Gibbs sampler for logistic regression
-//'
-//' @include slda-class.R
-//'
-//' @param m The number of iterations to run the Gibbs sampler.
-//' @param burn The number of iterations to discard as the burn-in period.
-//' @param thin The period of iterations to keep after the burn-in period
-//'   (default: 1).
-//' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
-//' @param x A D x p matrix of additional predictors (no column of 1s for
-//'   intercept).
-//' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression coefficients.
-//' @param sigma0 A (p + 1) x (p + 1) variance-covariance matrix for the prior
-//'   on the regression coefficients.
-//' @param eta_start A (p + 1) x 1 vector of starting values for the
-//'   regression coefficients.
-//' @param proposal_sd The proposal standard deviation for drawing the
-//'   regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).
-//' @param verbose Should parameter draws be output during sampling? (default:
-//'   \code{FALSE}).
-//' @param display_progress Should percent progress of sampler be displayed
-//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-//'   \code{display_progress} be set to \code{TRUE} at any given time.
-//'
-//' @return An object of class \code{Logistic}.
+// Collapsed Gibbs sampler for logistic regression
+//
+// @param m The number of iterations to run the Gibbs sampler.
+// @param burn The number of iterations to discard as the burn-in period.
+// @param thin The period of iterations to keep after the burn-in period
+//   (default: 1).
+// @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
+// @param x A D x p matrix of additional predictors (no column of 1s for
+//   intercept).
+// @param mu0 A (p + 1) x 1 mean vector for the prior on the regression coefficients.
+// @param sigma0 A (p + 1) x (p + 1) variance-covariance matrix for the prior
+//   on the regression coefficients.
+// @param eta_start A (p + 1) x 1 vector of starting values for the
+//   regression coefficients.
+// @param proposal_sd The proposal standard deviation for drawing the
+//   regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).
+// @param verbose Should parameter draws be output during sampling? (default:
+//   \code{FALSE}).
+// @param display_progress Should percent progress of sampler be displayed
+//   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+//   \code{display_progress} be set to \code{TRUE} at any given time.
+//
+// @return An object of class \code{Logistic}.
 //' @export
-//' @family Gibbs sampler
-// [[Rcpp::export]]
+// [[Rcpp::export(.gibbs_logistic_cpp)]]
 S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
                       const arma::colvec& y, const arma::mat& x,
                       const arma::colvec& mu0, const arma::mat& sigma0,
@@ -1178,54 +1164,50 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
   return results;
 }
 
-//' Collapsed Gibbs sampler for the sLDA-X model
-//'
-//' In general, don't use this directly. Instead, use \code{\link{gibbs_sldax}}.
-//'
-//' @include slda-class.R
-//'
-//' @param m The number of iterations to run the Gibbs sampler.
-//' @param burn The number of iterations to discard as the burn-in period.
-//' @param thin The period of iterations to keep after the burn-in period
-//'   (default: 1).
-//' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
-//' @param x A D x p matrix of additional predictors (no column of 1s for
-//'   intercept).
-//' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
-//' @param V The number of unique terms in the vocabulary.
-//' @param K The number of topics.
-//' @param model An integer denoting the type of model to fit.
-//' @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
-//' @param sigma0 A (K + p + 1) x (K + p + 1) variance-covariance matrix for the
-//'   prior on the regression coefficients. The first p + 1 columns/rows
-//'   correspond to predictors in X, while the last K columns/rows correspond to
-//'   the K topic means.
-//' @param a0 The shape parameter for the prior on sigma2.
-//' @param b0 The scale parameter for the prior on sigma2.
-//' @param eta_start A (K + p) x 1 vector of starting values for the
-//'   regression coefficients. The first p elements correspond to predictors
-//'   in X, while the last K elements correspond to the K topic means.
-//' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
-//'   regression coefficients will be constrained so that they are in descending
-//'   order; if \code{FALSE}, no constraints will be applied.
-//' @param alpha_ The hyper-parameter for the prior on the topic proportions
-//'   (default: 0.1).
-//' @param gamma_ The hyper-parameter for the prior on the topic-specific
-//'   vocabulary probabilities (default: 1.01).
-//' @param proposal_sd The proposal standard deviation for drawing the
-//'   regression coefficients, N(0, proposal_sd) (default: 0.2).
-//' @param interaction_xcol The column number of the design matrix for the
-//' additional predictors for which an interaction with the \eqn{K} topics is
-//' desired (default: \eqn{-1L}, no interaction). Currently only supports a
-//' single continuous predictor or a two-category categorical predictor
-//' represented as a single dummy-coded column.
-//' @param verbose Should parameter draws be output during sampling? (default:
-//'   \code{FALSE}).
-//' @param display_progress Should percent progress of sampler be displayed
-//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-//'   \code{display_progress} be set to \code{TRUE} at any given time.
+// Collapsed Gibbs sampler for the sLDA-X model
+//
+// @param m The number of iterations to run the Gibbs sampler.
+// @param burn The number of iterations to discard as the burn-in period.
+// @param thin The period of iterations to keep after the burn-in period
+//   (default: 1).
+// @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
+// @param x A D x p matrix of additional predictors (no column of 1s for
+//   intercept).
+// @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
+// @param V The number of unique terms in the vocabulary.
+// @param K The number of topics.
+// @param model An integer denoting the type of model to fit.
+// @param mu0 A K x 1 mean vector for the prior on the regression coefficients.
+// @param sigma0 A (K + p + 1) x (K + p + 1) variance-covariance matrix for the
+//   prior on the regression coefficients. The first p + 1 columns/rows
+//   correspond to predictors in X, while the last K columns/rows correspond to
+//   the K topic means.
+// @param a0 The shape parameter for the prior on sigma2.
+// @param b0 The scale parameter for the prior on sigma2.
+// @param eta_start A (K + p) x 1 vector of starting values for the
+//   regression coefficients. The first p elements correspond to predictors
+//   in X, while the last K elements correspond to the K topic means.
+// @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
+//   regression coefficients will be constrained so that they are in descending
+//   order; if \code{FALSE}, no constraints will be applied.
+// @param alpha_ The hyper-parameter for the prior on the topic proportions
+//   (default: 0.1).
+// @param gamma_ The hyper-parameter for the prior on the topic-specific
+//   vocabulary probabilities (default: 1.01).
+// @param proposal_sd The proposal standard deviation for drawing the
+//   regression coefficients, N(0, proposal_sd) (default: 0.2).
+// @param interaction_xcol The column number of the design matrix for the
+// additional predictors for which an interaction with the \eqn{K} topics is
+// desired (default: \eqn{-1L}, no interaction). Currently only supports a
+// single continuous predictor or a two-category categorical predictor
+// represented as a single dummy-coded column.
+// @param verbose Should parameter draws be output during sampling? (default:
+//   \code{FALSE}).
+// @param display_progress Should percent progress of sampler be displayed
+//   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
+//   \code{display_progress} be set to \code{TRUE} at any given time.
 //' @export
-// [[Rcpp::export]]
+// [[Rcpp::export(.gibbs_sldax_cpp)]]
 S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    uint32_t m, uint32_t burn, uint32_t thin,
                    uint16_t K, uint8_t model,

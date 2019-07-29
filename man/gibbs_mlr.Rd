@@ -62,8 +62,7 @@ regression coefficients.
 For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} identity matrix.
 }
 \seealso{
-Other Gibbs sampler: \code{\link{gibbs_logistic_cpp}},
-  \code{\link{gibbs_logistic}},
-  \code{\link{gibbs_mlr_cpp}}, \code{\link{gibbs_sldax}}
+Other Gibbs sampler: \code{\link{gibbs_logistic}},
+  \code{\link{gibbs_sldax}}
 }
 \concept{Gibbs sampler}

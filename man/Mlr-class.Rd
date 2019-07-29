@@ -11,36 +11,37 @@ An S4 class to represent a regression model.
 \section{Slots}{
 
 \describe{
-\item{\code{eta}}{A M x (p + 1) numeric matrix of draws of topic regression
-coefficients}
-
-\item{\code{sigma2}}{A M x 1 numeric vector of draws of residual variance}
-
-\item{\code{mu0}}{A (p + 1) x 1 numeric matrix of prior means for eta}
-
-\item{\code{sigma0}}{A (p + 1) x (p + 1) numeric prior covariance matrix for eta}
-
-\item{\code{a0}}{A numeric prior shape hyperparameter for sigma2}
-
-\item{\code{b0}}{A numeric prior rate hyperparameter for sigma2}
-
-\item{\code{eta_start}}{A (p + 1) x 1 numeric matrix of starting values for eta}
-
-\item{\code{ndocs}}{The number of documents in the corpus.}
+\item{\code{ndocs}}{The number of documents/observations.}
 
 \item{\code{nchain}}{The number of iterations of the Gibbs sampler.}
 
-\item{\code{loglike}}{The log-likelihood (up to an additive constant).}
+\item{\code{mu0}}{A (p + 1) x 1 matrix of prior means for eta.}
 
-\item{\code{logpost}}{The log-posterior (up to an additive constant).}
+\item{\code{sigma0}}{A (p + 1) x (p + 1) prior covariance matrix for eta.}
 
-\item{\code{p_eff}}{The effective number of parameters.}
+\item{\code{a0}}{A prior shape hyperparameter for sigma2.}
+
+\item{\code{b0}}{A prior rate hyperparameter for sigma2.}
+
+\item{\code{eta_start}}{A (p + 1) x 1 matrix of starting values for eta.}
+
+\item{\code{eta}}{A nchain x (p + 1) matrix of draws of regression coefficients.}
+
+\item{\code{sigma2}}{A nchain x 1 numeric vector of draws of the residual variance.}
+
+\item{\code{loglike}}{A nchain x 1 vector of the log-likelihood (up to an additive
+constant).}
+
+\item{\code{logpost}}{A nchain x 1 vector of the log-posterior (up to an additive
+constant).}
 
 \item{\code{waic}}{WAIC (up to an additive constant) on the deviance scale.}
 
 \item{\code{se_waic}}{Standard error of the WAIC.}
 
-\item{\code{lpd}}{A matrix of iterations x observations of predictive posterior
-likelihoods (NOT log-likelihoods).}
+\item{\code{p_eff}}{The effective number of parameters.}
+
+\item{\code{lpd}}{A nchain x ndocs matrix of predictive posterior likelihoods (NOT
+log-likelihoods).}
 }}
 

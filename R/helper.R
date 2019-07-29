@@ -170,7 +170,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
             Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as
             'formula'.")
 
-    if (model == 4 || model == 5) { # y should be dichotomous
+    if (model == 4 | model == 5) { # y should be dichotomous
       # Check if y is factor and convert to 0/1 numeric if it is
       if (is.factor(y)) y <- as.numeric(y) - 1
       # Check that y is 0/1
@@ -190,14 +190,14 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   }
 
   if (model == 1) {
-    if (!is.null(y) || !is.null(x) || !is.null(mu0) || !is.null(sigma0) ||
-        !is.null(a0) || !is.null(b0) || !is.null(eta_start) ||
+    if (!is.null(y) | !is.null(x) | !is.null(mu0) | !is.null(sigma0) |
+        !is.null(a0) | !is.null(b0) | !is.null(eta_start) |
         !is.null(proposal_sd)) {
       stop("Invalid parameter supplied for 'lda' model")
     }
   }
   if (model == 2) {
-    if (!is.null(x) || !is.null(proposal_sd)) {
+    if (!is.null(x) | !is.null(proposal_sd)) {
       stop("Invalid parameter supplied for 'slda' model")
     }
   }
@@ -207,12 +207,12 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
     }
   }
   if (model == 4) {
-    if (!is.null(x) || !is.null(a0) || !is.null(b0)) {
+    if (!is.null(x) | !is.null(a0) | !is.null(b0)) {
       stop("Invalid parameter supplied for 'slda_logit' model")
     }
   }
   if (model == 5) {
-    if (!is.null(a0) || !is.null(b0)) {
+    if (!is.null(a0) | !is.null(b0)) {
       stop("Invalid parameter supplied for 'sldax_logit' model")
     }
   }
@@ -312,7 +312,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
+  res <- .gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
                          mu0, sigma0, a0, b0,
                          eta_start, proposal_sd, interaction_xcol,
                          alpha_, gamma_,
@@ -412,7 +412,7 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
+  res <- .gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
                        verbose, display_progress)
   colnames(res@eta) <- colnames(x)
   return(res)
@@ -420,8 +420,8 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 
 #' Fit logistic regression model
 #'
-#' \code{gibbs_logistic} is used to fit a Bayesian linear regression model using
-#' Gibbs sampling.
+#' \code{gibbs_logistic} is used to fit a Bayesian logistic regression model
+#' using Gibbs sampling.
 #'
 #' For \code{mu0}, by default, we use a vector of \eqn{p} 0s for \eqn{p}
 #' regression coefficients.
@@ -513,7 +513,7 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
+  res <- .gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
                             eta_start, proposal_sd,
                             verbose, display_progress)
   colnames(res@eta) <- colnames(x)

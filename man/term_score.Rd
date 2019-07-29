@@ -2,7 +2,7 @@
 % Please edit documentation in R/slda-results.R
 \name{term_score}
 \alias{term_score}
-\title{Compute term-scores for each word-topic pair (p. 75, Srivasta & Sahami, 2009)}
+\title{Compute term-scores for each word-topic pair}
 \usage{
 term_score(beta_)
 }
@@ -14,5 +14,7 @@ for each of \eqn{K} topics.}
 A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
 }
 \description{
-Compute term-scores for each word-topic pair (p. 75, Srivasta & Sahami, 2009)
+For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
+A. N. Srivastava & M. Sahami (Eds.), Text mining: Classification, clustering,
+and applications. Chapman and Hall/CRC.
 }
