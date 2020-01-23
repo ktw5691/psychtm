@@ -1442,7 +1442,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       uint16_t iter = 0;
       uint16_t max_iter = 1; // Only draw once
       if (constrain_eta) {
-        max_iter = 1000;   // Max repeated draws if trying to constrain eta
+        max_iter = 10000;   // Max repeated draws if trying to constrain eta
       }
       while (!eta_order & (iter < max_iter)) { // Runs at least once
         iter++;
@@ -1479,6 +1479,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           }
         }
       }
+      if (iter >= max_iter - 1 & max_iter > 1) Rcout << "Reached max_iter while drawing eta\n";
       eta = etac; // New draw
 
       if (model == slda || model == sldax) {
