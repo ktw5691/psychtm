@@ -312,23 +312,29 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- .gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
-                         mu0, sigma0, a0, b0,
-                         eta_start, proposal_sd, interaction_xcol,
-                         alpha_, gamma_,
-                         constrain_eta, verbose, display_progress)
-  if (model %in% c(3, 5) & !is.null(colnames(x))) {
-    if (interaction_xcol < 1) {
-      colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)))
+  res_out <- tryCatch({
+    res <- .gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
+                            mu0, sigma0, a0, b0,
+                            eta_start, proposal_sd, interaction_xcol,
+                            alpha_, gamma_,
+                            constrain_eta, verbose, display_progress)
+    if (model %in% c(3, 5) & !is.null(colnames(x))) {
+      if (interaction_xcol < 1) {
+        colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)))
+      }
+      else {
+        colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)),
+                               paste0(colnames(x)[interaction_xcol], ":topic",  seq_len(K - 1)))
+      }
+    } else if (model %in% c(2, 4)) {
+      colnames(res@eta) <- paste0("topic", seq_len(K))
     }
-    else {
-      colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)),
-                             paste0(colnames(x)[interaction_xcol], ":topic",  seq_len(K - 1)))
-    }
-  } else if (model %in% c(2, 4)) {
-    colnames(res@eta) <- paste0("topic", seq_len(K))
-  }
-  return(res)
+    return(res)
+  }, error = function(err_cond) {
+    stop(err_cond)
+  })
+
+  return(res_out)
 }
 
 #' Fit linear regression model
@@ -412,10 +418,16 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- .gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
-                       verbose, display_progress)
-  colnames(res@eta) <- colnames(x)
-  return(res)
+  res_out <- tryCatch({
+    res <- .gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
+                          verbose, display_progress)
+    colnames(res@eta) <- colnames(x)
+    return(res)
+    }, error = function(err_cond) {
+      stop(err_cond)
+    })
+
+  return(res_out)
 }
 
 #' Fit logistic regression model
@@ -513,9 +525,21 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
-  res <- .gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
-                            eta_start, proposal_sd,
-                            verbose, display_progress)
-  colnames(res@eta) <- colnames(x)
-  return(res)
+  # Check proposal_sd
+  chk_proposal_sd <- (length(proposal_sd) == q_) &
+    (sum(sign(proposal_sd) > 0) == q_)
+  if (!chk_proposal_sd)
+    stop(paste("'proposal_sd' must be a positive vector of length", q_))
+
+  res_out <- tryCatch({
+    res <- .gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
+                               eta_start, proposal_sd,
+                               verbose, display_progress)
+    colnames(res@eta) <- colnames(x)
+    return(res)
+  }, error = function(err_cond) {
+    stop(err_cond)
+  })
+
+  return(res_out)
 }
