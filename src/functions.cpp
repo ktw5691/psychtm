@@ -3,120 +3,18 @@
 #include <vector>
 #include <progress.hpp>
 #include <progress_bar.hpp>
+
+#include "error.h"
+#include "rmvnorm_cpp.h"
+#include "table_cpp.h"
+#include "draw_eta_norm.h"
+#include "invlogit.h"
+#include "get_loglike.h"
+
 using namespace Rcpp;
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
 // [[Rcpp::plugins(cpp11)]]
-
-// Function to handle errors
-void error(std::string s) {
-  throw std::runtime_error(s);
-}
-
-//' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
-//'
-//' @param n The number of samples to draw.
-//' @param mu The q x 1 mean vector of the distribution (column vector).
-//' @param sigma The q x q variance-covariance matrix of the distribution.
-//'
-//' @return A n x q matrix of random draws.
-arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
-                      const arma::mat& sigma) {
-
-  // TODO: Check for positive-definite sigma
-  const uint16_t ncols = sigma.n_cols;
-  if ((mu.size() != sigma.n_rows) || (mu.size() != ncols)) {
-    Rcerr <<
-      "sigma must be a square matrix and mu must be a column vector with length equal to the number of rows and columns in sigma\n";
-  }
-  arma::mat y = arma::randn(n, ncols);
-
-  return arma::repmat(mu, 1, n).t() + y * arma::chol(sigma);
-}
-
-//' Get the top number of observations
-//'
-//' @param v A row vector of values to be tabulated.
-//'
-//' @return A map of (values, frequencies)
-std::map<uint32_t, uint32_t> table_cpp(const arma::urowvec& v) {
-
-  // Create a map to store frequencies
-  std::map<uint32_t, uint32_t> Elt;
-  Elt.clear();
-
-  // Fill the map with occurrences per number.
-  for (int i = 0; i < v.size(); ++i) Elt[ v(i) ] += 1;
-
-  return Elt;
-}
-
-//' Draw eta from full conditional posterior for sLDA/sLDAX/MLR models
-//'
-//' @param w A D x q matrix containing a predictor model matrix of assumed form
-//'   (X, Zbar, XZbarInteractions).
-//' @param y A D x 1 vector of the outcome variable for each document.
-//' @param sigma2 The residual variance.
-//' @param mu0 A q x 1 vector of prior means for the regression coefficients.
-//' @param sigma0 A q x q prior variance-covariance matrix for the regression
-//'   coefficients.
-//'
-//' @return A q x 1 vector of draws of eta.
-arma::colvec draw_eta_norm(const arma::mat& w, const arma::vec& y,
-                           long double sigma2, const arma::vec& mu0,
-                           const arma::mat& sigma0) {
-
-  arma::mat wtw = w.t() * w;
-  arma::mat sigma0_inv = arma::inv_sympd(sigma0);
-  arma::mat sigma1 = arma::inv_sympd(sigma0_inv + wtw / sigma2);
-  arma::colvec eta1 = sigma1 * (sigma0_inv * mu0 + w.t() * y / sigma2);
-
-  return rmvnorm_cpp(1, eta1, sigma1).t();
-}
-
-//' Compute inverse logit
-//' @param x A double
-//'
-//' @return Inverse-logit(x) on probability scale.
-double invlogit(double x) {
-  double temp = exp(x) / (1.0 + exp(x));
-  return temp;
-}
-
-//' Log-likelihood for logistic regression for observation d
-//'
-//' @param yd An integer 0/1 outcome to be predicted.
-//' @param muhatd A double predicted outcome on logit scale.
-//'
-//' @return The current log-likelihood for observation d.
-double get_ll_logit_yd(bool yd, double muhatd) {
-
-  // Compute log-likelihood of y
-  double ll_temp = yd * muhatd - log(1.0 + exp(muhatd));
-  return ll_temp;
-}
-
-//' Log-likelihood for logistic regression
-//'
-//' @param y A D x 1 vector of 0/1 outcomes to be predicted.
-//' @param w A D x q matrix containing a predictor model matrix.
-//' @param eta A q x 1 vector of regression coefficients.
-//'
-//' @return The current log-likelihood.
-double get_ll_logit(const arma::colvec& y, const arma::mat& w,
-                    const arma::colvec& eta) {
-
-  // Add likelihood of y
-  uint32_t D = w.n_rows;
-  arma::colvec muhat = w * eta;
-
-  // Compute log-likelihood of y
-  double ll_temp = 0.0;
-  for (uint32_t d = 0; d < D; d++) {
-    ll_temp += get_ll_logit_yd(y(d), arma::as_scalar(muhat(d)));
-  }
-  return ll_temp;
-}
 
 //' Log-posterior for regression coefficients with normal prior
 //'
@@ -224,7 +122,7 @@ long double draw_sigma2(float a0, float b0,
                         const arma::colvec& eta) {
 
   const uint32_t D = y.size(); // Number of observations
-  if ((a0 < 0.0) || (b0 < 0.0)) error("a0 and b0 must be positive");
+  if ((a0 <= 0.0) || (b0 <= 0.0)) stop("a0 and b0 must be positive");
   long double a = 0.5 * (static_cast<float>(D) + a0);
 
   if ((w.n_rows != D) || (w.n_cols != eta.size()))
@@ -649,103 +547,6 @@ NumericVector waic_diff(const arma::mat& l_pred1, const arma::mat& l_pred2) {
   return diff_waic_se;
 }
 
-//' Log-likelihood for MLR
-//'
-//' @param y A D x 1 vector of outcomes to be predicted.
-//' @param w A D x q matrix containing a predictor model matrix.
-//' @param eta A q x 1 vector of regression coefficients.
-//' @param sigma2 The current draw of the residual variance of y.
-//'
-//' @return The current log-likelihood.
-double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
-                  const arma::colvec& eta, double sigma2) {
-
-  double temp_prod = arma::as_scalar(
-    (y - w * eta).t() * (y - w * eta)
-  );
-  double ll_temp = -0.5 / sigma2 * temp_prod;
-
-  return ll_temp;
-}
-
-//' Log-likelihood for LDA model
-//'
-//' @param zdocs A D x max(\eqn{N_d}) matrix of topic indicators for all documents.
-//' @param docs A D x max(\eqn{N_d}) matrix of word indicators for all documents.
-//' @param theta A D x K matrix of the current estimates of the document topic proportions.
-//' @param beta a K x V matrix of the current estimates of the word-topic probabilities.
-//' @param docs_index A vector of length D containing elements 1, 2, ..., D.
-//' @param N A vector of length D containing the number of words in each document.
-//'
-//' @return The current log-likelihood.
-double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
-                  const arma::mat& theta, const arma::mat& beta,
-                  const IntegerVector& docs_index, const arma::colvec& N) {
-
-  double ll_temp = 0.0;
-  // Add likelihood of documents
-  for (uint32_t d : docs_index) {
-    for (uint32_t n = 0; n < N(d); n++) {
-      uint16_t zdn = zdocs(d, n) - 1; // Topic for word dn (0-indexed)
-      uint32_t wdn = docs(d, n) - 1;  // Word for word dn (0-indexed)
-      ll_temp += log(theta(d, zdn));  // f(z_{dn} | theta_d)
-      ll_temp += log(beta(zdn, wdn)); // f(w_{dn} | z_{dn}, beta_{z_{dn}})
-    }
-  }
-  return ll_temp;
-}
-
-//' Log-likelihood for sLDA/sLDAX model
-//'
-//' @param y A D x 1 vector of outcomes to be predicted.
-//' @param w A D x q matrix containing a predictor model matrix of assumed form
-//'   (X, Zbar, XZbarInteractions).
-//' @param eta A q x 1 vector of regression coefficients.
-//' @param sigma2 The current draw of the residual variance of y.
-//' @param zdocs A D x max(\eqn{N_d}) matrix of topic indicators for all documents.
-//' @param docs A D x max(\eqn{N_d}) matrix of word indicators for all documents.
-//' @param theta A D x K matrix of the current estimates of the document topic proportions.
-//' @param beta a K x V matrix of the current estimates of the word-topic probabilities.
-//' @param docs_index A vector of length D containing elements 1, 2, ..., D.
-//' @param N A vector of length D containing the number of words in each document.
-//'
-//' @return The current log-likelihood.
-double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
-                        const arma::colvec& eta, double sigma2,
-                        const arma::umat& zdocs, const arma::umat& docs,
-                        const arma::mat& theta, const arma::mat& beta,
-                        const IntegerVector& docs_index, const arma::colvec& N) {
-
-  double ll_temp = get_ll_mlr(y, w, eta, sigma2) +
-    get_ll_lda(zdocs, docs, theta, beta, docs_index, N);
-  return ll_temp;
-}
-
-//' Log-likelihood for logistic sLDA/sLDAX model
-//'
-//' @param y A D x 1 vector of outcomes to be predicted.
-//' @param w A D x q matrix containing a predictor model matrix of assumed form
-//'   (X, Zbar, XZbarInteractions).
-//' @param eta A q x 1 vector of regression coefficients.
-//' @param zdocs A D x max(\eqn{N_d}) matrix of topic indicators for all documents.
-//' @param docs A D x max(\eqn{N_d}) matrix of word indicators for all documents.
-//' @param theta A D x K matrix of the current estimates of the document topic proportions.
-//' @param beta a K x V matrix of the current estimates of the word-topic probabilities.
-//' @param docs_index A vector of length D containing elements 1, 2, ..., D.
-//' @param N A vector of length D containing the number of words in each document.
-//'
-//' @return The current log-likelihood.
-double get_ll_slda_logit(const arma::colvec& y, const arma::mat& w,
-                         const arma::colvec& eta,
-                         const arma::umat& zdocs, const arma::umat& docs,
-                         const arma::mat& theta, const arma::mat& beta,
-                         const IntegerVector& docs_index, const arma::colvec& N) {
-
- double ll_temp = get_ll_logit(y, w, eta) +
-   get_ll_lda(zdocs, docs, theta, beta, docs_index, N);
- return ll_temp;
-}
-
 //' Log-posterior for normal outcome regression
 //'
 //' @param ll A double of the current log-likelihood.
@@ -980,8 +781,8 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
     try {
       eta = draw_eta_norm(x, y, sigma2, mu0, sigma0);
     } catch (std::exception& e) {
-      Rcerr << "Runtime Error: " << e.what() <<
-        " while drawing eta vector\n";
+      Rcerr << "Runtime Error: " << e.what() << " while drawing eta vector\n";
+      forward_exception_to_r(e);
     }
 
     // Draw sigma2
@@ -989,6 +790,7 @@ S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
       sigma2 = draw_sigma2(a0, b0, x, y, eta);
     } catch (std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " while drawing sigma2\n";
+      forward_exception_to_r(e);
     }
 
     if ( (i > burn) && (i % thin == 0) ) {
@@ -1101,6 +903,7 @@ S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
     } catch (std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " while drawing eta vector\n";
+      forward_exception_to_r(e);
     }
 
     // Update acceptance rates and tune proposal standard deviations
@@ -1280,6 +1083,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
   } catch(std::exception& e) {
     Rcerr << "Runtime error: " << e.what() <<
       " while computing topic-word co-occurrences\n";
+    forward_exception_to_r(e);
   }
 
   nk = arma::sum(ndk, 0).t(); // Column sums
@@ -1291,6 +1095,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() <<
         " when estimating theta vector for document " << d << "\n";
+      forward_exception_to_r(e);
     }
   }
 
@@ -1301,6 +1106,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
     } catch(std::exception& e) {
       Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
         "of beta matrix\n";
+      forward_exception_to_r(e);
     }
   }
 
@@ -1385,10 +1191,11 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           } else {
             Rcerr << "Invalid model specified. Exiting.\n";
           }
-        } catch(std::exception&  e) {
+        } catch(std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() <<
             " occurred while drawing topic for word " << n << " in document "
             << d << "\n";
+          forward_exception_to_r(e);
         }
 
         zdocs(d, n) = topic;
@@ -1408,6 +1215,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() <<
           " when estimating theta vector for document " << d << "\n";
+        forward_exception_to_r(e);
       }
     }
 
@@ -1433,6 +1241,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       } catch(std::exception& e) {
         Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
           "of beta matrix\n";
+        forward_exception_to_r(e);
       }
     }
 
@@ -1452,6 +1261,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           } catch (std::exception& e) {
             Rcerr << "Runtime Error: " << e.what() <<
               " while drawing eta vector\n";
+            forward_exception_to_r(e);
           }
         } else if (model == slda_logit || model == sldax_logit) {
           try {
@@ -1460,6 +1270,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           } catch (std::exception& e) {
             Rcerr << "Runtime Error: " << e.what() <<
               " while drawing eta vector\n";
+            forward_exception_to_r(e);
           }
         }
         if (constrain_eta) {
@@ -1488,6 +1299,7 @@ S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           sigma2 = draw_sigma2(a0, b0, r, y, eta);
         } catch (std::exception& e) {
           Rcerr << "Runtime Error: " << e.what() << " while drawing sigma2\n";
+          forward_exception_to_r(e);
         }
       }
     }
