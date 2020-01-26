@@ -1,29 +1,30 @@
 Package: psychtm
 Type: Package
 Title: Text Mining for Psychological Research
-Version: 2019.7
-Date: 2019-07-22
+Version: 2020.1
+Date: 2019-01-26
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
 Description: Supports Bayesian estimation of supervised (sLDAX) and unsupervised (LDA) topic models.
 License: GPL-3
 Depends: R (>= 3.3.0)
 Imports:
+    methods,
     Rcpp,
     RcppArmadillo,
     RcppProgress,
-    tibble,
-    methods
+    tibble
 Suggests:
+    covr,
     dplyr,
     ggplot2,
-    testthat,
-    covr
+    testthat
 LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress
 BugReports: https://github.com/ktw5691/psychtm/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
+Encoding: UTF-8
 SystemRequirements: C++11
 Collate:
     'RcppExports.R'

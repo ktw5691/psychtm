@@ -4,10 +4,21 @@
 \alias{gibbs_logistic}
 \title{Fit logistic regression model}
 \usage{
-gibbs_logistic(formula, data, m = 100, burn = 0, thin = 1,
-  y = NULL, x = NULL, mu0 = NULL, sigma0 = NULL,
-  eta_start = NULL, proposal_sd = NULL, verbose = FALSE,
-  display_progress = FALSE)
+gibbs_logistic(
+  formula,
+  data,
+  m = 100,
+  burn = 0,
+  thin = 1,
+  y = NULL,
+  x = NULL,
+  mu0 = NULL,
+  sigma0 = NULL,
+  eta_start = NULL,
+  proposal_sd = NULL,
+  verbose = FALSE,
+  display_progress = FALSE
+)
 }
 \arguments{
 \item{formula}{An object of class \code{\link[stats]{formula}}: a symbolic
@@ -64,7 +75,8 @@ For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} diagonal matrix
 with diagonal elements (variances) of 6.25.
 }
 \seealso{
-Other Gibbs sampler: \code{\link{gibbs_mlr}},
-  \code{\link{gibbs_sldax}}
+Other Gibbs sampler: 
+\code{\link{gibbs_mlr}()},
+\code{\link{gibbs_sldax}()}
 }
 \concept{Gibbs sampler}

@@ -4,9 +4,22 @@
 \alias{gibbs_mlr}
 \title{Fit linear regression model}
 \usage{
-gibbs_mlr(formula, data, m = 100, burn = 0, thin = 1, y = NULL,
-  x = NULL, mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
-  eta_start = NULL, verbose = FALSE, display_progress = FALSE)
+gibbs_mlr(
+  formula,
+  data,
+  m = 100,
+  burn = 0,
+  thin = 1,
+  y = NULL,
+  x = NULL,
+  mu0 = NULL,
+  sigma0 = NULL,
+  a0 = NULL,
+  b0 = NULL,
+  eta_start = NULL,
+  verbose = FALSE,
+  display_progress = FALSE
+)
 }
 \arguments{
 \item{formula}{An object of class \code{\link[stats]{formula}}: a symbolic
@@ -62,7 +75,8 @@ regression coefficients.
 For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} identity matrix.
 }
 \seealso{
-Other Gibbs sampler: \code{\link{gibbs_logistic}},
-  \code{\link{gibbs_sldax}}
+Other Gibbs sampler: 
+\code{\link{gibbs_logistic}()},
+\code{\link{gibbs_sldax}()}
 }
 \concept{Gibbs sampler}

@@ -4,12 +4,31 @@
 \alias{gibbs_sldax}
 \title{Fit supervised or unsupervised topic models (sLDAX or LDA)}
 \usage{
-gibbs_sldax(formula, data, m = 100, burn = 0, thin = 1, docs, V,
-  K = 2L, model = c("lda", "slda", "sldax", "slda_logit",
-  "sldax_logit"), y = NULL, x = NULL, interaction_xcol = -1L,
-  alpha_ = 0.1, gamma_ = 1.01, mu0 = NULL, sigma0 = NULL,
-  a0 = NULL, b0 = NULL, eta_start = NULL, constrain_eta = TRUE,
-  proposal_sd = NULL, verbose = FALSE, display_progress = FALSE)
+gibbs_sldax(
+  formula,
+  data,
+  m = 100,
+  burn = 0,
+  thin = 1,
+  docs,
+  V,
+  K = 2L,
+  model = c("lda", "slda", "sldax", "slda_logit", "sldax_logit"),
+  y = NULL,
+  x = NULL,
+  interaction_xcol = -1L,
+  alpha_ = 0.1,
+  gamma_ = 1.01,
+  mu0 = NULL,
+  sigma0 = NULL,
+  a0 = NULL,
+  b0 = NULL,
+  eta_start = NULL,
+  constrain_eta = TRUE,
+  proposal_sd = NULL,
+  verbose = FALSE,
+  display_progress = FALSE
+)
 }
 \arguments{
 \item{formula}{An object of class \code{\link[stats]{formula}}: a symbolic
@@ -129,7 +148,8 @@ matrix with diagonal elements (variances) of 6.25 for
 \code{model = "slda_logit"} and \code{model = "sldax_logit"}.
 }
 \seealso{
-Other Gibbs sampler: \code{\link{gibbs_logistic}},
-  \code{\link{gibbs_mlr}}
+Other Gibbs sampler: 
+\code{\link{gibbs_logistic}()},
+\code{\link{gibbs_mlr}()}
 }
 \concept{Gibbs sampler}
