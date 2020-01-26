@@ -9,21 +9,22 @@ Description: Supports Bayesian estimation of supervised (sLDAX) and unsupervised
 License: GPL-3
 Depends: R (>= 3.3.0)
 Imports:
+    methods,
     Rcpp,
     RcppArmadillo,
     RcppProgress,
-    tibble,
-    methods
+    tibble
 Suggests:
+    covr,
     dplyr,
     ggplot2,
-    testthat,
-    covr
+    testthat
 LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress
 BugReports: https://github.com/ktw5691/psychtm/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
+Encoding: UTF-8
 SystemRequirements: C++11
 Collate:
     'RcppExports.R'
