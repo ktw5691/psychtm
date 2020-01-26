@@ -1,9 +1,8 @@
 #include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppArmadillo)]]
-
-//' Get the top number of observations
+//' @title Get the top number of observations
 //'
+//' @name table_cpp
 //' @param v A row vector of values to be tabulated.
 //'
 //' @return A map of (values, frequencies)

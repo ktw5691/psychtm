@@ -1,8 +1,8 @@
 #include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppArmadillo)]]
-
-//' Compute inverse logit
+//' @title Compute inverse logit
+//'
+//' @name invlogit
 //' @param x A double
 //'
 //' @return Inverse-logit(x) on probability scale.

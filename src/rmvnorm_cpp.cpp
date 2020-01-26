@@ -1,9 +1,8 @@
 #include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppArmadillo)]]
-
-//' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
+//' @title Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 //'
+//' @name rmvnorm_cpp
 //' @param n The number of samples to draw.
 //' @param mu The q x 1 mean vector of the distribution (column vector).
 //' @param sigma The q x q variance-covariance matrix of the distribution.

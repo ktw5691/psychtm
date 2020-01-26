@@ -1,9 +1,8 @@
 #include <RcppArmadillo.h>
 
-// [[Rcpp::depends(RcppArmadillo)]]
-
-//' Log-likelihood for logistic regression for observation d
+//' @title Log-likelihood for logistic regression for observation d
 //'
+//' @name get_ll_logit_yd
 //' @param yd An integer 0/1 outcome to be predicted.
 //' @param muhatd A double predicted outcome on logit scale.
 //'
@@ -15,8 +14,9 @@ double get_ll_logit_yd(bool yd, double muhatd) {
   return ll_temp;
 }
 
-//' Log-likelihood for logistic regression
+//' @title Log-likelihood for logistic regression
 //'
+//' @name get_ll_logit
 //' @param y A D x 1 vector of 0/1 outcomes to be predicted.
 //' @param w A D x q matrix containing a predictor model matrix.
 //' @param eta A q x 1 vector of regression coefficients.
@@ -37,8 +37,9 @@ double get_ll_logit(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' Log-likelihood for MLR
+//' @title Log-likelihood for MLR
 //'
+//' @name get_ll_mlr
 //' @param y A D x 1 vector of outcomes to be predicted.
 //' @param w A D x q matrix containing a predictor model matrix.
 //' @param eta A q x 1 vector of regression coefficients.
@@ -56,8 +57,9 @@ double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' Log-likelihood for LDA model
+//' @title Log-likelihood for LDA model
 //'
+//' @name get_ll_lda
 //' @param zdocs A D x max(\eqn{N_d}) matrix of topic indicators for all documents.
 //' @param docs A D x max(\eqn{N_d}) matrix of word indicators for all documents.
 //' @param theta A D x K matrix of the current estimates of the document topic proportions.
@@ -84,8 +86,9 @@ double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
   return ll_temp;
 }
 
-//' Log-likelihood for sLDA/sLDAX model
+//' @title Log-likelihood for sLDA/sLDAX model
 //'
+//' @name get_ll_slda_norm
 //' @param y A D x 1 vector of outcomes to be predicted.
 //' @param w A D x q matrix containing a predictor model matrix of assumed form
 //'   (X, Zbar, XZbarInteractions).
@@ -111,8 +114,9 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' Log-likelihood for logistic sLDA/sLDAX model
+//' @title Log-likelihood for logistic sLDA/sLDAX model
 //'
+//' @name get_ll_slda_logit
 //' @param y A D x 1 vector of outcomes to be predicted.
 //' @param w A D x q matrix containing a predictor model matrix of assumed form
 //'   (X, Zbar, XZbarInteractions).
