@@ -51,7 +51,7 @@ Rcpp::S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
   const uint16_t pp1 = x.n_cols;
   const uint32_t chain_outlength = (m - burn) / thin; // Truncates remainder
 
-  arma::mat etam(chain_outlength, pp1);
+  arma::mat etam = arma::mat(chain_outlength, pp1, arma::fill::zeros);
   Rcpp::NumericVector loglike(chain_outlength); // Store log-likelihood (up to an additive constant)
   Rcpp::NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
   arma::mat l_pred(chain_outlength, D);
@@ -60,7 +60,7 @@ Rcpp::S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
   arma::vec accept  = arma::vec(pp1, arma::fill::zeros);
   arma::vec acc_rate(pp1);
 
-  arma::colvec eta(pp1);
+  arma::colvec eta = eta_start;
 
   Progress prog(m, display_progress);
   for (uint32_t i = 1; i <= m; i++) {
