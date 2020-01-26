@@ -2,7 +2,7 @@ Package: psychtm
 Type: Package
 Title: Text Mining for Psychological Research
 Version: 2020.1
-Date: 2019-01-26
+Date: 2020-01-26
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
 Description: Supports Bayesian estimation of supervised (sLDAX) and unsupervised (LDA) topic models.
