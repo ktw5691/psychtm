@@ -105,9 +105,13 @@ Rcpp::S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
       }
     }
     if (display_progress) {
-      p.increment();
+      // Check to see if user cancelled sampler
+      if (Progress::check_abort()) {
+        Rcpp::stop("");
+      } else {
+        p.increment();
+      }
     }
-    Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
   }
 
   // Compute WAIC and p_eff

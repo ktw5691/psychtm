@@ -432,9 +432,13 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       }
     }
     if (display_progress) {
-      prog.increment();
+      // Check to see if user cancelled sampler
+      if (Progress::check_abort()) {
+        Rcpp::stop("");
+      } else {
+        prog.increment();
+      }
     }
-    Rcpp::checkUserInterrupt(); // Check to see if user cancelled sampler
   }
 
   // Compute WAIC and p_eff
