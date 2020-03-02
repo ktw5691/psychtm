@@ -409,7 +409,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           accept(j) = attempt(j) = 0;
         }
       }
-      if (i == burn / 5.0 && burn > 0) Rcpp::Rcout << "Finished tuning proposal distributions\n";
+      if (verbose && i == burn / 5.0 && burn > 0) Rcpp::Rcout << "Finished tuning proposal distributions\n";
     }
 
     if (i % 500 == 0 && verbose) {
