@@ -26,8 +26,9 @@ long double draw_sigma2(float a0, float b0,
   resid = y - w * eta;
   double b_update = arma::as_scalar(resid.t() * resid);
 
-  // Parameterization is 1 / rate
-  long double b = 1.0 / (0.5 * (b0 + b_update));
+  long double scale = 0.5 * (b0 + b_update);
+  // Parameterization of R::rgamma(a, b) is a = shape, b = 1 / scale
+  long double b = 1.0 / scale;
   long double sigma2inv = R::rgamma(a, b);
   return 1.0 / sigma2inv;
 }
