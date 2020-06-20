@@ -68,3 +68,12 @@ install.packages("devtools")
 ``` r
 devtools::install_github("ktw5691/psychtm")
 ```
+
+## Limitations
+
+  - This package should be considered beta software and is still under
+    active development: use at your own risk
+
+  - This package uses a Gibbs sampling algorithm that currently can be
+    memory-intensive for a large corpus; future developments are planned
+    to better scale to larger corpora
