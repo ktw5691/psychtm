@@ -49,10 +49,11 @@ double get_ll_logit(const arma::colvec& y, const arma::mat& w,
 double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
                   const arma::colvec& eta, double sigma2) {
 
+  uint32_t D = w.n_rows;
   double temp_prod = arma::as_scalar(
     (y - w * eta).t() * (y - w * eta)
   );
-  double ll_temp = -0.5 / sigma2 * temp_prod;
+  double ll_temp = -0.5 * (static_cast<float>(D) * (log(2.0 * M_PI) + log(sigma2)) + temp_prod / sigma2);
 
   return ll_temp;
 }
