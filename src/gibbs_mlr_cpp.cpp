@@ -94,7 +94,7 @@ Rcpp::S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
       logpost(temp_pos) = get_lpost_mlr(loglike(temp_pos), eta, sigma2,
               mu0, sigma0, a0, b0);
 
-      l_pred.row(temp_pos) = post_pred_norm(x, eta, sigma2);
+      l_pred.row(temp_pos) = post_pred_norm(y, x, eta, sigma2);
 
       etam.row(temp_pos) = eta.t();
       sigma2m(temp_pos) = sigma2;

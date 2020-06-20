@@ -101,7 +101,7 @@ Rcpp::S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,
       loglike(temp_pos) = get_ll_logit(y, x, eta);
       // Log-posterior
       logpost(temp_pos) = get_lpost_eta(loglike(temp_pos), eta, mu0, sigma0);
-      l_pred.row(temp_pos) = post_pred_logit(x, eta);
+      l_pred.row(temp_pos) = post_pred_logit(y, x, eta);
       etam.row(temp_pos) = eta.t();
     }
     if (i % 500 == 0) {
