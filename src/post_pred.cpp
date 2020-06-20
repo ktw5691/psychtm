@@ -1,27 +1,23 @@
 #include <RcppArmadillo.h>
 
 #include "get_loglike.h"
-#include "invlogit.h"
-#include "rmvnorm_cpp.h"
 
 //' @title Posterior predictive likelihood for sLDA/sLDAX/MLR
 //'
 //' @name post_pred_norm
+//' @parm y A D x 1 vector of outcomes.
 //' @param w A D x q matrix of additional predictors.
 //' @param eta A q x 1 vector of regression coefficients.
 //' @param sigma2 The residual variance.
 //'
 //' @return Posterior predictive likelihood.
-arma::rowvec post_pred_norm(const arma::mat& w,
+arma::rowvec post_pred_norm(const arma::colvec& y, const arma::mat& w,
                             const arma::colvec& eta, double sigma2) {
 
-  const uint16_t D = w.n_rows;
   arma::colvec mu_hat = w * eta;
-
-  arma::mat sigma(D, D, arma::fill::eye); // D x D identity matrix
-  // Draw D new observations
-  arma::colvec yhat = rmvnorm_cpp(1, mu_hat, sigma2 * sigma).t();
-  arma::colvec loglike_pred = -0.5 / sigma2 * arma::square(yhat - mu_hat);
+  // Log-likelihood of observed y given current posterior draw of eta, sigma2
+  arma::colvec loglike_pred = -0.5 * (log(2.0 * M_PI) + log(sigma2) +
+    arma::square(y - mu_hat) / sigma2);
 
   return exp(loglike_pred.t());
 }
@@ -29,18 +25,17 @@ arma::rowvec post_pred_norm(const arma::mat& w,
 //' @title Posterior predictive likelihood for logistic sLDA/sLDAX/regression
 //'
 //' @name post_pred_logit
+//' @parm y A D x 1 vector of outcomes.
 //' @param w A D x q matrix of additional predictors.
 //' @param eta A q x 1 vector of regression coefficients.
 //' @return Predictive posterior likelihood of all D observations.
-arma::rowvec post_pred_logit(const arma::mat& w, const arma::colvec& eta) {
+arma::rowvec post_pred_logit(const arma::colvec& y, const arma::mat& w, const arma::colvec& eta) {
 
   const uint16_t D = w.n_rows;
   arma::rowvec loglike_pred(D);
   arma::colvec mu_hat = w * eta;
   for (uint16_t d = 0; d < D; d++) {
-    double phat = invlogit(arma::as_scalar(mu_hat(d)));
-    uint16_t yhat = Rcpp::rbinom(1, 1, phat)(0);
-    loglike_pred(d) = get_ll_logit_yd(yhat, arma::as_scalar(mu_hat(d)));
+    loglike_pred(d) = get_ll_logit_yd(y(d), arma::as_scalar(mu_hat(d)));
   }
   return exp(loglike_pred);
 }
