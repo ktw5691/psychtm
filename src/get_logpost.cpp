@@ -15,17 +15,18 @@
 double get_lpost_eta(double ll, const arma::colvec& eta,
                      const arma::colvec& mu0, const arma::mat& sigma0) {
 
+  uint32_t q = eta.size();
   double lp_temp = ll;
-  // Add prior on eta
+  // Add log-prior on eta
   double temp_prod = arma::as_scalar(
     (eta - mu0).t() * arma::inv_sympd(sigma0) * (eta - mu0)
   );
-  lp_temp += (-0.5 * temp_prod);
+  lp_temp += (-0.5 * ( static_cast<float>(q) * (log(2.0 * M_PI) + log(arma::det(sigma0))) + temp_prod ));
 
   return lp_temp;
 }
 
-//' @title Log-posterior for normal outcome regression
+//' @title Log-posterior contribution for normal outcome priors on coefs and sigma2 + log-likelihood
 //'
 //' @name get_lpost_mlr
 //' @param ll A double of the current log-likelihood.
@@ -37,21 +38,23 @@ double get_lpost_eta(double ll, const arma::colvec& eta,
 //' @param a0 The shape parameter for the prior on sigma2.
 //' @param b0 The scale parameter for the prior on sigma2.
 //'
-//' @return The current log-posterior.
+//' @return The current log-posterior contribution.
 double get_lpost_mlr(double ll,
                      const arma::colvec& eta, double sigma2,
                      const arma::colvec& mu0, const arma::mat& sigma0,
                      double a0, double b0) {
 
+  // Log-likelihood + log-prior on eta
   double lp_temp = get_lpost_eta(ll, eta, mu0, sigma0);
 
-  // Add prior on sigma2
-  lp_temp += ((-0.5 * a0 - 1.0) * log(sigma2) - 0.5 * b0 / sigma2);
+  // Add log-prior on sigma2 ~ Inv-Gamma(a0 / 2, b0 / 2)
+  lp_temp += (0.5 * a0) * log(0.5 * b0) - lgamma(0.5 * a0) +
+    (-0.5 * a0 - 1.0) * log(sigma2) - 0.5 * b0 / sigma2;
 
   return lp_temp;
 }
 
-//' @title Log-posterior for LDA model
+//' @title Log-posterior contribution from LDA model priors + log-likelihood
 //'
 //' @name get_lpost_lda
 //' @param ll A double of the current log-likelihood.
@@ -60,23 +63,28 @@ double get_lpost_mlr(double ll,
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
 //'   vocabulary probabilities.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions.
-//' @param V The number of words in the vocabulary.
-//' @param docs_index A vector of length D containing elements 1, 2, ..., D.
 //'
-//' @return The current log-posterior.
+//' @return The current log-posterior contribution.
 double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
-                     double gamma_, double alpha_,
-                     uint32_t V, const Rcpp::IntegerVector& docs_index) {
+                     double gamma_, double alpha_) {
 
-  // Add prior on beta matrix
-  double temp_betapost = arma::accu(log(beta));
-  double lp_temp = ll + ((gamma_ - 1.0) * temp_betapost);
+  float D = static_cast<float>(theta.n_rows);
+  float K = static_cast<float>(theta.n_cols);
+  float V = static_cast<float>(beta.n_cols);
 
-  // Add prior on theta matrix
-  double temp_thetapost = arma::accu(log(theta));
-  lp_temp += ((alpha_ - 1) * temp_thetapost);
+  // Add log-prior on beta matrix
+  double sum_logbeta = arma::accu(log(beta));
+  double beta_contrib = K * lgamma(V * gamma_) -
+    V * K * lgamma(gamma_) +
+    (gamma_ - 1.0) * sum_logbeta;
 
-  return lp_temp;
+  // Add log-prior on theta matrix
+  double sum_logtheta = arma::accu(log(theta)); // Sum log(theta_{di}) across docs and topics
+  double theta_contrib = D * lgamma(K * alpha_) -
+    K * D * lgamma(alpha_) +
+    (alpha_ - 1) * sum_logtheta;
+
+  return ll + beta_contrib + theta_contrib;
 }
 
 //' @title Log-posterior for sLDA/sLDAX model
@@ -95,19 +103,18 @@ double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions.
 //' @param a0 The shape parameter for the prior on sigma2.
 //' @param b0 The scale parameter for the prior on sigma2.
-//' @param V The number of words in the vocabulary.
-//' @param docs_index A vector of length D containing elements 1, 2, ..., D.
 //'
 //' @return The current log-posterior.
 double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
                            const arma::mat& theta, const arma::mat& beta,
                            const arma::colvec& mu0, const arma::mat& sigma0,
                            double gamma_, double alpha_,
-                           double a0, double b0, uint32_t V,
-                           const Rcpp::IntegerVector& docs_index) {
+                           double a0, double b0) {
 
+  // Combine log-likelihood and log-priors for regression coefs and residual variance
   double lp_temp = get_lpost_mlr(ll, eta, sigma2, mu0, sigma0, a0, b0);
-  lp_temp += get_lpost_lda(lp_temp, theta, beta, gamma_, alpha_, V, docs_index);
+  // Add contribution from LDA log-priors
+  lp_temp = get_lpost_lda(lp_temp, theta, beta, gamma_, alpha_);
   return lp_temp;
 }
 
@@ -124,18 +131,17 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
 //'   vocabulary probabilities.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions.
-//' @param V The number of words in the vocabulary.
-//' @param docs_index A vector of length D containing elements 1, 2, ..., D.
 //'
 //' @return The current log-posterior.
 double get_lpost_slda_logit(double ll, const arma::colvec& eta,
                             const arma::mat& theta, const arma::mat& beta,
                             const arma::colvec& mu0, const arma::mat& sigma0,
-                            double gamma_, double alpha_,
-                            uint32_t V, const Rcpp::IntegerVector& docs_index) {
+                            double gamma_, double alpha_) {
 
+  // Combine log-likelihood and log-prior for regression coefs
   double lp_temp = get_lpost_eta(ll, eta, mu0, sigma0);
-  lp_temp += get_lpost_lda(lp_temp, theta, beta, gamma_, alpha_, V, docs_index);
+  // Add log-priors from LDA model
+  lp_temp = get_lpost_lda(lp_temp, theta, beta, gamma_, alpha_);
   return lp_temp;
 }
 
