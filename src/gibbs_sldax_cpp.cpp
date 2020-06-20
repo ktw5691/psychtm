@@ -365,7 +365,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           loglike(temp_pos) = get_ll_lda(zdocs, docs, theta, beta,
                                              docs_index, N);
           logpost(temp_pos) = get_lpost_lda(
-            loglike(temp_pos), theta, beta, gamma_, alpha_, V, docs_index);
+            loglike(temp_pos), theta, beta, gamma_, alpha_);
           break;
         case slda: // Fall through
         case sldax:
@@ -373,8 +373,8 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
             y, r, eta, sigma2, zdocs, docs, theta, beta, docs_index, N);
           logpost(temp_pos) = get_lpost_slda_norm(
             loglike(temp_pos), eta, sigma2, theta, beta, mu0, sigma0, gamma_,
-            alpha_, a0, b0, V, docs_index);
-          l_pred.row(temp_pos) = post_pred_norm(r, eta, sigma2);
+            alpha_, a0, b0);
+          l_pred.row(temp_pos) = post_pred_norm(y, r, eta, sigma2);
           sigma2m(temp_pos) = sigma2;
           break;
         case slda_logit: // Fall through
@@ -382,8 +382,8 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           loglike(temp_pos) = get_ll_slda_logit(
             y, r, eta, zdocs, docs, theta, beta, docs_index, N);
           logpost(temp_pos) = get_lpost_slda_logit(loglike(temp_pos),
-            eta, theta, beta, mu0, sigma0, gamma_, alpha_, V, docs_index);
-          l_pred.row(temp_pos) = post_pred_logit(r, eta);
+            eta, theta, beta, mu0, sigma0, gamma_, alpha_);
+          l_pred.row(temp_pos) = post_pred_logit(y, r, eta);
           break;
         default: Rcpp::Rcerr << "Invalid model specified. Exiting.\n";
       }
