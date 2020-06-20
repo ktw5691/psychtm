@@ -82,9 +82,9 @@ uint16_t draw_zdn_slda_norm(double yd, const arma::rowvec& w_d,
   //   probability for the problematic topic to 1 / K;
   //   this tends to occur if sigma^2 draw near 0
   if (sigma2 < 0.0) Rcpp::stop("sigma2 must be positive");
-  arma::vec log_num = get_log_numer_samplez(V, ndk_n, nkm_n, nk_n,
-                                            alpha_, gamma_) +
-                                              R::dnorm(yd, dot(w_d, eta), sqrt(sigma2), true);
+  arma::vec log_num = get_log_numer_samplez(
+    V, ndk_n, nkm_n, nk_n, alpha_, gamma_) +
+      R::dnorm(yd, dot(w_d, eta), sqrt(sigma2), true);
   uint16_t zdn = draw_zdn(log_num);
   return zdn;
 }
