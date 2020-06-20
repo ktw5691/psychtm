@@ -34,7 +34,6 @@ arma::mat count_topic_word(uint16_t K, uint32_t V,
     Rcpp::stop("'doc_topic' and 'doc_word' must have the same number of columns");
 
   const arma::ucolvec topics_index = arma::linspace<arma::ucolvec>(1, K, K);
-  const arma::ucolvec docs_index = arma::linspace<arma::ucolvec>(0, D - 1, D);
   // Matrix to store number of topic/word co-occurences
   arma::mat topic_word_freq = arma::mat(K, V, arma::fill::zeros);
 
