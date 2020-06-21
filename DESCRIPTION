@@ -9,6 +9,7 @@ Description: Supports Bayesian estimation of supervised (sLDAX) and unsupervised
 License: GPL-3
 Depends: R (>= 3.3.0)
 Imports:
+    label.switching,
     methods,
     Rcpp,
     RcppArmadillo,
@@ -23,13 +24,17 @@ LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress (>= 0.4.2)
 BugReports: https://github.com/ktw5691/psychtm/issues
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Encoding: UTF-8
 SystemRequirements: C++11
 Collate:
     'RcppExports.R'
-    'helper.R'
     'onUnload.R'
-    'slda-class.R'
-    'slda-generic-functions.R'
-    'slda-results.R'
+    'utils.R'
+    'model-class.R'
+    'mlr-class.R'
+    'logistic-class.R'
+    'sldax-class.R'
+    'sldax-generic-functions.R'
+    'helper.R'
+    'sldax-results.R'
