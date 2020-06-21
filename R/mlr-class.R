@@ -3,24 +3,9 @@ NULL
 
 #' An S4 class to represent a regression model.
 #'
-#' @slot ndocs The number of documents/observations.
-#' @slot nchain The number of iterations of the Gibbs sampler.
-#' @slot mu0 A (p + 1) x 1 matrix of prior means for eta.
-#' @slot sigma0 A (p + 1) x (p + 1) prior covariance matrix for eta.
 #' @slot a0 A prior shape hyperparameter for sigma2.
 #' @slot b0 A prior rate hyperparameter for sigma2.
-#' @slot eta_start A (p + 1) x 1 matrix of starting values for eta.
-#' @slot eta A nchain x (p + 1) matrix of draws of regression coefficients.
 #' @slot sigma2 A nchain x 1 numeric vector of draws of the residual variance.
-#' @slot loglike A nchain x 1 vector of the log-likelihood (up to an additive
-#'   constant).
-#' @slot logpost A nchain x 1 vector of the log-posterior (up to an additive
-#'   constant).
-#' @slot waic WAIC (up to an additive constant) on the deviance scale.
-#' @slot se_waic Standard error of the WAIC.
-#' @slot p_eff The effective number of parameters.
-#' @slot lpd A nchain x ndocs matrix of predictive posterior likelihoods (NOT
-#'   log-likelihoods).
 Mlr <- setClass("Mlr",
   contains = "Model",
   slots = c(
@@ -70,9 +55,23 @@ setMethod("b0<-", "Mlr", function(x, value) {
   x
 })
 
-# setMethod("initialize", "Mlr",
-#           function(.Object) {
-#             .Object <- callNextMethod(.Object)
-#             .Object
-#           }
-# )
+#' Helper function (constructor) for Mlr class.
+#'
+#' @param a0 A prior shape hyperparameter for sigma2.
+#' @param b0 A prior rate hyperparameter for sigma2.
+#' @param sigma2 A nchain x 1 numeric vector of draws of the residual variance.
+Mlr <- function(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...) {
+  super <- Model(...)
+  a0 <- as.double(a0)
+  b0 <- as.double(b0)
+  sigma2 <- as.double(sigma2)
+
+  new("Mlr", a0 = a0, b0 = b0, sigma2 = sigma2,
+      ndocs = super@ndocs, nchain = super@nchain, mu0 = super@mu0,
+      sigma0 = super@sigma0, eta_start = super@eta_start, eta = super@eta,
+      loglike = super@loglike, logpost = super@logpost, waic = super@waic,
+      se_waic = super@se_waic, p_eff = super@p_eff, lpd = super@lpd)
+}
+
+#' Validator function for Mlr class
+#' TODO

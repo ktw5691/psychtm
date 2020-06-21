@@ -3,23 +3,8 @@ NULL
 
 #' An S4 class to represent a logistic regression model.
 #'
-#' @slot ndocs The number of documents/observations.
-#' @slot nchain The number of iterations of the Gibbs sampler.
-#' @slot mu0 A (p + 1) x 1 matrix of prior means for eta.
-#' @slot sigma0 A (p + 1) x (p + 1) prior covariance matrix for eta.
-#' @slot eta_start A (p + 1) x 1 matrix of starting values for eta.
-#' @slot eta A nchain x (p + 1) matrix of draws of regression coefficients.
 #' @slot proposal_sd A (p + 1) x 1 vector of proposal scales for
 #'   Metropolis-Hastings sampling of eta.
-#' @slot loglike A nchain x 1 vector of the log-likelihood (up to an additive
-#'   constant).
-#' @slot logpost A nchain x 1 vector of the log-posterior (up to an additive
-#'   constant).
-#' @slot waic WAIC (up to an additive constant) on the deviance scale.
-#' @slot se_waic Standard error of the WAIC.
-#' @slot p_eff The effective number of parameters.
-#' @slot lpd A nchain x ndocs matrix of predictive posterior likelihoods (NOT
-#'   log-likelihoods).
 Logistic <- setClass("Logistic",
   contains = "Model",
   slots = c(
@@ -42,9 +27,20 @@ setMethod("proposal_sd<-", "Logistic", function(x, value) {
   x
 })
 
-# setMethod("initialize", "Logistic",
-#           function(.Object) {
-#             .Object <- callNextMethod(.Object)
-#             .Object
-#           }
-# )
+#' Helper function (constructor) for Logistic class.
+#'
+#' @param proposal_sd A (p + 1) x 1 vector of proposal scales for
+#'   Metropolis-Hastings sampling of eta.
+Logistic <- function(proposal_sd = NaN, ...) {
+  super <- Model(...)
+  proposal_sd <- as.double(proposal_sd)
+
+  new("Logistic", proposal_sd = proposal_sd,
+      ndocs = super@ndocs, nchain = super@nchain, mu0 = super@mu0,
+      sigma0 = super@sigma0, eta_start = super@eta_start, eta = super@eta,
+      loglike = super@loglike, logpost = super@logpost, waic = super@waic,
+      se_waic = super@se_waic, p_eff = super@p_eff, lpd = super@lpd)
+}
+
+#' Validator function for Logistic class
+#' TODO
