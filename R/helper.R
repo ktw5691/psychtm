@@ -85,11 +85,11 @@ check_logical <- function(arg) {
 #'   Not needed if \code{data} is supplied.
 #' @param x An optional D x p design matrix of additional predictors (do NOT
 #'   include an intercept column!). Not needed if \code{data} is supplied.
-#' @param interaction_xcol The column number of the design matrix for the
-#' additional predictors for which an interaction with the \eqn{K} topics is desired
-#' (default: \eqn{-1L}, no interaction). Currently only supports a single continuous
-#' predictor or a two-category categorical predictor represented as a single
-#' dummy-coded column.
+#' @param interaction_xcol EXPERIMENTAL: The column number of the design matrix for
+#'   the additional predictors for which an interaction with the \eqn{K} topics is
+#'   desired (default: \eqn{-1L}, no interaction). Currently only supports a single
+#'   continuous predictor or a two-category categorical predictor represented as a
+#'   single dummy-coded column.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
 #'   (default: 0.1).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -102,7 +102,7 @@ check_logical <- function(arg) {
 #' @param b0 The scale parameter for the prior on sigma2 (default: 0.001).
 #' @param eta_start A q x 1 vector of starting values for the
 #'   regression coefficients.
-#' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
+#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
 #'   regression coefficients will be constrained so that they are in descending
 #'   order; if \code{FALSE}, no constraints will be applied.
 #' @param proposal_sd The proposal standard deviations for drawing the
@@ -124,9 +124,18 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         y = NULL, x = NULL, interaction_xcol = -1L,
                         alpha_ = 0.1, gamma_ = 1.01,
                         mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
-                        eta_start = NULL, constrain_eta = TRUE,
+                        eta_start = NULL, constrain_eta = FALSE,
                         proposal_sd = NULL,
                         verbose = FALSE, display_progress = FALSE) {
+
+  # Start timing
+  t1 <- Sys.time()
+
+  # Check if any arguments without defaults were not supplied by user
+  if (missing(formula)) missing_msg(formula)
+  if (missing(data)) missing_msg(data)
+  if (missing(docs)) missing_msg(docs)
+  if (missing(V)) missing_msg(V)
 
   # Check model and convert to integer codes
   if (is.character(model)) {
@@ -150,6 +159,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                  slda_logit = 4L,
                  sldax_logit = 5L)
 
+  sldax_call <- match.call()
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
   if (sum(mind) > 0) {
@@ -329,6 +339,11 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
     } else if (model %in% c(2, 4)) {
       colnames(res@eta) <- paste0("topic", seq_len(K))
     }
+    t2 <- Sys.time()
+    extra(res) <- list(time_elapsed = t2 - t1,
+                       start_time = t1,
+                       end_time = t2,
+                       call = sldax_call)
     return(res)
   }, error = function(err_cond) {
     stop(err_cond)
@@ -381,6 +396,14 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
                       eta_start = NULL,
                       verbose = FALSE, display_progress = FALSE) {
 
+  # Start timing
+  t1 <- Sys.time()
+
+  # Check if any arguments without defaults were not supplied by user
+  if (missing(formula)) missing_msg(formula)
+  if (missing(data)) missing_msg(data)
+
+  mlr_call <- match.call()
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
   if (sum(mind) > 0) {
@@ -422,6 +445,11 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
     res <- .gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
                           verbose, display_progress)
     colnames(res@eta) <- colnames(x)
+    t2 <- Sys.time()
+    extra(res) <- list(time_elapsed = t2 - t1,
+                       start_time = t1,
+                       end_time = t2,
+                       call = mlr_call)
     return(res)
     }, error = function(err_cond) {
       stop(err_cond)
@@ -476,6 +504,14 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
                            eta_start = NULL, proposal_sd = NULL,
                            verbose = FALSE, display_progress = FALSE) {
 
+  # Start timing
+  t1 <- Sys.time()
+
+  # Check if any arguments without defaults were not supplied by user
+  if (missing(formula)) missing_msg(formula)
+  if (missing(data)) missing_msg(data)
+
+  logistic_call <- match.call()
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
   if (sum(mind) > 0) {
@@ -536,6 +572,11 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
                                eta_start, proposal_sd,
                                verbose, display_progress)
     colnames(res@eta) <- colnames(x)
+    t2 <- Sys.time()
+    extra(res) <- list(time_elapsed = t2 - t1,
+                       start_time = t1,
+                       end_time = t2,
+                       call = logistic_call)
     return(res)
   }, error = function(err_cond) {
     stop(err_cond)
