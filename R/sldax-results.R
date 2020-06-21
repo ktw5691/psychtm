@@ -195,7 +195,7 @@ setMethod("gg_coef",
 #' @rdname sldax-gettop-methods
 setMethod("est_theta",
           c(mcmc_fit = "Sldax"),
-          function(mcmc_fit, burn, thin, stat) {
+          function(mcmc_fit, burn, thin, stat, correct_label_switch, verbose) {
 
             m <- mcmc_fit@nchain
             K <- mcmc_fit@ntopics
@@ -214,12 +214,31 @@ setMethod("est_theta",
                   z_count[k] <- sum(topics[d, , i] == k, na.rm = TRUE)
                 theta[d, , i] <- .est_thetad(z_count, alpha_)
               }
-              if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
-                cat("Iteration", i, "of", len, "\n")
+              if (verbose) {
+                if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
+                  cat("Iteration", i, "of", len, "\n")
+              }
             }
 
-            if (stat == "mean") theta_mean <- apply(theta, c(1, 2), mean)
-            if (stat == "median") theta_mean <- apply(theta, c(1, 2), median)
+            if (correct_label_switch) {
+              # Permute to dimensions: MCMC draws, Docs, Topics
+              theta_perm <- aperm(theta, c(3, 1, 2))
+              # Relabeling algorithm from Stephens (2000)
+              relabel_out <- label.switching::stephens(theta_perm)
+              if (verbose)
+                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
+              reorder_theta <- label.switching::permute.mcmc(
+                aperm(theta_perm, c(1, 3, 2)),
+                permutations = relabel_out$permutations)$output
+              reorder_theta <- aperm(reorder_theta, c(1, 3, 2)) # MCMC, D, K
+              if (stat == "mean")
+                theta_mean <- apply(reorder_theta, c(2, 3), mean)
+              if (stat == "median")
+                theta_mean <- apply(reorder_theta, c(2, 3), median)
+            } else {
+              if (stat == "mean") theta_mean <- apply(theta, c(1, 2), mean)
+              if (stat == "median") theta_mean <- apply(theta, c(1, 2), median)
+            }
             return(theta_mean)
           }
 )
@@ -227,7 +246,8 @@ setMethod("est_theta",
 #' @rdname sldax-gettop-methods
 setMethod("est_beta",
           c(mcmc_fit = "Sldax"),
-          function(mcmc_fit, docs, burn, thin, stat) {
+          function(mcmc_fit, docs, burn, thin, stat,
+                   correct_label_switch, verbose) {
 
             m <- mcmc_fit@nchain
             K <- mcmc_fit@ntopics
@@ -244,12 +264,31 @@ setMethod("est_beta",
               wz_co <- .count_topic_word(K, V, topics[, , i], docs)
               for (k in seq_len(K)) beta_[k, , i] <- .est_betak(
                 wz_co[k, ], gamma_)
-              if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
-                cat("Iteration", i, "of", len, "\n")
+              if (verbose) {
+                if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
+                  cat("Iteration", i, "of", len, "\n")
+              }
             }
 
-            if (stat == "mean") beta_mean <- apply(beta_, c(1, 2), mean)
-            if (stat == "median") beta_mean <- apply(beta_, c(1, 2), median)
+            if (correct_label_switch) {
+              # Permute to dimensions: MCMC draws, Words, Topics
+              beta_perm <- aperm(beta_, c(3, 2, 1))
+              # Relabeling algorithm from Stephens (2000)
+              relabel_out <- label.switching::stephens(beta_perm)
+              if (verbose)
+                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
+              reorder_beta <- label.switching::permute.mcmc(
+                aperm(beta_perm, c(1, 3, 2)),
+                permutations = relabel_out$permutations)$output
+              reorder_beta <- aperm(reorder_beta, c(1, 3, 2)) # MCMC, K, V
+              if (stat == "mean")
+                beta_mean <- t(apply(reorder_beta, c(2, 3), mean))
+              if (stat == "median")
+                beta_mean <- t(apply(reorder_beta, c(2, 3), median))
+            } else {
+              if (stat == "mean") beta_mean <- apply(beta_, c(1, 2), mean)
+              if (stat == "median") beta_mean <- apply(beta_, c(1, 2), median)
+            }
             return(beta_mean)
           }
 )

@@ -167,9 +167,13 @@ setGeneric("gg_coef",
 )
 
 #' @rdname sldax-gettop-methods
+#' @param correct_label_switch Should Stephens' (2000) algorithm be used to
+#'   correct label switching? (default: \code{TRUE})
+#' @param verbose Print status information? (default: \code{FALSE})
 #' @export
 setGeneric("est_theta",
-           function(mcmc_fit, burn = 0, thin = 1, stat = "mean") {
+           function(mcmc_fit, burn = 0, thin = 1, stat = "mean",
+                    correct_label_switch = TRUE, verbose = FALSE) {
 
              passed_args <- names(as.list(match.call())[-1])
 
@@ -196,6 +200,11 @@ setGeneric("est_theta",
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
 
+             if (!is.logical(correct_label_switch))
+               stop("'correct_label_switch' must be 'TRUE' or 'FALSE'.")
+             if (!is.logical(verbose))
+               stop("'verbose' must be 'TRUE' or 'FALSE'.")
+
              standardGeneric("est_theta")
            }
 )
@@ -206,7 +215,8 @@ setGeneric("est_theta",
 #' @rdname sldax-gettop-methods
 #' @export
 setGeneric("est_beta",
-           function(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean") {
+           function(mcmc_fit, docs, burn = 0, thin = 1, stat = "mean",
+                    correct_label_switch = TRUE, verbose = FALSE) {
 
              passed_args <- names(as.list(match.call())[-1])
 
@@ -241,6 +251,11 @@ setGeneric("est_beta",
              }
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
+
+             if (!is.logical(correct_label_switch))
+               stop("'correct_label_switch' must be 'TRUE' or 'FALSE'.")
+             if (!is.logical(verbose))
+               stop("'verbose' must be 'TRUE' or 'FALSE'.")
 
              standardGeneric("est_beta")
            }
