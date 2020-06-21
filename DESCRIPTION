@@ -29,12 +29,12 @@ Encoding: UTF-8
 SystemRequirements: C++11
 Collate:
     'RcppExports.R'
-    'onUnload.R'
-    'utils.R'
+    'helper.R'
     'model-class.R'
-    'mlr-class.R'
     'logistic-class.R'
+    'mlr-class.R'
+    'onUnload.R'
     'sldax-class.R'
     'sldax-generic-functions.R'
-    'helper.R'
     'sldax-results.R'
+    'utils.R'
