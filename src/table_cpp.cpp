@@ -13,7 +13,7 @@ std::map<uint32_t, uint32_t> table_cpp(const arma::urowvec& v) {
   Elt.clear();
 
   // Fill the map with occurrences per number.
-  for (int i = 0; i < v.size(); ++i) Elt[ v(i) ] += 1;
+  for (arma::uword i = 0; i < v.size(); ++i) Elt[ v(i) ] += 1;
 
   return Elt;
 }

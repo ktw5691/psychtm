@@ -338,7 +338,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           }
         }
       }
-      if (iter >= max_iter - 1 & max_iter > 1) Rcpp::Rcout << "Reached max_iter while drawing eta\n";
+      if ( (iter >= max_iter - 1) & (max_iter > 1) ) Rcpp::Rcout << "Reached max_iter while drawing eta\n";
       eta = etac; // New draw
 
       if (model == slda || model == sldax) {
