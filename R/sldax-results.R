@@ -1,4 +1,4 @@
-#' @include slda-class.R slda-generic-functions.R
+#' @include sldax-class.R sldax-generic-functions.R
 NULL
 
 #' Compute term-scores for each word-topic pair
