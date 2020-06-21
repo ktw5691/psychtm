@@ -24,7 +24,7 @@ gibbs_sldax(
   a0 = NULL,
   b0 = NULL,
   eta_start = NULL,
-  constrain_eta = TRUE,
+  constrain_eta = FALSE,
   proposal_sd = NULL,
   verbose = FALSE,
   display_progress = FALSE
@@ -59,11 +59,11 @@ Not needed if \code{data} is supplied.}
 \item{x}{An optional D x p design matrix of additional predictors (do NOT
 include an intercept column!). Not needed if \code{data} is supplied.}
 
-\item{interaction_xcol}{The column number of the design matrix for the
-additional predictors for which an interaction with the \eqn{K} topics is desired
-(default: \eqn{-1L}, no interaction). Currently only supports a single continuous
-predictor or a two-category categorical predictor represented as a single
-dummy-coded column.}
+\item{interaction_xcol}{EXPERIMENTAL: The column number of the design matrix for
+the additional predictors for which an interaction with the \eqn{K} topics is
+desired (default: \eqn{-1L}, no interaction). Currently only supports a single
+continuous predictor or a two-category categorical predictor represented as a
+single dummy-coded column.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
 (default: 0.1).}
@@ -84,7 +84,7 @@ regression coefficients. See 'Details'.}
 \item{eta_start}{A q x 1 vector of starting values for the
 regression coefficients.}
 
-\item{constrain_eta}{A logical (default = \code{TRUE}): If \code{TRUE}, the
+\item{constrain_eta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
 regression coefficients will be constrained so that they are in descending
 order; if \code{FALSE}, no constraints will be applied.}
 
