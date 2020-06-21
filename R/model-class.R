@@ -94,6 +94,7 @@ setGeneric("sigma0", function(x) standardGeneric("sigma0"))
 setGeneric("sigma0<-", function(x, value) standardGeneric("sigma0<-"))
 
 setMethod("sigma0", "Model", function(x) x@sigma0)
+
 setMethod("sigma0<-", "Model", function(x, value) {
   x@sigma0 <- value
   x
@@ -141,6 +142,7 @@ setGeneric("logpost", function(x) standardGeneric("logpost"))
 setGeneric("logpost<-", function(x, value) standardGeneric("logpost<-"))
 
 setMethod("logpost", "Model", function(x) x@logpost)
+
 setMethod("logpost<-", "Model", function(x, value) {
   x@logpost <- value
   x
@@ -172,8 +174,11 @@ setMethod("se_waic<-", "Model", function(x, value) {
 
 #### p_eff
 setGeneric("p_eff", function(x) standardGeneric("p_eff"))
+
 setGeneric("p_eff<-", function(x, value) standardGeneric("p_eff<-"))
+
 setMethod("p_eff", "Model", function(x) x@p_eff)
+
 setMethod("p_eff<-", "Model", function(x, value) {
   x@p_eff <- value
   x
@@ -181,18 +186,22 @@ setMethod("p_eff<-", "Model", function(x, value) {
 
 #### lpd
 setGeneric("lpd", function(x) standardGeneric("lpd"))
+
 setGeneric("lpd<-", function(x, value) standardGeneric("lpd<-"))
+
 setMethod("lpd", "Model", function(x) x@lpd)
+
 setMethod("lpd<-", "Model", function(x, value) {
   x@lpd <- value
   x
 })
 
 #### extra
-
 setGeneric("extra", function(x) standardGeneric("extra"))
 
 setGeneric("extra<-", function(x, value) standardGeneric("extra<-"))
+
+setMethod("extra", "Model", function(x) x@extra)
 
 setMethod("extra<-", "Model", function(x, value) {
   x@extra <- value
@@ -217,17 +226,17 @@ setMethod("extra<-", "Model", function(x, value) {
 #'   log-likelihoods).
 #' @slot extra A list of additional model fitting information. Contains
 #'   time_elapsed, start_time, end_time, and call.
-Model <- function(ndocs = NaN, nchain = 100, mu0 = NaN, sigma0 = NaN,
+Model <- function(ndocs, nchain = 100, mu0 = NaN, sigma0 = NaN,
                   eta_start = NaN, eta = NaN, loglike = NaN, logpost = NaN,
                   waic = NaN, se_waic = NaN, p_eff = NaN, lpd = NaN) {
   ndocs <- as.double(ndocs)
   nchain <- as.double(nchain)
-  mu0 <- as.vector(mu0)
+  mu0 <- as.double(mu0)
   sigma0 <- as.matrix(sigma0)
-  eta_start <- as.vector(mu0)
+  eta_start <- as.double(mu0)
   eta <- as.matrix(eta)
-  loglike <- as.vector(loglike)
-  logpost <- as.vector(logpost)
+  loglike <- as.double(loglike)
+  logpost <- as.double(logpost)
   waic <- as.double(waic)
   se_waic <- as.double(se_waic)
   p_eff <- as.double(p_eff)
