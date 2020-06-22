@@ -24,9 +24,10 @@
   interaction_xcol = -1L,
   alpha_ = 0.1,
   gamma_ = 1.01,
-  constrain_eta = TRUE,
-  sample_beta = FALSE,
-  sample_theta = FALSE,
+  constrain_eta = FALSE,
+  sample_beta = TRUE,
+  sample_theta = TRUE,
+  return_assignments = FALSE,
   verbose = FALSE,
   display_progress = FALSE
 )
@@ -82,23 +83,27 @@ represented as a single dummy-coded column.}
 \item{gamma_}{The hyper-parameter for the prior on the topic-specific
 vocabulary probabilities (default: 1.01).}
 
-\item{constrain_eta}{A logical (default = \code{TRUE}): If \code{TRUE}, the
+\item{constrain_eta}{A logical (default = \code{false}): If \code{true}, the
 regression coefficients will be constrained so that they are in descending
 order; if \code{FALSE}, no constraints will be applied.}
 
-\item{sample_beta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+\item{sample_beta}{A logical (default = \code{true}): If \code{true}, the
 topic-vocabulary distributions are sampled from their full conditional
 distribution.}
 
-\item{sample_theta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+\item{sample_theta}{A logical (default = \code{true}): If \code{true}, the
 topic proportions are sampled from their full conditional distribution.}
 
+\item{return_assignments}{A logical (default = \code{false}): If
+\code{true}, returns an N x \eqn{max N_d} x M array of topic assignments
+in slot @topics. CAUTION: this can be memory-intensive.}
+
 \item{verbose}{Should parameter draws be output during sampling? (default:
-\code{FALSE}).}
+\code{False}).}
 
 \item{display_progress}{Should percent progress of sampler be displayed
-(default: \code{FALSE}). Recommended that only one of \code{verbose} and
-\code{display_progress} be set to \code{TRUE} at any given time.}
+(default: \code{false}). Recommended that only one of \code{verbose} and
+\code{display_progress} be set to \code{true} at any given time.}
 }
 \description{
 Collapsed Gibbs sampler for the sLDA-X model

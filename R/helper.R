@@ -81,7 +81,10 @@ check_logical <- function(arg) {
 #' @param K The number of topics.
 #' @param model A string denoting the type of model to fit. See 'Details'.
 #'   (default: \code{"lda"}).
-#' @param sample_theta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param sample_beta A logical (default = \code{TRUE}): If \code{TRUE}, the
+#'   topic-vocabulary distributions are sampled from their full conditional
+#'   distribution.
+#' @param sample_theta A logical (default = \code{TRUE}): If \code{TRUE}, the
 #'   topic proportions will be sampled. CAUTION: This can be memory-intensive.
 #' @param y An optional D x 1 vector of binary outcomes (0/1) to be predicted.
 #'   Not needed if \code{data} is supplied.
@@ -111,6 +114,9 @@ check_logical <- function(arg) {
 #'   regression coefficients, N(0, proposal_sd(j)), \eqn{j = 1, \ldots, q}.
 #'   Only used for \code{model = "slda_logit"} and
 #'   \code{model = "sldax_logit"} (default: 2.38 for all coefficients).
+#' @param return_assignments A logical (default = \code{FALSE}): If
+#'   \code{TRUE}, returns an N x \eqn{max N_d} x M array of topic assignments
+#'   in slot @topics. CAUTION: this can be memory-intensive.
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   \code{FALSE}).
 #' @param display_progress Should percent progress of sampler be displayed
@@ -123,12 +129,12 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         docs, V, K = 2L,
                         model = c("lda", "slda", "sldax",
                                   "slda_logit", "sldax_logit"),
-                        sample_beta = FALSE, sample_theta = FALSE,
+                        sample_beta = TRUE, sample_theta = TRUE,
                         y = NULL, x = NULL, interaction_xcol = -1L,
                         alpha_ = 0.1, gamma_ = 1.01,
                         mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
                         eta_start = NULL, constrain_eta = FALSE,
-                        proposal_sd = NULL,
+                        proposal_sd = NULL, return_assignments = FALSE,
                         verbose = FALSE, display_progress = FALSE) {
 
   # Start timing
@@ -342,7 +348,9 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                             alpha_ = alpha_, gamma_ = gamma_,
                             constrain_eta = constrain_eta,
                             sample_beta = sample_beta,
-                            sample_theta = sample_theta, verbose = verbose,
+                            sample_theta = sample_theta,
+                            return_assignments = return_assignments,
+                            verbose = verbose,
                             display_progress = display_progress)
     if (model %in% c(3, 5) & !is.null(colnames(x))) {
       if (interaction_xcol < 1) {
