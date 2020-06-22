@@ -250,10 +250,10 @@ Model <- function(ndocs, nchain = 100, mu0 = NaN, sigma0 = NaN,
 
 #' Validator function for Model class
 setValidity("Model", function(object) {
-  if ( (length(object@nchain) != nrow(object@eta)) |
-       (length(object@nchain) != length(object@loglike)) |
-       (length(object@nchain) != length(object@logpost)) |
-       (length(object@nchain) != nrow(object@lpd))) {
+  if ( (object@nchain != NROW(object@eta)) |
+       (object@nchain != length(object@loglike)) |
+       (object@nchain != length(object@logpost)) |
+       (object@nchain != NROW(object@lpd))) {
     "@eta and @lpd must have the same number of rows as the length of @nchain"
   } else if ( (length(object@waic) != length(object@se_waic)) |
               (length(object@waic) != length(object@p_eff))) {
@@ -261,7 +261,7 @@ setValidity("Model", function(object) {
   } else if ( (ncol(object@lpd) != object@ndocs)) {
     "@lpd should have number of columns equal to value of @ndocs"
   } else if ( (length(object@mu0) != length(object@eta_start)) |
-              (length(object@mu0) != length(object@eta)) |
+              (length(object@mu0) != ncol(object@eta)) |
               (length(object@mu0) != nrow(object@sigma0)) |
               (length(object@mu0) != ncol(object@sigma0))) {
     "@mu0, @eta_start, and @eta should all have the same length which should be equal to the number of rows and columns in @sigma0"

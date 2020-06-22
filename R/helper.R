@@ -258,7 +258,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   }
   if (model %in% c(3, 5)) {
     if (interaction_xcol <= 0) {
-      p <- ncol(x)
+      p <- NCOL(x)
     } else {
       p <- ncol(x) + K - 1
     }
