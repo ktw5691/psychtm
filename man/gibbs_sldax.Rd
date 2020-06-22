@@ -16,8 +16,6 @@ gibbs_sldax(
   model = c("lda", "slda", "sldax", "slda_logit", "sldax_logit"),
   sample_beta = TRUE,
   sample_theta = TRUE,
-  y = NULL,
-  x = NULL,
   interaction_xcol = -1L,
   alpha_ = 0.1,
   gamma_ = 1.01,
@@ -62,12 +60,6 @@ distribution.}
 
 \item{sample_theta}{A logical (default = \code{TRUE}): If \code{TRUE}, the
 topic proportions will be sampled. CAUTION: This can be memory-intensive.}
-
-\item{y}{An optional D x 1 vector of binary outcomes (0/1) to be predicted.
-Not needed if \code{data} is supplied.}
-
-\item{x}{An optional D x p design matrix of additional predictors (do NOT
-include an intercept column!). Not needed if \code{data} is supplied.}
 
 \item{interaction_xcol}{EXPERIMENTAL: The column number of the design matrix for
 the additional predictors for which an interaction with the \eqn{K} topics is

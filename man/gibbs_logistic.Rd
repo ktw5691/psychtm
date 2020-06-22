@@ -10,8 +10,6 @@ gibbs_logistic(
   m = 100,
   burn = 0,
   thin = 1,
-  y = NULL,
-  x = NULL,
   mu0 = NULL,
   sigma0 = NULL,
   eta_start = NULL,
@@ -33,12 +31,6 @@ description of the model to be fitted.}
 
 \item{thin}{The period of iterations to keep after the burn-in period
 (default: 1).}
-
-\item{y}{An optional D x 1 vector of binary outcomes (0/1) to be predicted.
-Not needed if \code{data} is supplied.}
-
-\item{x}{An optional D x p design matrix of additional predictors (do NOT
-include an intercept column!). Not needed if \code{data} is supplied.}
 
 \item{mu0}{An optional p x 1 mean vector for the prior on the regression
 coefficients. See 'Details'.}

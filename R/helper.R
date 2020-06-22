@@ -86,10 +86,6 @@ check_logical <- function(arg) {
 #'   distribution.
 #' @param sample_theta A logical (default = \code{TRUE}): If \code{TRUE}, the
 #'   topic proportions will be sampled. CAUTION: This can be memory-intensive.
-#' @param y An optional D x 1 vector of binary outcomes (0/1) to be predicted.
-#'   Not needed if \code{data} is supplied.
-#' @param x An optional D x p design matrix of additional predictors (do NOT
-#'   include an intercept column!). Not needed if \code{data} is supplied.
 #' @param interaction_xcol EXPERIMENTAL: The column number of the design matrix for
 #'   the additional predictors for which an interaction with the \eqn{K} topics is
 #'   desired (default: \eqn{-1L}, no interaction). Currently only supports a single
@@ -130,8 +126,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         model = c("lda", "slda", "sldax",
                                   "slda_logit", "sldax_logit"),
                         sample_beta = TRUE, sample_theta = TRUE,
-                        y = NULL, x = NULL, interaction_xcol = -1L,
-                        alpha_ = 0.1, gamma_ = 1.01,
+                        interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01,
                         mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
                         eta_start = NULL, constrain_eta = FALSE,
                         proposal_sd = NULL, return_assignments = FALSE,
@@ -145,6 +140,21 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   if (missing(data)) missing_msg(data)
   if (missing(docs)) missing_msg(docs)
   if (missing(V)) missing_msg(V)
+
+  # Check for non-negative integers only in docs
+  if (any(!is.non_negative_integer(docs)))
+    stop("Invalid elements in 'docs'. 'docs' can only contain non-negative integers")
+  # Check for documents of at least two words in length in docs
+  if (any(apply(docs, 1, function(x) length(x[x > 0])) < 2))
+    stop("Each document (row) in 'docs' must contain at least 2 positive integers")
+  # Check for missing values in documents
+  if (any(is.na(docs))) stop("NA found in 'docs'. Please use 0 instead to indicate unused word positions")
+
+  # Check that data and docs have same number of observations
+  if (NROW(data) != NROW(docs))
+    stop("'data' and 'docs' have unequal numbers of observations")
+  # Check for missing values in data
+  if (any(is.na(data))) stop("Cannot handle missing values in 'data'")
 
   # Check model and convert to integer codes
   if (is.character(model)) {
@@ -354,7 +364,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                             display_progress = display_progress)
     if (model %in% c(3, 5) & !is.null(colnames(x))) {
       if (interaction_xcol < 1) {
-        colnames(eta(res) <- c(colnames(x), paste0("topic", seq_len(K)))
+        colnames(eta(res)) <- c(colnames(x), paste0("topic", seq_len(K)))
       }
       else {
         colnames(eta(res)) <- c(colnames(x), paste0("topic", seq_len(K)),
@@ -394,10 +404,6 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   (default: 0).
 #' @param thin The period of iterations to keep after the burn-in period
 #'   (default: 1).
-#' @param y An optional D x 1 vector of binary outcomes (0/1) to be predicted.
-#'   Not needed if \code{data} is supplied.
-#' @param x An optional D x p design matrix of additional predictors (do NOT
-#'   include an intercept column!). Not needed if \code{data} is supplied.
 #' @param mu0 An optional p x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A p x p variance-covariance matrix for the prior on the
@@ -415,7 +421,6 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #' @return An object of class \code{\linkS4class{Mlr}}.
 #' @family Gibbs sampler
 gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
-                      y = NULL, x = NULL,
                       mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
                       eta_start = NULL,
                       verbose = FALSE, display_progress = FALSE) {
@@ -501,10 +506,6 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   (default: 0).
 #' @param thin The period of iterations to keep after the burn-in period
 #'   (default: 1).
-#' @param y An optional D x 1 vector of binary outcomes (0/1) to be predicted.
-#'   Not needed if \code{data} is supplied.
-#' @param x An optional D x p design matrix of additional predictors (do NOT
-#'   include an intercept column!). Not needed if \code{data} is supplied.
 #' @param mu0 An optional p x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A p x p variance-covariance matrix for the prior on the
@@ -523,7 +524,6 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 #' @return An object of class \code{\linkS4class{Logistic}}.
 #' @family Gibbs sampler
 gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
-                           y = NULL, x = NULL,
                            mu0 = NULL, sigma0 = NULL,
                            eta_start = NULL, proposal_sd = NULL,
                            verbose = FALSE, display_progress = FALSE) {
