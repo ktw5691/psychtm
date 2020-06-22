@@ -81,6 +81,8 @@ check_logical <- function(arg) {
 #' @param K The number of topics.
 #' @param model A string denoting the type of model to fit. See 'Details'.
 #'   (default: \code{"lda"}).
+#' @param sample_theta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#'   topic proportions will be sampled. CAUTION: This can be memory-intensive.
 #' @param y An optional D x 1 vector of binary outcomes (0/1) to be predicted.
 #'   Not needed if \code{data} is supplied.
 #' @param x An optional D x p design matrix of additional predictors (do NOT
@@ -121,6 +123,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         docs, V, K = 2L,
                         model = c("lda", "slda", "sldax",
                                   "slda_logit", "sldax_logit"),
+                        sample_beta = FALSE, sample_theta = FALSE,
                         y = NULL, x = NULL, interaction_xcol = -1L,
                         alpha_ = 0.1, gamma_ = 1.01,
                         mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
@@ -310,6 +313,14 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_K <- check_int(K)
   if (!chk_K) stop("'K' is not an integer")
 
+  # Check sample_beta
+  chk_sample_beta <- check_logical(sample_beta)
+  if (!chk_sample_beta) stop("'sample_beta' is not TRUE/FALSE")
+
+  # Check sample_theta
+  chk_sample_theta <- check_logical(sample_theta)
+  if (!chk_sample_theta) stop("'sample_theta' is not TRUE/FALSE")
+
   # Check constrain_eta
   chk_constrain <- check_logical(constrain_eta)
   if (!chk_constrain) stop("'constrain_eta' is not TRUE/FALSE")
@@ -323,11 +334,16 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
   res_out <- tryCatch({
-    res <- .gibbs_sldax_cpp(docs, V, m, burn, thin, K, model, y, x,
-                            mu0, sigma0, a0, b0,
-                            eta_start, proposal_sd, interaction_xcol,
-                            alpha_, gamma_,
-                            constrain_eta, verbose, display_progress)
+    res <- .gibbs_sldax_cpp(docs = docs, V = V, m = m, burn = burn, thin = thin,
+                            K = K, model = model, y = y, x = x,
+                            mu0 = mu0, sigma0 = sigma0, a0 = a0, b0 = b0,
+                            eta_start = eta_start, proposal_sd = proposal_sd,
+                            interaction_xcol = interaction_xcol,
+                            alpha_ = alpha_, gamma_ = gamma_,
+                            constrain_eta = constrain_eta,
+                            sample_beta = sample_beta,
+                            sample_theta = sample_theta, verbose = verbose,
+                            display_progress = display_progress)
     if (model %in% c(3, 5) & !is.null(colnames(x))) {
       if (interaction_xcol < 1) {
         colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)))

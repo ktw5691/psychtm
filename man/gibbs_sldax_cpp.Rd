@@ -25,6 +25,8 @@
   alpha_ = 0.1,
   gamma_ = 1.01,
   constrain_eta = TRUE,
+  sample_beta = FALSE,
+  sample_theta = FALSE,
   verbose = FALSE,
   display_progress = FALSE
 )
@@ -83,6 +85,13 @@ vocabulary probabilities (default: 1.01).}
 \item{constrain_eta}{A logical (default = \code{TRUE}): If \code{TRUE}, the
 regression coefficients will be constrained so that they are in descending
 order; if \code{FALSE}, no constraints will be applied.}
+
+\item{sample_beta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+topic-vocabulary distributions are sampled from their full conditional
+distribution.}
+
+\item{sample_theta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+topic proportions are sampled from their full conditional distribution.}
 
 \item{verbose}{Should parameter draws be output during sampling? (default:
 \code{FALSE}).}

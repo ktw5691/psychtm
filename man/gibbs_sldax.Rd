@@ -14,6 +14,8 @@ gibbs_sldax(
   V,
   K = 2L,
   model = c("lda", "slda", "sldax", "slda_logit", "sldax_logit"),
+  sample_beta = FALSE,
+  sample_theta = FALSE,
   y = NULL,
   x = NULL,
   interaction_xcol = -1L,
@@ -52,6 +54,9 @@ description of the model to be fitted.}
 
 \item{model}{A string denoting the type of model to fit. See 'Details'.
 (default: \code{"lda"}).}
+
+\item{sample_theta}{A logical (default = \code{FALSE}): If \code{TRUE}, the
+topic proportions will be sampled. CAUTION: This can be memory-intensive.}
 
 \item{y}{An optional D x 1 vector of binary outcomes (0/1) to be predicted.
 Not needed if \code{data} is supplied.}

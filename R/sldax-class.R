@@ -9,6 +9,8 @@ NULL
 #' @slot gamma A numeric prior hyperparameter for beta.
 #' @slot topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
 #'   unused word index (i.e., the document did not have a word at that index).
+#' @slot theta A D x K x M numeric array of topic proportions.
+#' @slot beta A K x V x M numeric array of topic-vocabulary distributions.
 Sldax <- setClass("Sldax",
   contains = c("Mlr", "Logistic"),
   slots = c(
@@ -16,13 +18,17 @@ Sldax <- setClass("Sldax",
     ntopics     = "numeric",
     alpha       = "numeric",
     gamma       = "numeric",
-    topics      = "array"),
+    topics      = "array",
+    theta       = "array",
+    beta        = "array"),
   prototype = list(
     nvocab = NA_real_,
     ntopics = NA_real_,
     alpha = NA_real_,
     gamma = NA_real_,
-    topics = array(NA_real_, dim = c(1, 1, 1))
+    topics = array(NA_real_, dim = c(1, 2, 1)),
+    theta = array(NA_real_, dim = c(1, 2, 1)),
+    beta = array(NA_real_, dim = c(2, 2, 1))
   )
 )
 
@@ -35,6 +41,30 @@ setMethod("topics", "Sldax", function(x) x@topics)
 
 setMethod("topics<-", "Sldax", function(x, value) {
   x@topics <- value
+  x
+})
+
+#### theta
+setGeneric("theta", function(x) standardGeneric("theta"))
+
+setGeneric("theta<-", function(x, value) standardGeneric("theta<-"))
+
+setMethod("theta", "Sldax", function(x) x@theta)
+
+setMethod("theta<-", "Sldax", function(x, value) {
+  x@theta <- value
+  x
+})
+
+#### beta
+setGeneric("beta_", function(x) standardGeneric("beta_"))
+
+setGeneric("beta_<-", function(x, value) standardGeneric("beta_<-"))
+
+setMethod("beta_", "Sldax", function(x) x@beta)
+
+setMethod("beta_<-", "Sldax", function(x, value) {
+  x@beta <- value
   x
 })
 
@@ -88,17 +118,20 @@ setMethod("nvocab<-", "Sldax", function(x, value) {
 #' @param gamma A numeric prior hyperparameter for beta.
 #' @param topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
 #'   unused word index (i.e., the document did not have a word at that index).
-
-Sldax <- function(nvocab, topics, ntopics = 2.0, alpha = 0.1, gamma = 1.01, ...) {
+#' @param theta A D x K x M numeric array of topic proportions.
+Sldax <- function(nvocab, topics, theta, beta, ntopics = 2.0, alpha = 0.1,
+                  gamma = 1.01, ...) {
   super <- Model(...)
   nvocab <- as.double(nvocab)
   topics <- as.array(topics)
+  theta <- as.array(theta)
+  beta <- as.array(beta)
   ntopics <- as.double(ntopics)
   alpha <- as.double(alpha)
   gamma <- as.double(gamma)
 
-  new("Sldax", nvocab = nvocab, topics = topics, ntopics = ntopics,
-      alpha = alpha, gamma = gamma,
+  new("Sldax", nvocab = nvocab, topics = topics, theta = theta, beta = beta,
+      ntopics = ntopics, alpha = alpha, gamma = gamma,
       ndocs = super@ndocs, nchain = super@nchain, mu0 = super@mu0,
       sigma0 = super@sigma0, eta_start = super@eta_start, eta = super@eta,
       loglike = super@loglike, logpost = super@logpost, waic = super@waic,

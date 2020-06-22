@@ -3,6 +3,6 @@
 
 #include <RcppArmadillo.h>
 
-arma::cube draw_theta(const arma::mat& z_count, float alpha_);
+arma::mat draw_theta(const arma::mat& z_count, float alpha_);
 
 #endif

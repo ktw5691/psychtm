@@ -3,6 +3,6 @@
 
 #include <RcppArmadillo.h>
 
-arma::mat draw_thetad(const arma::urowvec& z_count, float alpha_);
+arma::mat draw_thetad(const arma::rowvec& z_count, float alpha_);
 
 #endif

@@ -11,7 +11,7 @@
 //' @return A K x 1 vector draw of \eqn{\theta_d}.
 //' @export
 // [[Rcpp::export(.draw_thetad)]]
-arma::mat draw_thetad(const arma::urowvec& z_count, float alpha_) {
+arma::mat draw_thetad(const arma::rowvec& z_count, float alpha_) {
 
   const uint16_t K = z_count.size(); // Number of topics
   if (alpha_ <= 0.0) Rcpp::stop("alpha_ must be positive");
@@ -19,7 +19,6 @@ arma::mat draw_thetad(const arma::urowvec& z_count, float alpha_) {
 
   arma::rowvec alp(K);
   alp.fill(alpha_);
-  arma::mat thetad = rdirichlet_cpp(1, z_count + alp);
 
-  return thetad;
+  return rdirichlet_cpp(1, z_count + alp);;
 }

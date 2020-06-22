@@ -23,6 +23,59 @@
     .Call(`_psychtm_count_topic_word`, K, V, doc_topic, doc_word)
 }
 
+#' @title Sample \eqn{B} from full conditional distribution
+#'
+#' @name draw_beta
+#' @param m Number of samples
+#' @param wz_co A K x V matrix of counts of word-topic co-occurrences
+#'   (topics: columns; words: rows).
+#' @param gamma_ The hyperparameter on the Dirichlet prior for \eqn{\beta_k}.
+#'
+#' @return A K x V matrix \eqn{B}.
+#' @export
+.draw_beta <- function(wz_co, gamma_) {
+    .Call(`_psychtm_draw_beta`, wz_co, gamma_)
+}
+
+#' @title Sample \eqn{\beta_k} from full conditional distribution
+#'
+#' @name draw_betak
+#' @param wz_co A V x 1 vector of counts of the draws of each word for topic
+#'   k over all documents.
+#' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
+#'
+#' @return A V x 1 vector of estimates for \eqn{\beta_k}.
+#' @export
+.draw_betak <- function(wz_co, gamma_) {
+    .Call(`_psychtm_draw_betak`, wz_co, gamma_)
+}
+
+#' @title Sample \eqn{\Theta} from full conditional distribution
+#'
+#' @name draw_theta
+#' @param m Number of samples
+#' @param z_count A D x K matrix of counts of topic draws (columns) in
+#'   documents (rows).
+#' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
+#'
+#' @return A D x K matrix \eqn{\Theta}.
+#' @export
+.draw_theta <- function(z_count, alpha_) {
+    .Call(`_psychtm_draw_theta`, z_count, alpha_)
+}
+
+#' @title Sample \eqn{\theta_d} from full conditional distribution
+#'
+#' @name draw_thetad
+#' @param z_count A K x 1 vector of counts of topic draw in document d.
+#' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
+#'
+#' @return A K x 1 vector draw of \eqn{\theta_d}.
+#' @export
+.draw_thetad <- function(z_count, alpha_) {
+    .Call(`_psychtm_draw_thetad`, z_count, alpha_)
+}
+
 #' @title Estimate \eqn{\beta_k}
 #'
 #' @name est_betak
@@ -133,6 +186,11 @@
 #' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 #'   regression coefficients will be constrained so that they are in descending
 #'   order; if \code{FALSE}, no constraints will be applied.
+#' @param sample_beta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#'   topic-vocabulary distributions are sampled from their full conditional
+#'   distribution.
+#' @param sample_theta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#'   topic proportions are sampled from their full conditional distribution.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
 #'   (default: 0.1).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -150,8 +208,8 @@
 #'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{TRUE} at any given time.
 #' @export
-.gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = TRUE, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, verbose, display_progress)
+.gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = TRUE, sample_beta = FALSE, sample_theta = FALSE, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, sample_beta, sample_theta, verbose, display_progress)
 }
 
 #' @title Contribution to effective number of parameters for WAIC from observation y_d

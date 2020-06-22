@@ -3,6 +3,8 @@
 #include "draw_eta.h"
 #include "draw_sigma2.h"
 #include "draw_zdn.h"
+#include "draw_beta.h"
+#include "draw_theta.h"
 #include "est_betak.h"
 #include "est_thetad.h"
 #include "get_loglike.h"
@@ -41,6 +43,11 @@
 //' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
 //'   regression coefficients will be constrained so that they are in descending
 //'   order; if \code{FALSE}, no constraints will be applied.
+//' @param sample_beta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//'   topic-vocabulary distributions are sampled from their full conditional
+//'   distribution.
+//' @param sample_theta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//'   topic proportions are sampled from their full conditional distribution.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
 //'   (default: 0.1).
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -72,6 +79,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    int interaction_xcol = -1,
                    float alpha_ = 0.1, float gamma_ = 1.01,
                    bool constrain_eta = true,
+                   bool sample_beta = false, bool sample_theta = false,
                    bool verbose = false, bool display_progress = false) {
 
   if (m <= burn) Rcpp::stop("Length of chain m not greater than burn-in period.");
@@ -109,6 +117,11 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
 
   // D x max(N_d) x m array to store topic draws
   arma::ucube topicsm = arma::ucube(D, maxNd, chain_outlength, arma::fill::zeros);
+  // D x K x m array to store topic proportion draws
+  arma::cube thetam = arma::cube(D, K, chain_outlength, arma::fill::zeros);
+  // K x V x m array to store topic-vocabulary distribution draws
+  arma::cube betam = arma::cube(K, V, chain_outlength, arma::fill::zeros);
+
   Rcpp::NumericVector loglike(chain_outlength); // Store log-likelihood (up to an additive constant)
   Rcpp::NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
 
@@ -136,25 +149,43 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
 
   nk = arma::sum(ndk, 0).t(); // Column sums
 
-  // Estimate theta
-  for (uint32_t d : docs_index) {
+  if (sample_theta) {
     try {
-      theta.row(d) = est_thetad(ndk.row(d), alpha_);
+      theta = draw_theta(ndk, alpha_);
     } catch(std::exception& e) {
-      Rcpp::Rcerr << "Runtime Error: " << e.what() <<
-        " when estimating theta vector for document " << d << "\n";
+      Rcpp::Rcerr << "Runtime Error: " << e.what() << " when sampling Theta\n";
       forward_exception_to_r(e);
+    }
+  } else {
+    // Estimate theta
+    for (uint32_t d : docs_index) {
+      try {
+        theta.row(d) = est_thetad(ndk.row(d), alpha_);
+      } catch(std::exception& e) {
+        Rcpp::Rcerr << "Runtime Error: " << e.what() <<
+          " when estimating theta vector for document " << d << "\n";
+        forward_exception_to_r(e);
+      }
     }
   }
 
-  // Estimate beta
-  for (uint16_t k = 0; k < K; k++) {
+  if (sample_beta) {
     try {
-      beta.row(k) = est_betak(nkm.row(k), gamma_);
+      beta = draw_beta(nkm, gamma_);
     } catch(std::exception& e) {
-      Rcpp::Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
-        "of beta matrix\n";
+      Rcpp::Rcerr << "Runtime Error: " << e.what() << " when sampling Beta\n";
       forward_exception_to_r(e);
+    }
+  } else {
+    // Estimate beta
+    for (uint16_t k = 0; k < K; k++) {
+      try {
+        beta.row(k) = est_betak(nkm.row(k), gamma_);
+      } catch(std::exception& e) {
+        Rcpp::Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+          "of beta matrix\n";
+        forward_exception_to_r(e);
+      }
     }
   }
 
@@ -256,14 +287,24 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       }
     }
 
-    // Estimate theta for doc d
-    for (uint32_t d: docs_index) {
+    if (sample_theta) {
+      // Sample theta
       try {
-        theta.row(d) = est_thetad(ndk.row(d), alpha_);
+        theta = draw_theta(ndk, alpha_);
       } catch(std::exception& e) {
-        Rcpp::Rcerr << "Runtime Error: " << e.what() <<
-          " when estimating theta vector for document " << d << "\n";
+        Rcpp::Rcerr << "Runtime Error: " << e.what() << " when sampling Theta\n";
         forward_exception_to_r(e);
+      }
+    } else {
+      // Estimate theta
+      for (uint32_t d : docs_index) {
+        try {
+          theta.row(d) = est_thetad(ndk.row(d), alpha_);
+        } catch(std::exception& e) {
+          Rcpp::Rcerr << "Runtime Error: " << e.what() <<
+            " when estimating theta vector for document " << d << "\n";
+          forward_exception_to_r(e);
+        }
       }
     }
 
@@ -282,14 +323,23 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       r = zbar;
     }
 
-    // Estimate beta
-    for (uint16_t k = 0; k < K; k++) {
+    if (sample_beta) {
       try {
-        beta.row(k) = est_betak(nkm.row(k), gamma_);
+        beta = draw_beta(nkm, gamma_);
       } catch(std::exception& e) {
-        Rcpp::Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
-          "of beta matrix\n";
+        Rcpp::Rcerr << "Runtime Error: " << e.what() << " when sampling Beta\n";
         forward_exception_to_r(e);
+      }
+    } else {
+      // Estimate beta
+      for (uint16_t k = 0; k < K; k++) {
+        try {
+          beta.row(k) = est_betak(nkm.row(k), gamma_);
+        } catch(std::exception& e) {
+          Rcpp::Rcerr << "Runtime Error: " << e.what() << " estimating row " << k <<
+            "of beta matrix\n";
+          forward_exception_to_r(e);
+        }
       }
     }
 
@@ -359,6 +409,13 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       if (temp_pos == chain_outlength) break; // Invalid index
 
       topicsm.slice(temp_pos) = zdocs;
+      if (sample_theta) {
+        thetam.slice(temp_pos) = theta;
+      }
+      if (sample_beta) {
+        betam.slice(temp_pos) = beta;
+      }
+
       // Likelihood
       switch(model) {
         case lda:
@@ -453,6 +510,16 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
   results.slot("gamma")   = gamma_;
   results.slot("loglike") = loglike;
   results.slot("logpost") = logpost;
+  if (sample_theta) {
+    results.slot("theta") = thetam;
+  } else {
+    results.slot("theta") = theta;
+  }
+  if (sample_beta) {
+    results.slot("beta") = betam;
+  } else {
+    results.slot("beta") = beta;
+  }
 
   if (model != lda) {
     results.slot("eta")       = etam;
