@@ -104,10 +104,10 @@ setMethod("get_zbar",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin) {
 
-            m <- mcmc_fit@nchain
+            m <- nchain(mcmc_fit)
             keep_index <- seq(burn + 1, m, thin)
 
-            topics <- mcmc_fit@topics[, , keep_index]
+            topics <- topics(mcmc_fit)[, , keep_index]
             # C++ returns 0 if not assigned (no word there)
             topics[topics == 0] <- NA
 
@@ -115,7 +115,7 @@ setMethod("get_zbar",
             z_med <- apply(topics, c(1, 2),
                            function(x) round(median(x, na.rm = TRUE), 0))
 
-            ntopic <- mcmc_fit@ntopics
+            ntopic <- ntopics(mcmc_fit)
             doc_lengths <- apply(topics[, , 1], 1, function(x) sum(!is.na(x)))
 
             zbar <- t(apply(z_med, 1, tabulate, nbins = ntopic)) / doc_lengths
@@ -140,23 +140,23 @@ setMethod("gg_coef",
                    call. = FALSE)
             }
 
-            m <- mcmc_fit@nchain
+            m <- nchain(mcmc_fit)
             keep_index <- seq(burn + 1, m, thin)
 
             if (stat == "mean") {
-              eta <- apply(mcmc_fit@eta[keep_index, ], 2, mean)
+              eta <- apply(eta(mcmc_fit)[keep_index, ], 2, mean)
             }
             if (stat == "median") {
-              eta <- apply(mcmc_fit@eta[keep_index, ], 2, median)
+              eta <- apply(eta(mcmc_fit)[keep_index, ], 2, median)
             }
 
-            varnames <- colnames(mcmc_fit@eta)
+            varnames <- colnames(eta(mcmc_fit))
 
             # Regression coefficients for each topic
             coefs <- tibble::tibble(
               coef = eta,
-              lbcl = apply(mcmc_fit@eta[keep_index, ], 2, quantile, .025),
-              ubcl = apply(mcmc_fit@eta[keep_index, ], 2, quantile, .975))
+              lbcl = apply(eta(mcmc_fit)[keep_index, ], 2, quantile, .025),
+              ubcl = apply(eta(mcmc_fit)[keep_index, ], 2, quantile, .975))
 
             names(coefs) <- c("est", "lbcl", "ubcl")
             coefs <- cbind(
@@ -197,12 +197,12 @@ setMethod("est_theta",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat, correct_label_switch, verbose) {
 
-            m <- mcmc_fit@nchain
-            K <- mcmc_fit@ntopics
-            ndoc <- mcmc_fit@ndocs
-            alpha_ <- mcmc_fit@alpha
+            m <- nchain(mcmc_fit)
+            K <- ntopics(mcmc_fit)
+            ndoc <- ndocs(mcmc_fit)
+            alpha_ <- alpha(mcmc_fit)
             keep <- seq(burn + 1, m, thin)
-            topics <- mcmc_fit@topics[, , keep]
+            topics <- topics(mcmc_fit)[, , keep]
             len <- dim(topics)[3]
             topics[topics == 0] <- NA
             theta <- array(dim = c(ndoc, K, len))
@@ -249,12 +249,12 @@ setMethod("est_beta",
           function(mcmc_fit, docs, burn, thin, stat,
                    correct_label_switch, verbose) {
 
-            m <- mcmc_fit@nchain
-            K <- mcmc_fit@ntopics
-            V <- mcmc_fit@nvocab
-            gamma_ <- mcmc_fit@gamma
+            m <- nchain(mcmc_fit)
+            K <- ntopics(mcmc_fit)
+            V <- nvocab(mcmc_fit)
+            gamma_ <- gamma(mcmc_fit)
             keep   <- seq(burn + 1, m, thin)
-            topics <- mcmc_fit@topics[, , keep]
+            topics <- topics(mcmc_fit)[, , keep]
             len    <- dim(topics)[3]
 
             topics[topics == 0] <- NA

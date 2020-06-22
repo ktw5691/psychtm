@@ -354,14 +354,14 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                             display_progress = display_progress)
     if (model %in% c(3, 5) & !is.null(colnames(x))) {
       if (interaction_xcol < 1) {
-        colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)))
+        colnames(eta(res) <- c(colnames(x), paste0("topic", seq_len(K)))
       }
       else {
-        colnames(res@eta) <- c(colnames(x), paste0("topic", seq_len(K)),
-                               paste0(colnames(x)[interaction_xcol], ":topic",  seq_len(K - 1)))
+        colnames(eta(res)) <- c(colnames(x), paste0("topic", seq_len(K)),
+                                paste0(colnames(x)[interaction_xcol], ":topic",  seq_len(K - 1)))
       }
     } else if (model %in% c(2, 4)) {
-      colnames(res@eta) <- paste0("topic", seq_len(K))
+      colnames(eta(res)) <- paste0("topic", seq_len(K))
     }
     t2 <- Sys.time()
     extra(res) <- list(time_elapsed = t2 - t1,
@@ -468,7 +468,7 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
   res_out <- tryCatch({
     res <- .gibbs_mlr_cpp(m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0,
                           verbose, display_progress)
-    colnames(res@eta) <- colnames(x)
+    colnames(eta(res)) <- colnames(x)
     t2 <- Sys.time()
     extra(res) <- list(time_elapsed = t2 - t1,
                        start_time = t1,
@@ -595,7 +595,7 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
     res <- .gibbs_logistic_cpp(m, burn, thin, y, x, mu0, sigma0,
                                eta_start, proposal_sd,
                                verbose, display_progress)
-    colnames(res@eta) <- colnames(x)
+    colnames(eta(res)) <- colnames(x)
     t2 <- Sys.time()
     extra(res) <- list(time_elapsed = t2 - t1,
                        start_time = t1,

@@ -113,7 +113,7 @@ setGeneric("get_zbar",
              if ( !check_int(thin) ) stop("'thin' must be an integer.")
              if (thin < 1)           stop("'thin' must be positive.")
 
-             m <- mcmc_fit@nchain
+             m <- nchain(mcmc_fit)
              if (burn >= m)
                stop("'burn' cannot exceed length of chain.")
              if (thin >= (m - burn))
@@ -146,7 +146,7 @@ setGeneric("gg_coef",
              if ( !check_int(thin) ) stop("'thin' must be an integer.")
              if (thin < 1)           stop("'thin' must be positive.")
 
-             m <- mcmc_fit@nchain
+             m <- nchain(mcmc_fit)
              if (burn >= m)
                stop("'burn' cannot exceed length of chain.")
              if (thin >= (m - burn))
@@ -187,7 +187,7 @@ setGeneric("est_theta",
              if ( !check_int(thin) ) stop("'thin' must be an integer.")
              if (thin < 1)           stop("'thin' must be positive.")
 
-             m <- mcmc_fit@nchain
+             m <- nchain(mcmc_fit)
              if (burn >= m)
                stop("'burn' cannot exceed length of chain.")
              if (thin >= (m - burn))
@@ -227,8 +227,8 @@ setGeneric("est_beta",
 
              if (!"docs" %in% passed_args)
                stop("Please supply a matrix for 'docs'.")
-             ndocs <- mcmc_fit@ndocs
-             maxn <- dim(mcmc_fit@topics)[2] # Maximum document length
+             ndocs <- ndocs(mcmc_fit)
+             maxn <- dim(topics(mcmc_fit))[2] # Maximum document length
              if (nrow(docs) != ndocs)
                stop(paste0("'docs' must have ", ndocs, " rows."))
              if (ncol(docs) != maxn)
@@ -239,7 +239,7 @@ setGeneric("est_beta",
              if ( !check_int(thin) ) stop("'thin' must be an integer.")
              if (thin < 1)           stop("'thin' must be positive.")
 
-             m <- mcmc_fit@nchain
+             m <- nchain(mcmc_fit)
              if (burn >= m)
                stop("'burn' cannot exceed length of chain.")
              if (thin >= (m - burn))
