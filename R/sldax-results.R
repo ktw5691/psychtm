@@ -1,6 +1,81 @@
 #' @include sldax-class.R sldax-generic-functions.R
 NULL
 
+#' @rdname sldax-gettop-methods
+setMethod("est_theta",
+          c(mcmc_fit = "Sldax"),
+          function(mcmc_fit, burn, thin, stat, correct_label_switch, verbose) {
+
+            m <- nchain(mcmc_fit)
+            keep <- seq(burn + 1, m, thin)
+            theta <- theta(mcmc_fit)[, , keep]
+            edge_case <- FALSE
+
+            # One-document edge case fails in label.switching::stephens()
+            if (length(dim(theta)) == 2) {
+              theta <- array(theta, dim = c(ndocs(mcmc_fit),
+                                            ntopics(mcmc_fit),
+                                            length(keep)))
+              edge_case <- TRUE
+              if (correct_label_switch)
+                warning("label.switching::stephens() does not handle single-observation or single-iteration cases. Falling back to no label switching correction.")
+            }
+
+            if (correct_label_switch & !edge_case) {
+              # Permute to dimensions: MCMC draws, Docs, Topics
+              theta_perm <- aperm(theta, c(3, 1, 2))
+              # Relabeling algorithm from Stephens (2000)
+              relabel_out <- label.switching::stephens(theta_perm)
+              if (verbose)
+                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
+              reorder_theta <- label.switching::permute.mcmc(
+                aperm(theta_perm, c(1, 3, 2)),
+                permutations = relabel_out$permutations)$output
+              reorder_theta <- aperm(reorder_theta, c(1, 3, 2)) # MCMC, D, K
+              if (stat == "mean")
+                theta_mean <- apply(reorder_theta, c(2, 3), mean)
+              if (stat == "median")
+                theta_mean <- apply(reorder_theta, c(2, 3), median)
+            } else {
+              if (stat == "mean") theta_mean <- apply(theta, c(1, 2), mean)
+              if (stat == "median") theta_mean <- apply(theta, c(1, 2), median)
+            }
+            return(theta_mean)
+          }
+)
+
+#' @rdname sldax-gettop-methods
+setMethod("est_beta",
+          c(mcmc_fit = "Sldax"),
+          function(mcmc_fit, burn, thin, stat, correct_label_switch, verbose) {
+
+            m <- nchain(mcmc_fit)
+            keep   <- seq(burn + 1, m, thin)
+            beta_ <- beta_(mcmc_fit)[, , keep]
+
+            if (correct_label_switch) {
+              # Permute to dimensions: MCMC draws, Words, Topics
+              beta_perm <- aperm(beta_, c(3, 2, 1))
+              # Relabeling algorithm from Stephens (2000)
+              relabel_out <- label.switching::stephens(beta_perm)
+              if (verbose)
+                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
+              reorder_beta <- label.switching::permute.mcmc(
+                aperm(beta_perm, c(1, 3, 2)),
+                permutations = relabel_out$permutations)$output
+              reorder_beta <- aperm(reorder_beta, c(1, 3, 2)) # MCMC, K, V
+              if (stat == "mean")
+                beta_mean <- t(apply(reorder_beta, c(2, 3), mean))
+              if (stat == "median")
+                beta_mean <- t(apply(reorder_beta, c(2, 3), median))
+            } else {
+              if (stat == "mean") beta_mean <- apply(beta_, c(1, 2), mean)
+              if (stat == "median") beta_mean <- apply(beta_, c(1, 2), median)
+            }
+            return(beta_mean)
+          }
+)
+
 #' Compute term-scores for each word-topic pair
 #'
 #' For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
@@ -14,22 +89,18 @@ NULL
 #' @export
 term_score <- function(beta_) {
 
-  passed_args <- names(as.list(match.call())[-1])
-
-  if (!"beta_" %in% passed_args)
-    stop("Please supply a matrix to 'beta_'.")
-  if (!is.matrix(beta_))
-    stop("Please supply a matrix to 'beta_'.")
-  if (sum(beta_ < 0.0 | beta_ > 1.0) > 0)
+  if (missing(beta_)) stop("Please supply a matrix to 'beta_'.")
+  if (!is.matrix(beta_)) stop("Please supply a matrix to 'beta_'.")
+  if (any(beta_ < 0.0 | beta_ > 1.0))
     stop("Entries of 'beta_' must be between 0.0 and 1.0.")
   sum_rowsum_beta <- sum(rowSums(beta_))
-  K <- nrow(beta_)
-  if (sum_rowsum_beta > K + 0.001 | sum_rowsum_beta < K - 0.001)
+  K <- NROW(beta_)
+  tol <- 0.001
+  if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
     stop("Rows of 'beta_' must each sum to 1.0.")
 
-  ntopic <- nrow(beta_)
-  ldenom <- apply(log(beta_), 2, sum) / ntopic # Sum logs over topics (rows)
-  mdenom <- matrix(ldenom, nrow = ntopic, ncol = ncol(beta_), byrow = TRUE)
+  ldenom <- apply(log(beta_), 2, sum) / K # Sum logs over topics (rows)
+  mdenom <- matrix(ldenom, nrow = K, ncol = NCOL(beta_), byrow = TRUE)
   tscore <- beta_ * (log(beta_) - mdenom)
 
   return(tscore)
@@ -40,8 +111,7 @@ setMethod("get_toptopics",
           c(theta = "matrix"),
           function(theta, ntopics) {
 
-            ndocs   <- nrow(theta)
-
+            ndocs   <- NROW(theta)
             doc_toptopics <- matrix(0, ndocs * ntopics, 3)
 
             row <- 1
@@ -56,7 +126,8 @@ setMethod("get_toptopics",
               row <- d * ntopics + 1
             }
 
-            doc_toptopics <- tibble::as_tibble(doc_toptopics)
+            doc_toptopics <- tibble::as_tibble(doc_toptopics,
+                                               .name_repair = "minimal")
             names(doc_toptopics) <- c("doc", "topic", "prob")
             doc_toptopics$prob <- as.numeric(doc_toptopics$prob)
 
@@ -75,7 +146,7 @@ setMethod("get_topwords",
               beta_out <- beta_
             }
 
-            ntopics <- nrow(beta_)
+            ntopics <- NROW(beta_)
             topic_topwords <- matrix("", ntopics * nwords, 3)
 
             row <- 1
@@ -85,15 +156,21 @@ setMethod("get_topwords",
                 topic_topwords[row + v - 1, 1] <- k
                 # If tie, pick first match
                 topic_topwords[row + v - 1, 2] <- vocab[
-                  which(beta_out[k, ] == sorted[v])[1]]
+                  which(beta_out[k, ] == sorted[v])[1]
+                ]
                 topic_topwords[row + v - 1, 3] <- sorted[v]
               }
               row <- k * nwords + 1
             }
 
-            topic_topwords <- tibble::as_tibble(topic_topwords)
-            names(topic_topwords) <- c("topic", "word", "prob")
-            topic_topwords$prob <- as.numeric(topic_topwords$prob)
+            topic_topwords <- tibble::as_tibble(topic_topwords,
+                                                .name_repair = "minimal")
+            names(topic_topwords) <- c("topic", "word", method)
+            if (method == "prob") {
+              topic_topwords$prob <- as.numeric(topic_topwords$prob)
+            } else {
+              topic_topwords$termscore <- as.numeric(topic_topwords$termscore)
+            }
 
             return(topic_topwords)
           }
@@ -105,20 +182,32 @@ setMethod("get_zbar",
           function(mcmc_fit, burn, thin) {
 
             m <- nchain(mcmc_fit)
-            keep_index <- seq(burn + 1, m, thin)
+            keep_index <- seq(burn + 1L, m, thin)
 
-            topics <- topics(mcmc_fit)[, , keep_index]
-            # C++ returns 0 if not assigned (no word there)
+            topics <- topics(mcmc_fit)
+            if (length(dim(topics)) == 3L) topics <- topics[, , keep_index]
+
+            # C++ returns 0 if not assigned (unused word position)
             topics[topics == 0] <- NA
 
             # Median topic draw for each word and doc
-            z_med <- apply(topics, c(1, 2),
-                           function(x) round(median(x, na.rm = TRUE), 0))
+            if (!is.null(dim(topics)) && length(dim(topics)) == 3L && dim(topics)[3] > 1L) {
+              z_med <- apply(topics, c(1, 2),
+                             function(x) round(median(x, na.rm = TRUE), 0))
+            } else {
+              z_med <- topics
+            }
 
             ntopic <- ntopics(mcmc_fit)
-            doc_lengths <- apply(topics[, , 1], 1, function(x) sum(!is.na(x)))
+            if (!is.null(dim(topics)) && length(dim(topics)) == 3 && dim(topics)[3] > 1L) {
+              doc_lengths <- apply(topics[, , 1], 1, function(x) sum(!is.na(x)))
+              zbar <- t(apply(z_med, 1, tabulate, nbins = ntopic)) / doc_lengths
+            } else {
+              doc_lengths <- sum(!is.na(topics))
+              zbar <- tabulate(z_med, nbins = ntopic) / doc_lengths
+            }
 
-            zbar <- t(apply(z_med, 1, tabulate, nbins = ntopic)) / doc_lengths
+
 
             return(zbar)
           }
@@ -144,7 +233,7 @@ setMethod("gg_coef",
             keep_index <- seq(burn + 1, m, thin)
 
             if (stat == "mean") {
-              eta <- apply(eta(mcmc_fit)[keep_index, ], 2, mean)
+              eta <- colMeans(eta(mcmc_fit)[keep_index, ])
             }
             if (stat == "median") {
               eta <- apply(eta(mcmc_fit)[keep_index, ], 2, median)
@@ -192,103 +281,4 @@ setMethod("gg_coef",
           }
 )
 
-#' @rdname sldax-gettop-methods
-setMethod("est_theta",
-          c(mcmc_fit = "Sldax"),
-          function(mcmc_fit, burn, thin, stat, correct_label_switch, verbose) {
 
-            m <- nchain(mcmc_fit)
-            K <- ntopics(mcmc_fit)
-            ndoc <- ndocs(mcmc_fit)
-            alpha_ <- alpha(mcmc_fit)
-            keep <- seq(burn + 1, m, thin)
-            topics <- topics(mcmc_fit)[, , keep]
-            len <- dim(topics)[3]
-            topics[topics == 0] <- NA
-            theta <- array(dim = c(ndoc, K, len))
-
-            for (i in seq_len(len)) {
-              for (d in seq_len(ndoc)) {
-                z_count <- numeric(K)
-                for (k in seq_len(K))
-                  z_count[k] <- sum(topics[d, , i] == k, na.rm = TRUE)
-                theta[d, , i] <- .est_thetad(z_count, alpha_)
-              }
-              if (verbose) {
-                if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
-                  cat("Iteration", i, "of", len, "\n")
-              }
-            }
-
-            if (correct_label_switch) {
-              # Permute to dimensions: MCMC draws, Docs, Topics
-              theta_perm <- aperm(theta, c(3, 1, 2))
-              # Relabeling algorithm from Stephens (2000)
-              relabel_out <- label.switching::stephens(theta_perm)
-              if (verbose)
-                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
-              reorder_theta <- label.switching::permute.mcmc(
-                aperm(theta_perm, c(1, 3, 2)),
-                permutations = relabel_out$permutations)$output
-              reorder_theta <- aperm(reorder_theta, c(1, 3, 2)) # MCMC, D, K
-              if (stat == "mean")
-                theta_mean <- apply(reorder_theta, c(2, 3), mean)
-              if (stat == "median")
-                theta_mean <- apply(reorder_theta, c(2, 3), median)
-            } else {
-              if (stat == "mean") theta_mean <- apply(theta, c(1, 2), mean)
-              if (stat == "median") theta_mean <- apply(theta, c(1, 2), median)
-            }
-            return(theta_mean)
-          }
-)
-
-#' @rdname sldax-gettop-methods
-setMethod("est_beta",
-          c(mcmc_fit = "Sldax"),
-          function(mcmc_fit, docs, burn, thin, stat,
-                   correct_label_switch, verbose) {
-
-            m <- nchain(mcmc_fit)
-            K <- ntopics(mcmc_fit)
-            V <- nvocab(mcmc_fit)
-            gamma_ <- gamma(mcmc_fit)
-            keep   <- seq(burn + 1, m, thin)
-            topics <- topics(mcmc_fit)[, , keep]
-            len    <- dim(topics)[3]
-
-            topics[topics == 0] <- NA
-            beta_ <- array(dim = c(K, V, len))
-
-            for (i in seq_len(len)) {
-              wz_co <- .count_topic_word(K, V, topics[, , i], docs)
-              for (k in seq_len(K)) beta_[k, , i] <- .est_betak(
-                wz_co[k, ], gamma_)
-              if (verbose) {
-                if (!is.nan(i %% floor(len / 10)) & (i %% floor(len / 10) == 0))
-                  cat("Iteration", i, "of", len, "\n")
-              }
-            }
-
-            if (correct_label_switch) {
-              # Permute to dimensions: MCMC draws, Words, Topics
-              beta_perm <- aperm(beta_, c(3, 2, 1))
-              # Relabeling algorithm from Stephens (2000)
-              relabel_out <- label.switching::stephens(beta_perm)
-              if (verbose)
-                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
-              reorder_beta <- label.switching::permute.mcmc(
-                aperm(beta_perm, c(1, 3, 2)),
-                permutations = relabel_out$permutations)$output
-              reorder_beta <- aperm(reorder_beta, c(1, 3, 2)) # MCMC, K, V
-              if (stat == "mean")
-                beta_mean <- t(apply(reorder_beta, c(2, 3), mean))
-              if (stat == "median")
-                beta_mean <- t(apply(reorder_beta, c(2, 3), median))
-            } else {
-              if (stat == "mean") beta_mean <- apply(beta_, c(1, 2), mean)
-              if (stat == "median") beta_mean <- apply(beta_, c(1, 2), median)
-            }
-            return(beta_mean)
-          }
-)
