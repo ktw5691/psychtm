@@ -226,7 +226,7 @@ setMethod("extra<-", "Model", function(x, value) {
 #'   log-likelihoods).
 #' @slot extra A list of additional model fitting information. Contains
 #'   time_elapsed, start_time, end_time, and call.
-Model <- function(ndocs, nchain = 100, mu0 = NaN, sigma0 = NaN,
+Model <- function(ndocs, nchain = 1, mu0 = NaN, sigma0 = NaN,
                   eta_start = NaN, eta = NaN, loglike = NaN, logpost = NaN,
                   waic = NaN, se_waic = NaN, p_eff = NaN, lpd = NaN) {
   ndocs <- as.double(ndocs)

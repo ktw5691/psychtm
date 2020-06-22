@@ -6,7 +6,7 @@
 \usage{
 Model(
   ndocs,
-  nchain = 100,
+  nchain = 1,
   mu0 = NaN,
   sigma0 = NaN,
   eta_start = NaN,
@@ -21,7 +21,7 @@ Model(
 
 Model(
   ndocs,
-  nchain = 100,
+  nchain = 1,
   mu0 = NaN,
   sigma0 = NaN,
   eta_start = NaN,
