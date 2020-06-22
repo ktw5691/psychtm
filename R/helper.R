@@ -1,29 +1,3 @@
-#' Check for integer argument
-#'
-#' @param arg Argument to check.
-check_int <- function(arg) {
-
-  good <- FALSE
-  if (is.numeric(arg)) {
-    if (!is.na(arg) & !is.infinite(arg)) {
-      if (arg %% 1 == 0) {
-        arg <- as.integer(arg)
-        good <- TRUE
-      }
-    }
-  }
-  return(good)
-}
-
-#' Check for logical argument
-#'
-#' @param arg Argument to check.
-check_logical <- function(arg) {
-  good <- FALSE
-  if (is.logical(arg) & !is.na(arg)) good <- TRUE
-  return(good)
-}
-
 #' Fit supervised or unsupervised topic models (sLDAX or LDA)
 #'
 #' \code{gibbs_sldax} is used to fit both supervised and unsupervised topic models.
@@ -136,8 +110,8 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   t1 <- Sys.time()
 
   # Check if any arguments without defaults were not supplied by user
-  if (missing(formula)) missing_msg(formula)
-  if (missing(data)) missing_msg(data)
+  if (missing(formula) & model != "lda") missing_msg(formula)
+  if (missing(data) & model != "lda") missing_msg(data)
   if (missing(docs)) missing_msg(docs)
   if (missing(V)) missing_msg(V)
 
@@ -151,10 +125,12 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   if (any(is.na(docs))) stop("NA found in 'docs'. Please use 0 instead to indicate unused word positions")
 
   # Check that data and docs have same number of observations
-  if (NROW(data) != NROW(docs))
-    stop("'data' and 'docs' have unequal numbers of observations")
-  # Check for missing values in data
-  if (any(is.na(data))) stop("Cannot handle missing values in 'data'")
+  if (model != "lda") {
+    if (NROW(data) != NROW(docs))
+      stop("'data' and 'docs' have unequal numbers of observations")
+    # Check for missing values in data
+    if (any(is.na(data))) stop("Cannot handle missing values in 'data'")
+  }
 
   # Check model and convert to integer codes
   if (is.character(model)) {
@@ -172,82 +148,74 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
     stop("'model' not recognized")
   }
   model <- switch(model,
-                 lda = 1L,
-                 slda = 2L,
-                 sldax = 3L,
-                 slda_logit = 4L,
-                 sldax_logit = 5L)
+                  lda = 1L,
+                  slda = 2L,
+                  sldax = 3L,
+                  slda_logit = 4L,
+                  sldax_logit = 5L)
 
   sldax_call <- match.call()
-  mf <- match.call(expand.dots = FALSE)
-  mind <- match(c("formula", "data"), names(mf), 0L)
-  if (sum(mind) > 0) {
-    mf <- mf[c(1L, mind)]
-    mf$drop.unused.levels <- TRUE
-    mf[[1L]] <- as.name("model.frame")
-    mf <- eval(mf, parent.frame())
-    y <- model.response(mf, "numeric")
-    mt <- attr(mf, "terms")
-    x <- model.matrix(mt, mf)
-    if ("(Intercept)" %in% dimnames(x)[[2]]) {
-      ip <- match("(Intercept)", dimnames(x)[[2]])
-      x <- x[, -ip]
-    }
-    x <- as.matrix(x) # If y ~ 1 supplied, x has dims D x 0
-    if (dim(x)[2] == 0)
-      stop("Design matrix 'x' has 0 columns.
-            Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as
-            'formula'.")
 
-    if (model == 4 | model == 5) { # y should be dichotomous
-      # Check if y is factor and convert to 0/1 numeric if it is
-      if (is.factor(y)) y <- as.numeric(y) - 1
-      # Check that y is 0/1
-      if (length(unique(y)) == 2) {
+  if (model != 1L) {
+    mf <- match.call(expand.dots = FALSE)
+    mind <- match(c("formula", "data"), names(mf), 0L)
+    if (sum(mind) > 0) {
+      mf <- mf[c(1L, mind)]
+      mf$drop.unused.levels <- TRUE
+      mf[[1L]] <- as.name("model.frame")
+      mf <- eval(mf, parent.frame())
+      y <- model.response(mf, "numeric")
+      mt <- attr(mf, "terms")
+      x <- model.matrix(mt, mf)
+      if ("(Intercept)" %in% dimnames(x)[[2]]) {
+        ip <- match("(Intercept)", dimnames(x)[[2]])
+        x <- x[, -ip]
+      }
+      x <- as.matrix(x) # If y ~ 1 supplied, x has dims D x 0
+      if (dim(x)[2] == 0)
+        stop("Design matrix 'x' has 0 columns.
+              Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as
+              'formula'.")
+
+      if (model == 4 | model == 5) { # y should be dichotomous
+        # Check if y is factor and convert to 0/1 numeric if it is
+        if (is.factor(y)) y <- as.numeric(y) - 1
+        # Check that y is 0/1
+        if (length(unique(y)) == 2) {
+          if (sum(unique(y) %in% c(0, 1)) != 2)
+            stop("'y' has 2 unique values, but they cannot be coerced to 0/1")
+        } else {
+          stop("'y' has > 2 unique values and is not dichotomous")
+        }
+        y <- as.matrix(y)
+        attr(y, "names") <- NULL
         if (sum(unique(y) %in% c(0, 1)) != 2)
           stop("'y' has 2 unique values, but they cannot be coerced to 0/1")
       } else {
-        stop("'y' has > 2 unique values and is not dichotomous")
+        y <- as.matrix(y) # Assume y is continuous
       }
-      y <- as.matrix(y)
-      attr(y, "names") <- NULL
-      if (sum(unique(y) %in% c(0, 1)) != 2)
-        stop("'y' has 2 unique values, but they cannot be coerced to 0/1")
-    } else {
-      y <- as.matrix(y) # Assume y is continuous
     }
   }
 
   if (model == 1) {
-    if (!is.null(y) | !is.null(x) | !is.null(mu0) | !is.null(sigma0) |
-        !is.null(a0) | !is.null(b0) | !is.null(eta_start) |
-        !is.null(proposal_sd)) {
+    if (!is.null(mu0) | !is.null(sigma0) | !is.null(a0) | !is.null(b0) |
+        !is.null(eta_start) | !is.null(proposal_sd)) {
       stop("Invalid parameter supplied for 'lda' model")
     }
   }
-  if (model == 2) {
-    if (!is.null(x) | !is.null(proposal_sd)) {
-      stop("Invalid parameter supplied for 'slda' model")
-    }
-  }
-  if (model == 3) {
+  if (model %in% c(2, 3)) {
     if (!is.null(proposal_sd)) {
-      stop("Invalid parameter supplied for 'sldax' model")
+      stop("Invalid parameter supplied for 'slda'/'sldax' model")
     }
   }
-  if (model == 4) {
-    if (!is.null(x) | !is.null(a0) | !is.null(b0)) {
-      stop("Invalid parameter supplied for 'slda_logit' model")
-    }
-  }
-  if (model == 5) {
+  if (model %in% c(4, 5)) {
     if (!is.null(a0) | !is.null(b0)) {
-      stop("Invalid parameter supplied for 'sldax_logit' model")
+      stop("Invalid parameter supplied for 'slda_logit'/'sldax_logit' model")
     }
   }
 
   # Default priors for supervised models
-  if (model %in% c(2, 4)) {
+  if (model %in% c(2, 4)) { # slda or slda_logit
     q_ <- K
     if (is.null(mu0)) mu0 <- rep(0, q_)
     if (is.null(sigma0)) {
@@ -256,7 +224,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
     }
     if (is.null(eta_start)) eta_start <- seq(2, -2, length.out = q_)
   }
-  if (model %in% c(3, 5)) {
+  if (model %in% c(3, 5)) { # sldax or sldax_logit
     if (interaction_xcol <= 0) {
       p <- NCOL(x)
     } else {
@@ -318,16 +286,16 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   }
 
   # Check m
-  chk_m <- check_int(m)
-  if (!chk_m) stop("'m' is not an integer")
+  chk_m <- is.positive_integer(m)
+  if (!chk_m) stop("'m' is not a positive integer")
 
   # Check burn
-  chk_burn <- check_int(burn)
-  if (!chk_burn) stop("'burn' is not an integer")
+  chk_burn <- is.non_negative_integer(burn)
+  if (!chk_burn) stop("'burn' is not a non-negative integer")
 
   # Check number of topics
-  chk_K <- check_int(K)
-  if (!chk_K) stop("'K' is not an integer")
+  chk_K <- is.positive_integer(K)
+  if (!chk_K) stop("'K' is not a positive integer")
 
   # Check sample_beta
   chk_sample_beta <- check_logical(sample_beta)
@@ -458,12 +426,12 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
   if (is.null(b0)) b0 <- 0.001
 
   # Check m
-  chk_m <- check_int(m)
-  if (!chk_m) stop("'m' is not an integer")
+  chk_m <- is.positive_integer(m)
+  if (!chk_m) stop("'m' is not a positive integer")
 
   # Check burn
-  chk_burn <- check_int(burn)
-  if (!chk_burn) stop("'burn' is not an integer")
+  chk_burn <- is.non_negative_integer(burn)
+  if (!chk_burn) stop("'burn' is not a non-negative integer")
 
   # Check verbose
   chk_verbose <- check_logical(verbose)
@@ -576,12 +544,12 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
   if (is.null(proposal_sd)) proposal_sd <- rep(2.38, q_)
 
   # Check m
-  chk_m <- check_int(m)
-  if (!chk_m) stop("'m' is not an integer")
+  chk_m <- is.positive_integer(m)
+  if (!chk_m) stop("'m' is not a positive integer")
 
   # Check burn
-  chk_burn <- check_int(burn)
-  if (!chk_burn) stop("'burn' is not an integer")
+  chk_burn <- is.non_negative_integer(burn)
+  if (!chk_burn) stop("'burn' is not a non-negative integer")
 
   # Check verbose
   chk_verbose <- check_logical(verbose)
