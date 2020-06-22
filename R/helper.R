@@ -432,6 +432,9 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
   if (missing(formula)) missing_msg(formula)
   if (missing(data)) missing_msg(data)
 
+  # Check for missing values in data
+  if (any(is.na(data))) stop("Cannot handle missing values in 'data'")
+
   mlr_call <- match.call()
   mf <- match.call(expand.dots = FALSE)
   mind <- match(c("formula", "data"), names(mf), 0L)
@@ -534,6 +537,9 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
   # Check if any arguments without defaults were not supplied by user
   if (missing(formula)) missing_msg(formula)
   if (missing(data)) missing_msg(data)
+
+  # Check for missing values in data
+  if (any(is.na(data))) stop("Cannot handle missing values in 'data'")
 
   logistic_call <- match.call()
   mf <- match.call(expand.dots = FALSE)
