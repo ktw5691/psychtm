@@ -183,13 +183,13 @@
 #' @param eta_start A (K + p) x 1 vector of starting values for the
 #'   regression coefficients. The first p elements correspond to predictors
 #'   in X, while the last K elements correspond to the K topic means.
-#' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
+#' @param constrain_eta A logical (default = \code{false}): If \code{true}, the
 #'   regression coefficients will be constrained so that they are in descending
 #'   order; if \code{FALSE}, no constraints will be applied.
-#' @param sample_beta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param sample_beta A logical (default = \code{true}): If \code{true}, the
 #'   topic-vocabulary distributions are sampled from their full conditional
 #'   distribution.
-#' @param sample_theta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param sample_theta A logical (default = \code{true}): If \code{true}, the
 #'   topic proportions are sampled from their full conditional distribution.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
 #'   (default: 0.1).
@@ -202,14 +202,17 @@
 #' desired (default: \eqn{-1L}, no interaction). Currently only supports a
 #' single continuous predictor or a two-category categorical predictor
 #' represented as a single dummy-coded column.
+#' @param return_assignments A logical (default = \code{false}): If
+#'   \code{true}, returns an N x \eqn{max N_d} x M array of topic assignments
+#'   in slot @topics. CAUTION: this can be memory-intensive.
 #' @param verbose Should parameter draws be output during sampling? (default:
-#'   \code{FALSE}).
+#'   \code{False}).
 #' @param display_progress Should percent progress of sampler be displayed
-#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#'   (default: \code{false}). Recommended that only one of \code{verbose} and
+#'   \code{display_progress} be set to \code{true} at any given time.
 #' @export
-.gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = TRUE, sample_beta = FALSE, sample_theta = FALSE, verbose = FALSE, display_progress = FALSE) {
-    .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, sample_beta, sample_theta, verbose, display_progress)
+.gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = FALSE, sample_beta = TRUE, sample_theta = TRUE, return_assignments = FALSE, verbose = FALSE, display_progress = FALSE) {
+    .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, sample_beta, sample_theta, return_assignments, verbose, display_progress)
 }
 
 #' @title Contribution to effective number of parameters for WAIC from observation y_d

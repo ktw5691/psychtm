@@ -40,13 +40,13 @@
 //' @param eta_start A (K + p) x 1 vector of starting values for the
 //'   regression coefficients. The first p elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
-//' @param constrain_eta A logical (default = \code{TRUE}): If \code{TRUE}, the
+//' @param constrain_eta A logical (default = \code{false}): If \code{true}, the
 //'   regression coefficients will be constrained so that they are in descending
 //'   order; if \code{FALSE}, no constraints will be applied.
-//' @param sample_beta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//' @param sample_beta A logical (default = \code{true}): If \code{true}, the
 //'   topic-vocabulary distributions are sampled from their full conditional
 //'   distribution.
-//' @param sample_theta A logical (default = \code{FALSE}): If \code{TRUE}, the
+//' @param sample_theta A logical (default = \code{true}): If \code{true}, the
 //'   topic proportions are sampled from their full conditional distribution.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
 //'   (default: 0.1).
@@ -59,11 +59,14 @@
 //' desired (default: \eqn{-1L}, no interaction). Currently only supports a
 //' single continuous predictor or a two-category categorical predictor
 //' represented as a single dummy-coded column.
+//' @param return_assignments A logical (default = \code{false}): If
+//'   \code{true}, returns an N x \eqn{max N_d} x M array of topic assignments
+//'   in slot @topics. CAUTION: this can be memory-intensive.
 //' @param verbose Should parameter draws be output during sampling? (default:
-//'   \code{FALSE}).
+//'   \code{False}).
 //' @param display_progress Should percent progress of sampler be displayed
-//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-//'   \code{display_progress} be set to \code{TRUE} at any given time.
+//'   (default: \code{false}). Recommended that only one of \code{verbose} and
+//'   \code{display_progress} be set to \code{true} at any given time.
 //' @export
 // [[Rcpp::export(.gibbs_sldax_cpp)]]
 Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
@@ -78,8 +81,9 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    arma::vec proposal_sd,
                    int interaction_xcol = -1,
                    float alpha_ = 0.1, float gamma_ = 1.01,
-                   bool constrain_eta = true,
-                   bool sample_beta = false, bool sample_theta = false,
+                   bool constrain_eta = false,
+                   bool sample_beta = true, bool sample_theta = true,
+                   bool return_assignments = false,
                    bool verbose = false, bool display_progress = false) {
 
   if (m <= burn) Rcpp::stop("Length of chain m not greater than burn-in period.");
@@ -116,11 +120,31 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
   arma::mat zbar(D, K);
 
   // D x max(N_d) x m array to store topic draws
-  arma::ucube topicsm = arma::ucube(D, maxNd, chain_outlength, arma::fill::zeros);
+  uint32_t ntopics_slices;
+  if (return_assignments) {
+    ntopics_slices = chain_outlength;
+  } else {
+    ntopics_slices = 1;
+  }
+  arma::ucube topicsm = arma::ucube(D, maxNd, ntopics_slices, arma::fill::zeros);
+
   // D x K x m array to store topic proportion draws
-  arma::cube thetam = arma::cube(D, K, chain_outlength, arma::fill::zeros);
+  uint32_t ntheta_slices;
+  if (sample_theta) {
+    ntheta_slices = chain_outlength;
+  } else {
+    ntheta_slices = 1;
+  }
+  arma::cube thetam = arma::cube(D, K, ntheta_slices, arma::fill::zeros);
+
   // K x V x m array to store topic-vocabulary distribution draws
-  arma::cube betam = arma::cube(K, V, chain_outlength, arma::fill::zeros);
+  uint32_t nbeta_slices;
+  if (sample_beta) {
+    nbeta_slices = chain_outlength;
+  } else {
+    nbeta_slices = 1;
+  }
+  arma::cube betam = arma::cube(K, V, nbeta_slices, arma::fill::zeros);
 
   Rcpp::NumericVector loglike(chain_outlength); // Store log-likelihood (up to an additive constant)
   Rcpp::NumericVector logpost(chain_outlength); // Store log-posterior (up to an additive constant)
@@ -408,13 +432,9 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
       uint32_t temp_pos = (i - burn - 1) / thin;
       if (temp_pos == chain_outlength) break; // Invalid index
 
-      topicsm.slice(temp_pos) = zdocs;
-      if (sample_theta) {
-        thetam.slice(temp_pos) = theta;
-      }
-      if (sample_beta) {
-        betam.slice(temp_pos) = beta;
-      }
+      if (return_assignments) topicsm.slice(temp_pos) = zdocs;
+      if (sample_theta) thetam.slice(temp_pos) = theta;
+      if (sample_beta) betam.slice(temp_pos) = beta;
 
       // Likelihood
       switch(model) {
@@ -505,20 +525,24 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
   results.slot("ndocs")   = D;
   results.slot("nvocab")  = V;
   results.slot("nchain")  = chain_outlength;
-  results.slot("topics")  = topicsm;
+  if (return_assignments) {
+    results.slot("topics") = topicsm; // Full chain
+  } else {
+    results.slot("topics") = zdocs; // Last draw
+  }
   results.slot("alpha")   = alpha_;
   results.slot("gamma")   = gamma_;
   results.slot("loglike") = loglike;
   results.slot("logpost") = logpost;
   if (sample_theta) {
-    results.slot("theta") = thetam;
+    results.slot("theta") = thetam; // Full chain of draws or estimates
   } else {
-    results.slot("theta") = theta;
+    results.slot("theta") = theta; // Last draw or estimate
   }
   if (sample_beta) {
-    results.slot("beta") = betam;
+    results.slot("beta") = betam; // Full chain of draws or estimates
   } else {
-    results.slot("beta") = beta;
+    results.slot("beta") = beta; // Last draw or estimate
   }
 
   if (model != lda) {
