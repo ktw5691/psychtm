@@ -25,3 +25,12 @@ is.positive_integer <- function(x, tol = sqrt(.Machine$double.eps)) {
 missing_msg <- function(x) {
   stop(paste0('\"', x, '\" argument is missing.'), call. = FALSE)
 }
+
+#' Check for logical and non-missing argument
+#'
+#' @param arg Argument to check.
+check_logical <- function(arg) {
+  good <- FALSE
+  if (is.logical(arg) & !is.na(arg)) good <- TRUE
+  return(good)
+}
