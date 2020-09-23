@@ -1,7 +1,7 @@
 Package: psychtm
 Type: Package
 Title: Text Mining for Psychological Research
-Version: 2020.4
+Version: 2020.5
 Date: 2020-09-23
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
