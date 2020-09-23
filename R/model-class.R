@@ -16,7 +16,7 @@
 #' @slot lpd A nchain x ndocs matrix of predictive posterior likelihoods (NOT
 #'   log-likelihoods).
 #' @slot extra A list of additional model fitting information. Contains
-#'   time_elapsed, start_time, end_time, and call.
+#'   time_elapsed, start_time, end_time, corrected_label_switching, and call.
 Model <- setClass("Model",
   slots = c(
     ndocs       = "numeric",
@@ -48,6 +48,7 @@ Model <- setClass("Model",
     extra = list(time_elapsed = NA_real_,
                  start_time = NA_real_,
                  end_time = NA_real_,
+                 corrected_label_switching = FALSE,
                  call = NA_character_)
   )
 )
@@ -209,23 +210,6 @@ setMethod("extra<-", "Model", function(x, value) {
 })
 
 #' Helper function (constructor) for Model class.
-#' @slot ndocs The number of documents/observations.
-#' @slot nchain The number of iterations of the Gibbs sampler.
-#' @slot mu0 A (p + 1) x 1 matrix of prior means for eta.
-#' @slot sigma0 A (p + 1) x (p + 1) prior covariance matrix for eta.
-#' @slot eta_start A (p + 1) x 1 matrix of starting values for eta.
-#' @slot eta A nchain x (p + 1) matrix of draws of regression coefficients.
-#' @slot loglike A nchain x 1 vector of the log-likelihood (up to an additive
-#'   constant).
-#' @slot logpost A nchain x 1 vector of the log-posterior (up to an additive
-#'   constant).
-#' @slot waic WAIC (up to an additive constant) on the deviance scale.
-#' @slot se_waic Standard error of the WAIC.
-#' @slot p_eff The effective number of parameters.
-#' @slot lpd A nchain x ndocs matrix of predictive posterior likelihoods (NOT
-#'   log-likelihoods).
-#' @slot extra A list of additional model fitting information. Contains
-#'   time_elapsed, start_time, end_time, and call.
 Model <- function(ndocs, nchain = 1, mu0 = NaN, sigma0 = NaN,
                   eta_start = NaN, eta = NaN, loglike = NaN, logpost = NaN,
                   waic = NaN, se_waic = NaN, p_eff = NaN, lpd = NaN) {
