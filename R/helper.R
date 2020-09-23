@@ -66,9 +66,9 @@
 #'   continuous predictor or a two-category categorical predictor represented as a
 #'   single dummy-coded column.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
-#'   (default: 0.1).
+#'   (default: 1.0).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
-#'   vocabulary probabilities (default: 1.01).
+#'   vocabulary probabilities (default: 1.0).
 #' @param mu0 An optional q x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A q x q variance-covariance matrix for the prior on the
@@ -100,10 +100,11 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         model = c("lda", "slda", "sldax",
                                   "slda_logit", "sldax_logit"),
                         sample_beta = TRUE, sample_theta = TRUE,
-                        interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01,
+                        interaction_xcol = -1L, alpha_ = 1.0, gamma_ = 1.0,
                         mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
                         eta_start = NULL, constrain_eta = FALSE,
                         proposal_sd = NULL, return_assignments = FALSE,
+                        correct_ls = TRUE,
                         verbose = FALSE, display_progress = FALSE) {
 
   # Start timing
@@ -172,7 +173,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
         x <- x[, -ip]
       }
       x <- as.matrix(x) # If y ~ 1 supplied, x has dims D x 0
-      if (dim(x)[2] == 0)
+      if (dim(x)[2] == 0 & model %in% c(3, 5))
         stop("Design matrix 'x' has 0 columns.
               Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as
               'formula'.")
@@ -317,6 +318,18 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
   chk_display <- check_logical(display_progress)
   if (!chk_display) stop("'display_progress' is not TRUE/FALSE")
 
+  # Check correct_ls
+  chk_correct_ls <- check_logical(correct_ls)
+  if (!chk_correct_ls) stop("'correct_ls' is not TRUE/FALSE")
+
+  # Check for requirements to correct label switching
+  if (isTRUE(correct_ls) & !(isTRUE(sample_beta) & isTRUE(sample_theta)))
+    stop("'sample_beta' and 'sample_theta' must both be TRUE to correct label switching")
+
+  # TODO: Currently does not handle label switching correction when topic-covariate interaction specified
+  if (isTRUE(correct_ls) & isFALSE(interaction_xcol < 1))
+    stop("Label switching correction is not currently supported for models with topic-covariate interactions")
+
   res_out <- tryCatch({
     res <- .gibbs_sldax_cpp(docs = docs, V = V, m = m, burn = burn, thin = thin,
                             K = K, model = model, y = y, x = x,
@@ -341,10 +354,57 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
     } else if (model %in% c(2, 4)) {
       colnames(eta(res)) <- paste0("topic", seq_len(K))
     }
+
+    # Correct label switching; requires sampling theta and beta
+    #   TODO: Label switching not implemented for models with topic-covariate interactions
+    correct_label_switch <- FALSE
+    if (correct_ls) {
+      # relabel_out$permutations is Nchain x K array of permutation indices
+      relabel_out = stephens(aperm(theta(res), c(3, 1, 2)), maxiter = 100) # First arg needs to be Nchain x D x K array
+      if (relabel_out$iterations >= 100) {
+        cat("Relabeling failed to converge, no label switching correction applied.")
+      } else {
+        # Permute theta
+        perm_theta <- permute.mcmc(aperm(theta(res), c(3, 2, 1)), relabel_out$permutations) # First arg needs to be Nchain x K x npar array; npar won't be swapped, but rows (K) will be permuted
+        perm_theta <- aperm(perm_theta$output, c(3, 2, 1)) # Return to D x K x Nchain format
+        theta(res) <- perm_theta
+        rm(perm_theta)
+
+        # Permute beta
+        perm_beta <- permute.mcmc(aperm(beta_(res), c(3, 1, 2)), relabel_out$permutations)
+        perm_beta <- aperm(perm_beta$output, c(2, 3, 1)) # Return to K x V x Nchain format
+        beta_(res) <- perm_beta
+        rm(perm_beta)
+
+        # Permute eta
+        perm_eta <- permute.mcmc(array(eta(res), dim = c(nchain(res), K, 1)), relabel_out$permutations)
+        perm_eta <- array(perm_eta$output, c(nchain(res), K))
+        eta(res) <- perm_eta
+        rm(perm_eta)
+
+        # Permute topic assignments for all words
+        if (return_assignments) {
+          perm_z <- topics(res)
+          for (iter in seq_len(nchain(res))){
+            perm_i <- relabel_out$permutations[iter, ]
+            if (isTRUE(all.equal(seq_len(K), perm_i))) next # No change needed, go to next sample
+            old_z <- perm_z[, , iter] # Original draws to check
+            for (k in seq_len(K)) {
+              new_index = perm_i[k]
+              if (new_index == k) next # Index does not need to change for this topic, go to next topic
+              perm_z[, , iter][old_z == k] <- new_index
+            }
+          }
+          topics(res) <- perm_z
+        }
+        correct_label_switch <- TRUE
+      }
+    }
     t2 <- Sys.time()
     extra(res) <- list(time_elapsed = t2 - t1,
                        start_time = t1,
                        end_time = t2,
+                       corrected_label_switching = correct_label_switch,
                        call = sldax_call)
     return(res)
   }, error = function(err_cond) {

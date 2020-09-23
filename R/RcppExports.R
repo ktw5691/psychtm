@@ -192,9 +192,9 @@
 #' @param sample_theta A logical (default = \code{true}): If \code{true}, the
 #'   topic proportions are sampled from their full conditional distribution.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
-#'   (default: 0.1).
+#'   (default: 1.0).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
-#'   vocabulary probabilities (default: 1.01).
+#'   vocabulary probabilities (default: 1.0).
 #' @param proposal_sd The proposal standard deviation for drawing the
 #'   regression coefficients, N(0, proposal_sd) (default: 0.2).
 #' @param interaction_xcol The column number of the design matrix for the
@@ -211,7 +211,7 @@
 #'   (default: \code{false}). Recommended that only one of \code{verbose} and
 #'   \code{display_progress} be set to \code{true} at any given time.
 #' @export
-.gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 0.1, gamma_ = 1.01, constrain_eta = FALSE, sample_beta = TRUE, sample_theta = TRUE, return_assignments = FALSE, verbose = FALSE, display_progress = FALSE) {
+.gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 1.0, gamma_ = 1.0, constrain_eta = FALSE, sample_beta = TRUE, sample_theta = TRUE, return_assignments = FALSE, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, sample_beta, sample_theta, return_assignments, verbose, display_progress)
 }
 
