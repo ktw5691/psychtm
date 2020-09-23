@@ -1,29 +1,17 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-sudo: false
-dist: trusty
-cache: packages
-latex: false
-fortran: true
-
-jobs:
-  include:
-  - os: osx
-  - r: devel
-  - r: release
-    after_success:
-    - Rscript -e 'covr::codecov()'
-  - r: 3.6
-  - r: 3.5
-  - r: 3.4
-  - r: 3.3
-    # r_packages:
-    #   - Rcpp
-    #   - dplyr
-    #   - ggplot2
-
-matrix:
-  fast_finish: true
-  # allow_failures:
-  # - env: DEVEL_PACKAGES=true
+r:
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
+  - release
+  - devel
+warnings_are_errors: false # Don't fail build; change to true when ready to submit to CRAN
+cache:
+  packages: true # Cache packages to reduce build times
+latex: true
+after_success:
+  - Rscript -e 'covr::codecov()'
+fast_finish: true
