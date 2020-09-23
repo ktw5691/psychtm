@@ -32,7 +32,7 @@ Wilcox, K. T. (2020). psychtm: Text mining for psychological research. R package
 
 To install this package from source:
 
-1) Ensure that appropriate compilers are installed on your computer:
+1) Ensure that appropriate `C++` compilers are installed on your computer:
 
 + Windows users may need to install [Rtools](https://CRAN.R-project.org/bin/windows/Rtools/). For easier command line use, be sure to select the option to install Rtools to their path.
 
@@ -40,16 +40,25 @@ To install this package from source:
 
 + Most Linux distributions should already have up-to-date compilers (or if not they can be updated easily).
 
-2) If necessary, install the `devtools` R package
+3) Install the `psychtm` package:
+
++ `psychtm` is not currently available on CRAN, but can be installed from this repository:
+3.1) If necessary, install the `devtools` R package
 
 ```{r, devtools-install, eval = FALSE}
 install.packages("devtools")
 ```
 
-3) Install the `psychtm` package from the Github source code:
+3.2) Install the latest stable development version from the Github source code:
 
 ```{r gh-installation, eval = FALSE}
 devtools::install_github("ktw5691/psychtm")
+```
+
+3.3) Alternatively, if you are interested in the most recent (untested) development snapshot:
+
+```{r gh-installation, eval = FALSE}
+devtools::install_github("ktw5691/psychtm@devel")
 ```
 
 ## Limitations
@@ -57,3 +66,7 @@ devtools::install_github("ktw5691/psychtm")
 + This package should be considered beta software and is still under active development: use at your own risk
 
 + This package uses a Gibbs sampling algorithm that currently can be memory-intensive for a large corpus; future developments are planned to better scale to larger corpora
+
+## Getting Help
+
++ If you think you have found a bug, please [open issues](https://github.com/ktw5691/psychtm/issues) and provide a [minimal complete verifiable example](https://stackoverflow.com/help/mcve).
