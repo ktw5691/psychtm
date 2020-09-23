@@ -11,7 +11,7 @@ r:
 os:
   - linux
   - osx
-  - windows
+  # - windows # R builds not currently supported on Travis CI
 allow_failures:
   - os: osx
 dist: xenial
