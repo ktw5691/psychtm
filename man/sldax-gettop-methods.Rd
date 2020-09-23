@@ -96,5 +96,5 @@ A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
 \code{est_theta()} estimates the mean or median theta matrix.
 \code{est_beta()} estimates the mean or median beta matrix.
 \code{get_coherence()} computes the coherence metric for each topic (see Mimno, Wallach, Talley, Leenders, & McCallum, 2011).
-\code{get_exclusivity()} computes the exclusivity metric for each topic (see Roberts, Stweart, & Airoldi, 2013).
+\code{get_exclusivity()} computes the exclusivity metric for each topic (see Roberts, Stewart, & Airoldi, 2013).
 }
