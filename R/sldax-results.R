@@ -2,109 +2,113 @@
 NULL
 
 #' @rdname sldax-gettop-methods
-setMethod("est_theta",
-          c(mcmc_fit = "Sldax"),
-          function(mcmc_fit, burn, thin, stat, correct_label_switch, verbose) {
-
-            m <- nchain(mcmc_fit)
-            keep <- seq(burn + 1, m, thin)
-            theta <- theta(mcmc_fit)[, , keep]
-            edge_case <- FALSE
-
-            # One-document edge case fails in label.switching::stephens()
-            if (length(dim(theta)) == 2) {
-              theta <- array(theta, dim = c(ndocs(mcmc_fit),
-                                            ntopics(mcmc_fit),
-                                            length(keep)))
-              edge_case <- TRUE
-              if (correct_label_switch)
-                warning("label.switching::stephens() does not handle single-observation or single-iteration cases. Falling back to no label switching correction.")
-            }
-
-            if (correct_label_switch & !edge_case) {
-              # Permute to dimensions: MCMC draws, Docs, Topics
-              theta_perm <- aperm(theta, c(3, 1, 2))
-              # Relabeling algorithm from Stephens (2000)
-              relabel_out <- label.switching::stephens(theta_perm)
-              if (verbose)
-                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
-              reorder_theta <- label.switching::permute.mcmc(
-                aperm(theta_perm, c(1, 3, 2)),
-                permutations = relabel_out$permutations)$output
-              reorder_theta <- aperm(reorder_theta, c(1, 3, 2)) # MCMC, D, K
-              if (stat == "mean")
-                theta_mean <- apply(reorder_theta, c(2, 3), mean)
-              if (stat == "median")
-                theta_mean <- apply(reorder_theta, c(2, 3), median)
-            } else {
-              if (stat == "mean") theta_mean <- apply(theta, c(1, 2), mean)
-              if (stat == "median") theta_mean <- apply(theta, c(1, 2), median)
-            }
-            return(theta_mean)
-          }
-)
-
-#' @rdname sldax-gettop-methods
 setMethod("est_beta",
           c(mcmc_fit = "Sldax"),
-          function(mcmc_fit, burn, thin, stat, correct_label_switch, verbose) {
+          function(mcmc_fit, burn, thin, stat) {
 
             m <- nchain(mcmc_fit)
             keep   <- seq(burn + 1, m, thin)
             beta_ <- beta_(mcmc_fit)[, , keep]
 
-            if (correct_label_switch) {
-              # Permute to dimensions: MCMC draws, Words, Topics
-              beta_perm <- aperm(beta_, c(3, 2, 1))
-              # Relabeling algorithm from Stephens (2000)
-              relabel_out <- label.switching::stephens(beta_perm)
-              if (verbose)
-                cat("Relabeling algorithm status: ", relabel_out$status, "\n")
-              reorder_beta <- label.switching::permute.mcmc(
-                aperm(beta_perm, c(1, 3, 2)),
-                permutations = relabel_out$permutations)$output
-              reorder_beta <- aperm(reorder_beta, c(1, 3, 2)) # MCMC, K, V
-              if (stat == "mean")
-                beta_mean <- t(apply(reorder_beta, c(2, 3), mean))
-              if (stat == "median")
-                beta_mean <- t(apply(reorder_beta, c(2, 3), median))
-            } else {
-              if (stat == "mean") beta_mean <- apply(beta_, c(1, 2), mean)
-              if (stat == "median") beta_mean <- apply(beta_, c(1, 2), median)
-            }
-            return(beta_mean)
+            if (stat == "mean") beta_hat <- apply(beta_, c(1, 2), mean)
+            if (stat == "median") beta_hat <- apply(beta_, c(1, 2), median)
+
+            return(beta_hat)
           }
 )
 
-#' Compute term-scores for each word-topic pair
-#'
-#' For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
-#' A. N. Srivastava & M. Sahami (Eds.), Text mining: Classification, clustering,
-#' and applications. Chapman and Hall/CRC.
-#'
-#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
-#'   for each of \eqn{K} topics.
-#'
-#' @return A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
-#' @export
-term_score <- function(beta_) {
+#' @rdname sldax-gettop-methods
+setMethod("est_theta",
+          c(mcmc_fit = "Sldax"),
+          function(mcmc_fit, burn, thin, stat) {
 
-  if (missing(beta_)) stop("Please supply a matrix to 'beta_'.")
-  if (!is.matrix(beta_)) stop("Please supply a matrix to 'beta_'.")
-  if (any(beta_ < 0.0 | beta_ > 1.0))
-    stop("Entries of 'beta_' must be between 0.0 and 1.0.")
-  sum_rowsum_beta <- sum(rowSums(beta_))
-  K <- NROW(beta_)
-  tol <- 0.001
-  if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
-    stop("Rows of 'beta_' must each sum to 1.0.")
+            m <- nchain(mcmc_fit)
+            keep <- seq(burn + 1, m, thin)
+            theta <- theta(mcmc_fit)[, , keep]
 
-  ldenom <- apply(log(beta_), 2, sum) / K # Sum logs over topics (rows)
-  mdenom <- matrix(ldenom, nrow = K, ncol = NCOL(beta_), byrow = TRUE)
-  tscore <- beta_ * (log(beta_) - mdenom)
+            if (stat == "mean") theta_hat <- apply(theta, c(1, 2), mean)
+            if (stat == "median") theta_hat <- apply(theta, c(1, 2), median)
 
-  return(tscore)
-}
+            return(theta_hat)
+          }
+)
+
+#' @rdname sldax-gettop-methods
+setMethod("get_coherence",
+          c(beta_ = "matrix", docs = "matrix"),
+          function(beta_, docs, nwords) {
+
+            K <- nrow(beta_)
+            coher_score <- numeric(K)
+
+            # Get M most probable words for each topic
+            topM <- suppressMessages(
+              get_topwords(beta_, nwords = nwords, method = "prob"))
+
+            for (k in seq_len(K)) {
+              # M most probable words for topic k
+              wordsMk_vec <- unlist(topM[topM$topic == k, "word"])
+
+              # Initialize document frequency of word presence to 0 (max is log(D))
+              log_corpusM <- numeric(nwords)
+              # Compute log of frequency of topic k's M most frequent words in corpus
+              for (m in seq_len(nwords)) {
+                log_corpusM[m] <- log(
+                  sum(
+                    apply(docs, 1, function(x) wordsMk_vec[m] %in% x)
+                  )
+                )
+              }
+              temp_score <- 0
+              # Compute coherence for topic k
+              for (l in 2:nwords) {
+                for (j in seq_len(l - 1)) {
+                  # Count presence of co-occurences of two words (1 or 0 for each document) in corpus; range is 0 to D
+                  d_lj <- sum(
+                    apply(docs, 1, function(x) as.integer( (wordsMk_vec[l] %in% x) & (wordsMk_vec[j] %in% x)))
+                  )
+                  temp_score <- temp_score + log(d_lj + 1) - log_corpusM[j]
+                }
+              }
+              coher_score[k] <- temp_score
+            }
+          return(coher_score)
+          }
+)
+
+#' @rdname sldax-gettop-methods
+setMethod("get_exclusivity",
+          c(beta_ = "matrix"),
+          function(beta_, nwords, weight) {
+
+            K <- nrow(beta_) # Number of topics
+            V <- ncol(beta_) # Vocabulary size
+
+            # Unnormalized marginal word probabilities across topics
+            sum_over_topics <- colSums(beta_)
+            # Divide each word-topic probability by the marginal word probabilities (unnormalized)
+            ex_temp <- beta_ %*% diag(1 / sum_over_topics) # K x V
+            # Exclusivity
+            #   V x K matrix of empirical CDF of weighted word probabilities for each topic
+            exc <- apply(ex_temp, 1, rank) / V
+            exc <- 1 / exc
+            # Frequency
+            #   V x K matrix of empirical CDF of word probabilities for each topic
+            fre <- apply(beta_, 1, rank) / V
+            fre <- 1 / fre
+            # Compute FREX as weighted harmonic mean of frequency and exclusivity
+            #   V x K matrix of FREX values
+            frex <- weight * exc + (1 - weight) * fre
+            frex <- 1 / frex
+
+            # Get top M word indices per topic
+            ind <- apply(beta_, 1, order, decreasing = TRUE)[seq_len(nwords), ] # M x K matrix
+            # For M most probable words per topic, compute sum of M corresponding FREX scores
+            frex_scores <- numeric(K)
+            for (k in seq_len(K)) frex_scores[k] <- sum(frex[ind[, k], k])
+            return(frex_scores)
+          }
+)
 
 #' @rdname sldax-gettop-methods
 setMethod("get_toptopics",
@@ -281,4 +285,32 @@ setMethod("gg_coef",
           }
 )
 
+#' Compute term-scores for each word-topic pair
+#'
+#' For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
+#' A. N. Srivastava & M. Sahami (Eds.), Text mining: Classification, clustering,
+#' and applications. Chapman and Hall/CRC.
+#'
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
+#'   for each of \eqn{K} topics.
+#'
+#' @return A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
+#' @export
+term_score <- function(beta_) {
 
+  if (missing(beta_)) stop("Please supply a matrix to 'beta_'.")
+  if (!is.matrix(beta_)) stop("Please supply a matrix to 'beta_'.")
+  if (any(beta_ < 0.0 | beta_ > 1.0))
+    stop("Entries of 'beta_' must be between 0.0 and 1.0.")
+  sum_rowsum_beta <- sum(rowSums(beta_))
+  K <- NROW(beta_)
+  tol <- 0.001
+  if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
+    stop("Rows of 'beta_' must each sum to 1.0.")
+
+  ldenom <- apply(log(beta_), 2, sum) / K # Sum logs over topics (rows)
+  mdenom <- matrix(ldenom, nrow = K, ncol = NCOL(beta_), byrow = TRUE)
+  tscore <- beta_ * (log(beta_) - mdenom)
+
+  return(tscore)
+}

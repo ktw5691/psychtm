@@ -8,6 +8,8 @@
 #' \code{gg_coef()} plots regression coefficients for \code{\link{Sldax}} models.
 #' \code{est_theta()} estimates the mean or median theta matrix.
 #' \code{est_beta()} estimates the mean or median beta matrix.
+#' \code{get_coherence()} computes the coherence metric for each topic (see Mimno, Wallach, Talley, Leenders, & McCallum, 2011).
+#' \code{get_exclusivity()} computes the exclusivity metric for each topic (see Roberts, Stweart, & Airoldi, 2013).
 #'
 #' @name sldax-gettop-methods
 NULL
@@ -16,56 +18,11 @@ NULL
 #' @param burn The number of draws to discard as a burn-in period (default: 0).
 #' @param thin The number of draws to skip as a thinning period (default: 1; i.e., no thinning).
 #' @param stat The summary statistic to use on the posterior draws (default: \code{"mean"}).
-#' @param correct_label_switch Should Stephens' (2000) algorithm be used to
-#'   correct label switching? (default: \code{TRUE})
-#' @param verbose Print status information? (default: \code{FALSE})
 #'
 #' @rdname sldax-gettop-methods
 #' @export
-setGeneric("est_theta",
-           function(mcmc_fit, burn = 0, thin = 1, stat = "mean",
-                    correct_label_switch = TRUE, verbose = FALSE) {
-
-             passed_args <- names(as.list(match.call())[-1])
-
-             if (missing(mcmc_fit))
-               stop("Please supply an object to 'mcmc_fit'.")
-             if (!is(mcmc_fit, "Sldax"))
-               stop("'mcmc_fit' must be an Sldax object.")
-
-             if (length(dim(theta(mcmc_fit))) != 3)
-               stop("Only one draw of 'theta' available, so this function is not useful.")
-
-             if ( !is.non_negative_integer(burn) ) stop("'burn' must be a non-negative integer.")
-             if ( !is.positive_integer(thin) ) stop("'thin' must be a positive integer.")
-
-             m <- nchain(mcmc_fit)
-             if (burn >= m)
-               stop("'burn' cannot exceed length of chain.")
-             if (thin > (m - burn))
-               stop("'thin' cannot exceed length of chain less 'burn'.")
-
-             if (length(stat) > 1) {
-               stat <- stat[1]
-               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
-             }
-             if (!(stat %in% c("mean", "median")))
-               stop("'stat' must be either 'mean' or 'median'.")
-
-             if (!is.logical(correct_label_switch))
-               stop("'correct_label_switch' must be 'TRUE' or 'FALSE'.")
-             if (!is.logical(verbose))
-               stop("'verbose' must be 'TRUE' or 'FALSE'.")
-
-             standardGeneric("est_theta")
-           }
-)
-
-#' @rdname sldax-gettop-methods
-#' @export
 setGeneric("est_beta",
-           function(mcmc_fit,  burn = 0, thin = 1, stat = "mean",
-                    correct_label_switch = TRUE, verbose = FALSE) {
+           function(mcmc_fit,  burn = 0, thin = 1, stat = "mean") {
 
              if (missing(mcmc_fit))
                stop("Please supply an object to 'mcmc_fit'.")
@@ -91,12 +48,105 @@ setGeneric("est_beta",
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
 
-             if (!is.logical(correct_label_switch))
-               stop("'correct_label_switch' must be 'TRUE' or 'FALSE'.")
-             if (!is.logical(verbose))
-               stop("'verbose' must be 'TRUE' or 'FALSE'.")
-
              standardGeneric("est_beta")
+           }
+)
+
+#' @rdname sldax-gettop-methods
+#' @export
+setGeneric("est_theta",
+           function(mcmc_fit, burn = 0, thin = 1, stat = "mean") {
+
+             # passed_args <- names(as.list(match.call())[-1])
+
+             if (missing(mcmc_fit))
+               stop("Please supply an object to 'mcmc_fit'.")
+             if (!is(mcmc_fit, "Sldax"))
+               stop("'mcmc_fit' must be an Sldax object.")
+
+             if (length(dim(theta(mcmc_fit))) != 3)
+               stop("Only one draw of 'theta' available, so this function is not useful.")
+
+             if ( !is.non_negative_integer(burn) ) stop("'burn' must be a non-negative integer.")
+             if ( !is.positive_integer(thin) ) stop("'thin' must be a positive integer.")
+
+             m <- nchain(mcmc_fit)
+             if (burn >= m)
+               stop("'burn' cannot exceed length of chain.")
+             if (thin > (m - burn))
+               stop("'thin' cannot exceed length of chain less 'burn'.")
+
+             if (length(stat) > 1) {
+               stat <- stat[1]
+               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
+             }
+             if (!(stat %in% c("mean", "median")))
+               stop("'stat' must be either 'mean' or 'median'.")
+             standardGeneric("est_theta")
+           }
+)
+
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of word-topic probabilities. Can be
+#'   computed using \code{\link{est_beta()}}. Each row sums to 1.
+#' @param docs The \eqn{D} x max(\eqn{N_d}) matrix of documents (word indices)
+#'   used to fit the \code{\link{Sldax}} model.
+#' @param nwords The number of highest-probability words per topic to consider where
+#'   \eqn{M \le V} and \eqn{V} is the size of the corpus vocabulary. (default: \code{10})
+#'
+#' @rdname sldax-gettop-methods
+#' @export
+setGeneric("get_coherence",
+           function(beta_, docs, nwords = 10) {
+
+             # passed_args <- names(as.list(match.call())[-1])
+
+             if (missing(beta_))
+               stop("Please supply an array to 'beta_'.")
+
+
+             if ( length(dim(beta_)) != 2 )
+               stop("'beta_' does not appear to be a K x V matrix.")
+
+             if (any(beta_ < 0.0 | beta_ > 1.0)) stop("Entries of 'beta_' must be between 0.0 and 1.0.")
+             sum_rowsum_beta <- sum(rowSums(beta_))
+             K <- nrow(beta_)
+             tol <- 0.001
+             if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
+               stop("Rows of 'beta_' must each sum to 1.0.")
+
+             if ( !is.positive_integer(nwords) ) stop("'nwords' must be a positive integer.")
+
+             standardGeneric("get_coherence")
+           }
+)
+
+#' @param weight The weight (between 0 and 1) to give to exclusivity (near 1) vs. frequency (near 0). (default: \code{0.7})
+#'
+#' @rdname sldax-gettop-methods
+#' @export
+setGeneric("get_exclusivity",
+           function(beta_, nwords = 10, weight = 0.7) {
+
+             # passed_args <- names(as.list(match.call())[-1])
+
+             if (missing(beta_))
+               stop("Please supply an array to 'beta_'.")
+
+             if (length(dim(beta_)) != 2)
+               stop("'beta_' does not appear to be a K x V matrix.")
+
+             if (any(beta_ < 0.0 | beta_ > 1.0)) stop("Entries of 'beta_' must be between 0.0 and 1.0.")
+             sum_rowsum_beta <- sum(rowSums(beta_))
+             K <- nrow(beta_)
+             tol <- 0.001
+             if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
+               stop("Rows of 'beta_' must each sum to 1.0.")
+
+             if ( !is.positive_integer(nwords) ) stop("'nwords' must be a positive integer.")
+
+             if ( ((weight >= 1.0) | (weight <= 0.0))) stop("'weight' must be between 0.0 and 1.0.")
+
+             standardGeneric("get_exclusivity")
            }
 )
 
@@ -125,8 +175,6 @@ setGeneric("get_toptopics",
            }
 )
 
-#' @param beta_ A \eqn{K} x \eqn{V} matrix of word-topic probabilities; each row
-#'   sums to 1.
 #' @param nwords The number of words to retrieve (default: V).
 #' @param vocab A character vector of length V containing the vocabulary.
 #' @param method If "termscore", use term scores (similar to tf-idf). If "prob",
@@ -210,7 +258,7 @@ setGeneric("gg_coef",
            function(mcmc_fit, burn = 0L, thin = 1L, stat = "mean",
                     errorbw = 0.5) {
 
-             passed_args <- names(as.list(match.call())[-1])
+             # passed_args <- names(as.list(match.call())[-1])
 
              if (missing(mcmc_fit))
                stop("Please supply an object to 'mcmc_fit'.")
