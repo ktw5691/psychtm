@@ -12,10 +12,10 @@ os:
   - linux
   - osx
   - windows
+dist: xenial
 warnings_are_errors: false # Don't fail build; change to true when ready to submit to CRAN
 cache:
   packages: true # Cache packages to reduce build times
 latex: true
 after_success:
   - Rscript -e 'covr::codecov()'
-fast_finish: true
