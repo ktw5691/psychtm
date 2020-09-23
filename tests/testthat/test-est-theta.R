@@ -106,31 +106,6 @@ test_that("est_theta() handles 'thin' longer than chain length minus 'burn'", {
   )
 })
 
-test_that("est_theta() warns user if label.switching::stephens will fail", {
-  docs <- matrix(c(1, 2, 1, 2), nrow = 1)
-  topics <- array(c(1, 2, 2, 1,
-                    1, 2, 2, 1), dim = c(1, 4, 2))
-  theta <- array(c(0.5, 0.5,
-                   0.5, 0.5), dim = c(1, 2, 2))
-  beta_ <- array(c(0.5, 0.5, 0.5, 0.5,
-                   0.5, 0.5, 0.5, 0.5), dim = c(2, 2, 2))
-  eta_start <- c(1, -1)
-  eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
-  lpd <- matrix(NaN, nrow = 2, ncol = 1)
-  loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
-  expect_warning(
-    est_theta(mcmc_fit = fit, correct_label_switch = TRUE),
-    "label.switching::stephens() does not handle single-observation or single-iteration cases. Falling back to no label switching correction.",
-    fixed = TRUE
-  )
-})
-
 test_that("est_theta() handles multiple values for 'stat'", {
   docs <- matrix(c(1, 2, 1, 2), nrow = 2)
   topics <- array(c(1, 2, 2, 1,
