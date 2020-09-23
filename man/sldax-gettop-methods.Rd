@@ -2,14 +2,18 @@
 % Please edit documentation in R/sldax-generic-functions.R, R/sldax-results.R
 \name{sldax-gettop-methods}
 \alias{sldax-gettop-methods}
-\alias{est_theta}
 \alias{est_beta}
+\alias{est_theta}
+\alias{get_coherence}
+\alias{get_exclusivity}
 \alias{get_toptopics}
 \alias{get_topwords}
 \alias{get_zbar}
 \alias{gg_coef}
-\alias{est_theta,Sldax-method}
 \alias{est_beta,Sldax-method}
+\alias{est_theta,Sldax-method}
+\alias{get_coherence,matrix,matrix-method}
+\alias{get_exclusivity,matrix-method}
 \alias{get_toptopics,matrix-method}
 \alias{get_topwords,matrix,numeric,character-method}
 \alias{get_zbar,Sldax-method}
@@ -17,23 +21,13 @@
 \title{Compute and visualize the most probable topics in a document or
 the most probable words in a topic.}
 \usage{
-est_theta(
-  mcmc_fit,
-  burn = 0,
-  thin = 1,
-  stat = "mean",
-  correct_label_switch = TRUE,
-  verbose = FALSE
-)
+est_beta(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
-est_beta(
-  mcmc_fit,
-  burn = 0,
-  thin = 1,
-  stat = "mean",
-  correct_label_switch = TRUE,
-  verbose = FALSE
-)
+est_theta(mcmc_fit, burn = 0, thin = 1, stat = "mean")
+
+get_coherence(beta_, docs, nwords = 10)
+
+get_exclusivity(beta_, nwords = 10, weight = 0.7)
 
 get_toptopics(theta, ntopics)
 
@@ -43,23 +37,13 @@ get_zbar(mcmc_fit, burn = 0L, thin = 1L)
 
 gg_coef(mcmc_fit, burn = 0L, thin = 1L, stat = "mean", errorbw = 0.5)
 
-\S4method{est_theta}{Sldax}(
-  mcmc_fit,
-  burn = 0,
-  thin = 1,
-  stat = "mean",
-  correct_label_switch = TRUE,
-  verbose = FALSE
-)
+\S4method{est_beta}{Sldax}(mcmc_fit, burn = 0, thin = 1, stat = "mean")
 
-\S4method{est_beta}{Sldax}(
-  mcmc_fit,
-  burn = 0,
-  thin = 1,
-  stat = "mean",
-  correct_label_switch = TRUE,
-  verbose = FALSE
-)
+\S4method{est_theta}{Sldax}(mcmc_fit, burn = 0, thin = 1, stat = "mean")
+
+\S4method{get_coherence}{matrix,matrix}(beta_, docs, nwords = 10)
+
+\S4method{get_exclusivity}{matrix}(beta_, nwords = 10, weight = 0.7)
 
 \S4method{get_toptopics}{matrix}(theta, ntopics)
 
@@ -78,19 +62,19 @@ gg_coef(mcmc_fit, burn = 0L, thin = 1L, stat = "mean", errorbw = 0.5)
 
 \item{stat}{The summary statistic to use on the posterior draws (default: \code{"mean"}).}
 
-\item{correct_label_switch}{Should Stephens' (2000) algorithm be used to
-correct label switching? (default: \code{TRUE})}
+\item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities. Can be
+computed using \code{\link{est_beta()}}. Each row sums to 1.}
 
-\item{verbose}{Print status information? (default: \code{FALSE})}
+\item{docs}{The \eqn{D} x max(\eqn{N_d}) matrix of documents (word indices)
+used to fit the \code{\link{Sldax}} model.}
+
+\item{nwords}{The number of words to retrieve (default: V).}
+
+\item{weight}{The weight (between 0 and 1) to give to exclusivity (near 1) vs. frequency (near 0). (default: \code{0.7})}
 
 \item{theta}{A D x K matrix of K topic proportions for all D documents.}
 
 \item{ntopics}{The number of topics to retrieve (default: all topics).}
-
-\item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities; each row
-sums to 1.}
-
-\item{nwords}{The number of words to retrieve (default: V).}
 
 \item{vocab}{A character vector of length V containing the vocabulary.}
 
@@ -111,4 +95,6 @@ A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
 \code{gg_coef()} plots regression coefficients for \code{\link{Sldax}} models.
 \code{est_theta()} estimates the mean or median theta matrix.
 \code{est_beta()} estimates the mean or median beta matrix.
+\code{get_coherence()} computes the coherence metric for each topic (see Mimno, Wallach, Talley, Leenders, & McCallum, 2011).
+\code{get_exclusivity()} computes the exclusivity metric for each topic (see Roberts, Stweart, & Airoldi, 2013).
 }

@@ -17,8 +17,8 @@ gibbs_sldax(
   sample_beta = TRUE,
   sample_theta = TRUE,
   interaction_xcol = -1L,
-  alpha_ = 0.1,
-  gamma_ = 1.01,
+  alpha_ = 1,
+  gamma_ = 1,
   mu0 = NULL,
   sigma0 = NULL,
   a0 = NULL,
@@ -27,6 +27,7 @@ gibbs_sldax(
   constrain_eta = FALSE,
   proposal_sd = NULL,
   return_assignments = FALSE,
+  correct_ls = TRUE,
   verbose = FALSE,
   display_progress = FALSE
 )
@@ -68,10 +69,10 @@ continuous predictor or a two-category categorical predictor represented as a
 single dummy-coded column.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
-(default: 0.1).}
+(default: 1.0).}
 
 \item{gamma_}{The hyper-parameter for the prior on the topic-specific
-vocabulary probabilities (default: 1.01).}
+vocabulary probabilities (default: 1.0).}
 
 \item{mu0}{An optional q x 1 mean vector for the prior on the regression
 coefficients. See 'Details'.}

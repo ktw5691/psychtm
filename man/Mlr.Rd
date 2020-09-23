@@ -8,13 +8,6 @@ Mlr(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...)
 
 Mlr(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...)
 }
-\arguments{
-\item{a0}{A prior shape hyperparameter for sigma2.}
-
-\item{b0}{A prior rate hyperparameter for sigma2.}
-
-\item{sigma2}{A nchain x 1 numeric vector of draws of the residual variance.}
-}
 \description{
 An S4 class to represent a regression model.
 

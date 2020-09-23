@@ -8,10 +8,6 @@ Logistic(proposal_sd = NaN, ...)
 
 Logistic(proposal_sd = NaN, ...)
 }
-\arguments{
-\item{proposal_sd}{A (p + 1) x 1 vector of proposal scales for
-Metropolis-Hastings sampling of eta.}
-}
 \description{
 An S4 class to represent a logistic regression model.
 

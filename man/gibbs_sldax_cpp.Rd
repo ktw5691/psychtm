@@ -22,8 +22,8 @@
   eta_start,
   proposal_sd,
   interaction_xcol = -1L,
-  alpha_ = 0.1,
-  gamma_ = 1.01,
+  alpha_ = 1,
+  gamma_ = 1,
   constrain_eta = FALSE,
   sample_beta = TRUE,
   sample_theta = TRUE,
@@ -78,10 +78,10 @@ single continuous predictor or a two-category categorical predictor
 represented as a single dummy-coded column.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
-(default: 0.1).}
+(default: 1.0).}
 
 \item{gamma_}{The hyper-parameter for the prior on the topic-specific
-vocabulary probabilities (default: 1.01).}
+vocabulary probabilities (default: 1.0).}
 
 \item{constrain_eta}{A logical (default = \code{false}): If \code{true}, the
 regression coefficients will be constrained so that they are in descending

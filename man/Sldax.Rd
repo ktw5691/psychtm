@@ -8,20 +8,6 @@ Sldax(nvocab, topics, theta, beta, ntopics = 2, alpha = 0.1, gamma = 1.01, ...)
 
 Sldax(nvocab, topics, theta, beta, ntopics = 2, alpha = 0.1, gamma = 1.01, ...)
 }
-\arguments{
-\item{nvocab}{The number of terms in the corpus vocabulary.}
-
-\item{topics}{A D x max(N_d) x M numeric array of topic draws. 0 indicates an
-unused word index (i.e., the document did not have a word at that index).}
-
-\item{theta}{A D x K x M numeric array of topic proportions.}
-
-\item{ntopics}{The number of topics for the LDA model (default: 2).}
-
-\item{alpha}{A numeric prior hyperparameter for theta.}
-
-\item{gamma}{A numeric prior hyperparameter for beta.}
-}
 \description{
 An S4 class to represent a sLDAX general model.
 
