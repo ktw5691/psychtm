@@ -112,13 +112,6 @@ setMethod("nvocab<-", "Sldax", function(x, value) {
 
 #' Helper function (constructor) for Sldax class.
 #'
-#' @param nvocab The number of terms in the corpus vocabulary.
-#' @param ntopics The number of topics for the LDA model (default: 2).
-#' @param alpha A numeric prior hyperparameter for theta.
-#' @param gamma A numeric prior hyperparameter for beta.
-#' @param topics A D x max(N_d) x M numeric array of topic draws. 0 indicates an
-#'   unused word index (i.e., the document did not have a word at that index).
-#' @param theta A D x K x M numeric array of topic proportions.
 Sldax <- function(nvocab, topics, theta, beta, ntopics = 2.0, alpha = 0.1,
                   gamma = 1.01, ...) {
   super <- Model(...)
