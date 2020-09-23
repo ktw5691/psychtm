@@ -28,9 +28,6 @@ setMethod("proposal_sd<-", "Logistic", function(x, value) {
 })
 
 #' Helper function (constructor) for Logistic class.
-#'
-#' @param proposal_sd A (p + 1) x 1 vector of proposal scales for
-#'   Metropolis-Hastings sampling of eta.
 Logistic <- function(proposal_sd = NaN, ...) {
   super <- Model(...)
   proposal_sd <- as.double(proposal_sd)

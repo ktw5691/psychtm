@@ -56,10 +56,6 @@ setMethod("b0<-", "Mlr", function(x, value) {
 })
 
 #' Helper function (constructor) for Mlr class.
-#'
-#' @param a0 A prior shape hyperparameter for sigma2.
-#' @param b0 A prior rate hyperparameter for sigma2.
-#' @param sigma2 A nchain x 1 numeric vector of draws of the residual variance.
 Mlr <- function(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...) {
   super <- Model(...)
   a0 <- as.double(a0)
