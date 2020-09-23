@@ -57,7 +57,7 @@ devtools::install_github("ktw5691/psychtm")
 
 3.3) Alternatively, if you are interested in the most recent (untested) development snapshot:
 
-```{r gh-installation, eval = FALSE}
+```{r gh-installation2, eval = FALSE}
 devtools::install_github("ktw5691/psychtm@devel")
 ```
 
