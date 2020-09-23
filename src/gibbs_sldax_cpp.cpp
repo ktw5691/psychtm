@@ -49,9 +49,9 @@
 //' @param sample_theta A logical (default = \code{true}): If \code{true}, the
 //'   topic proportions are sampled from their full conditional distribution.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
-//'   (default: 0.1).
+//'   (default: 1.0).
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
-//'   vocabulary probabilities (default: 1.01).
+//'   vocabulary probabilities (default: 1.0).
 //' @param proposal_sd The proposal standard deviation for drawing the
 //'   regression coefficients, N(0, proposal_sd) (default: 0.2).
 //' @param interaction_xcol The column number of the design matrix for the
@@ -80,7 +80,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    arma::colvec eta_start,
                    arma::vec proposal_sd,
                    int interaction_xcol = -1,
-                   float alpha_ = 0.1, float gamma_ = 1.01,
+                   float alpha_ = 1.0, float gamma_ = 1.0,
                    bool constrain_eta = false,
                    bool sample_beta = true, bool sample_theta = true,
                    bool return_assignments = false,
@@ -427,7 +427,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
     }
 
     if ( (i > burn) && (i % thin == 0) ) {
-      if (i == burn + 1 && burn > 0) Rcpp::Rcout << "Finished burn-in period\n";
+      if (verbose && i == burn + 1 && burn > 0) Rcpp::Rcout << "Finished burn-in period\n";
 
       uint32_t temp_pos = (i - burn - 1) / thin;
       if (temp_pos == chain_outlength) break; // Invalid index
