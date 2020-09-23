@@ -26,7 +26,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.path = "README-")
 
 ## How to Cite the Package
 
-Wilcox, K. T. (2020). psychtm: Text mining for psychological research. R package version 2020.6. Retrieved from [https://github.com/ktw5691/psychtm](https://github.com/ktw5691/psychtm)
+Wilcox, K. T. (2020). psychtm: Text mining for psychological research. R package version 2020.7. Retrieved from [https://github.com/ktw5691/psychtm](https://github.com/ktw5691/psychtm)
 
 ## Installation
 

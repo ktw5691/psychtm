@@ -30,7 +30,7 @@ How to Cite the Package
 -----------------------
 
 Wilcox, K. T. (2020). psychtm: Text mining for psychological research. R
-package version 2020.6. Retrieved from
+package version 2020.7. Retrieved from
 <https://github.com/ktw5691/psychtm>
 
 Installation
