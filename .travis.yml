@@ -11,9 +11,10 @@ r:
 os:
   - linux
   - osx
-  - windows
-allow_failures:
-  - os: osx
+  # - windows # R builds not currently supported on Travis CI
+jobs:
+  allow_failures:
+    - os: osx
 dist: xenial
 warnings_are_errors: false # Don't fail build; change to true when ready to submit to CRAN
 cache:
