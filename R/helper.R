@@ -217,6 +217,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 
   # Default priors for supervised models
   if (model %in% c(2, 4)) { # slda or slda_logit
+    p <- 0
     q_ <- K
     if (is.null(mu0)) mu0 <- rep(0, q_)
     if (is.null(sigma0)) {
