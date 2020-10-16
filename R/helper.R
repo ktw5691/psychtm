@@ -377,11 +377,13 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
         beta_(res) <- perm_beta
         rm(perm_beta)
 
-        # Permute eta for topics
-        perm_eta <- permute.mcmc(array(eta(res)[, seq(p + 1, q_)], dim = c(nchain(res), K, 1)), relabel_out$permutations)
-        perm_eta <- array(perm_eta$output, c(nchain(res), K))
-        eta(res)[, seq(p + 1, q_)] <- perm_eta
-        rm(perm_eta)
+        if (model != 1) { # Skip for LDA model
+          # Permute eta for topics
+          perm_eta <- permute.mcmc(array(eta(res)[, seq(p + 1, q_)], dim = c(nchain(res), K, 1)), relabel_out$permutations)
+          perm_eta <- array(perm_eta$output, c(nchain(res), K))
+          eta(res)[, seq(p + 1, q_)] <- perm_eta
+          rm(perm_eta)
+        }
 
         # Permute topic assignments for all words
         if (return_assignments) {
