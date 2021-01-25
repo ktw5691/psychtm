@@ -210,9 +210,6 @@ setMethod("get_zbar",
               doc_lengths <- sum(!is.na(topics))
               zbar <- tabulate(z_med, nbins = ntopic) / doc_lengths
             }
-
-
-
             return(zbar)
           }
 )

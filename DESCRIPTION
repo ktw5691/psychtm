@@ -1,8 +1,8 @@
 Package: psychtm
 Type: Package
 Title: Text Mining for Psychological Research
-Version: 2020.9
-Date: 2020-10-16
+Version: 2020.10
+Date: 2020-01-25
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
 Description: Supports Bayesian topic modeling using the SLDAX framework.
