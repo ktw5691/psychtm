@@ -1,8 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-psychtm Package for Text Mining in Psychological Research
-=========================================================
+# psychtm Package for Text Mining in Psychological Research
 
 [![Project Status: WIP – Initial development is in progress, but there
 has not yet been a stable, usable release suitable for the
@@ -12,8 +11,7 @@ Status](https://travis-ci.com/ktw5691/psychtm.svg?branch=master)](https://travis
 [![covr
 codecov](https://codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://codecov.io/gh/ktw5691/psychtm)
 
-Package Features
-----------------
+## Package Features
 
 -   Bayesian estimation of the SLDAX model and popular models subsumed
     by the SLDAX model, including the SLDA model, LDA model, and
@@ -26,15 +24,14 @@ Package Features
 
 -   Model comparison of supervised models using WAIC
 
-How to Cite the Package
------------------------
+## How to Cite the Package
 
-Wilcox, K. T. (2020). psychtm: Text mining for psychological research. R
-package version 2020.8. Retrieved from
-<https://github.com/ktw5691/psychtm>
+Wilcox, K. T., Jacobucci, R., Zhang, Z., Ammerman, B. A. (2021).
+Supervised latent Dirichlet allocation with covariates: A Bayesian
+structural and measurement model of text and covariates. *PsyArXiv*.
+<https://doi.org/10.31234/osf.io/62tc3>
 
-Installation
-------------
+## Installation
 
 ### Ensure that appropriate `C++` compilers are installed on your computer:
 
@@ -55,29 +52,33 @@ Installation
     from this repository
 -   If necessary, install the `devtools` R package
 
-<!-- -->
-
-    install.packages("devtools")
+``` r
+install.packages("devtools")
+```
 
 #### Option 1: Install the latest stable development version from the Github source code:
 
-    devtools::install_github("ktw5691/psychtm")
+``` r
+devtools::install_github("ktw5691/psychtm")
+```
 
 #### Option 2: If you are interested in the most recent (untested) development snapshot:
 
-    devtools::install_github("ktw5691/psychtm@devel")
+``` r
+devtools::install_github("ktw5691/psychtm@devel")
+```
 
-Limitations
------------
+## Limitations
 
 -   This package should be considered beta software and is still under
     active development: use at your own risk
+-   Documentation is also expected to be expanded and modified in future
+    releases. See the **Getting Help** section below.
 -   This package uses a Gibbs sampling algorithm that currently can be
     memory-intensive for a large corpus; future developments are planned
     to better scale to larger corpora
 
-Getting Help
-------------
+## Getting Help
 
 -   If you think you have found a bug, please [open
     issues](https://github.com/ktw5691/psychtm/issues) and provide a
