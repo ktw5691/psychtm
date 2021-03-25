@@ -1,0 +1,24 @@
+---
+title: "A brief overview of the psychtm R package"
+author: "Kenneth Tyler Wilcox"
+date: "22 March 2021"
+description: >
+  This is a starting point to familiarize yourself with psychtm. You will learn about the key functions in the package and workflow for sucessfully estimating different models implemented in this R package.
+
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{psychtm_intro}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(psychtm)
+```

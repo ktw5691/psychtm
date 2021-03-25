@@ -1,0 +1,23 @@
+---
+title: "Estimating SLDAX models"
+author: "Kenneth Tyler Wilcox"
+date: "22 March 2021"
+description: >
+  In this vignette, you will learn how to specify, estimate, and interpret SLDAX models using the `gibbs_sldax()` function to perform MCMC estimation.
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{gibbs_sldax}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(psychtm)
+```

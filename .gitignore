@@ -7,3 +7,4 @@ src/*.so
 src/*.dll
 *.config
 .Rproj.user/*
+inst/doc
