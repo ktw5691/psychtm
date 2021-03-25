@@ -1,8 +1,8 @@
 Package: psychtm
 Type: Package
 Title: Text Mining for Psychological Research
-Version: 2020.10
-Date: 2020-01-25
+Version: 2021.1
+Date: 2021-03-25
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
 Description: Supports Bayesian topic modeling using the SLDAX framework.
@@ -16,10 +16,12 @@ Imports:
     RcppProgress,
     tibble
 Suggests:
+    knitr,
     covr,
     dplyr,
     ggplot2,
-    testthat
+    testthat,
+    rmarkdown
 LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress (>= 0.4.2)
@@ -38,3 +40,4 @@ Collate:
     'sldax-generic-functions.R'
     'sldax-results.R'
     'utils.R'
+VignetteBuilder: knitr
