@@ -2,23 +2,8 @@
 % Please edit documentation in R/model-class.R
 \name{Model}
 \alias{Model}
-\title{An S4 super class to represent a regression-like model.}
+\title{Model class}
 \usage{
-Model(
-  ndocs,
-  nchain = 1,
-  mu0 = NaN,
-  sigma0 = NaN,
-  eta_start = NaN,
-  eta = NaN,
-  loglike = NaN,
-  logpost = NaN,
-  waic = NaN,
-  se_waic = NaN,
-  p_eff = NaN,
-  lpd = NaN
-)
-
 Model(
   ndocs,
   nchain = 1,
@@ -36,8 +21,6 @@ Model(
 }
 \description{
 An S4 super class to represent a regression-like model.
-
-Helper function (constructor) for Model class.
 }
 \section{Slots}{
 

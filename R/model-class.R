@@ -1,3 +1,5 @@
+#' Model class
+#'
 #' An S4 super class to represent a regression-like model.
 #'
 #' @slot ndocs The number of documents/observations.
@@ -53,7 +55,7 @@ Model <- setClass("Model",
   )
 )
 
-#### ndocs
+# ndocs
 setGeneric("ndocs", function(x) standardGeneric("ndocs"))
 
 setGeneric("ndocs<-", function(x, value) standardGeneric("ndocs<-"))
@@ -65,7 +67,7 @@ setMethod("ndocs<-", "Model", function(x, value) {
   x
 })
 
-#### nchain
+# nchain
 setGeneric("nchain", function(x) standardGeneric("nchain"))
 
 setGeneric("nchain<-", function(x, value) standardGeneric("nchain<-"))
@@ -77,7 +79,7 @@ setMethod("nchain<-", "Model", function(x, value) {
   x
 })
 
-#### mu0
+# mu0
 setGeneric("mu0", function(x) standardGeneric("mu0"))
 
 setGeneric("mu0<-", function(x, value) standardGeneric("mu0<-"))
@@ -89,7 +91,7 @@ setMethod("mu0<-", "Model", function(x, value) {
   x
 })
 
-#### sigma0
+# sigma0
 setGeneric("sigma0", function(x) standardGeneric("sigma0"))
 
 setGeneric("sigma0<-", function(x, value) standardGeneric("sigma0<-"))
@@ -101,7 +103,7 @@ setMethod("sigma0<-", "Model", function(x, value) {
   x
 })
 
-#### eta_start
+# eta_start
 setGeneric("eta_start", function(x) standardGeneric("eta_start"))
 
 setGeneric("eta_start<-", function(x, value) standardGeneric("eta_start<-"))
@@ -113,7 +115,7 @@ setMethod("eta_start<-", "Model", function(x, value) {
   x
 })
 
-#### eta
+# eta
 setGeneric("eta", function(x) standardGeneric("eta"))
 
 setGeneric("eta<-", function(x, value) standardGeneric("eta<-"))
@@ -125,7 +127,7 @@ setMethod("eta<-", "Model", function(x, value) {
   x
 })
 
-#### loglike
+# loglike
 setGeneric("loglike", function(x) standardGeneric("loglike"))
 
 setGeneric("loglike<-", function(x, value) standardGeneric("loglike<-"))
@@ -137,7 +139,7 @@ setMethod("loglike<-", "Model", function(x, value) {
   x
 })
 
-#### logpost
+# logpost
 setGeneric("logpost", function(x) standardGeneric("logpost"))
 
 setGeneric("logpost<-", function(x, value) standardGeneric("logpost<-"))
@@ -149,7 +151,7 @@ setMethod("logpost<-", "Model", function(x, value) {
   x
 })
 
-#### waic
+# waic
 setGeneric("waic", function(x) standardGeneric("waic"))
 
 setGeneric("waic<-", function(x, value) standardGeneric("waic<-"))
@@ -161,7 +163,7 @@ setMethod("waic<-", "Model", function(x, value) {
   x
 })
 
-#### se_waic
+# se_waic
 setGeneric("se_waic", function(x) standardGeneric("se_waic"))
 
 setGeneric("se_waic<-", function(x, value) standardGeneric("se_waic<-"))
@@ -173,7 +175,7 @@ setMethod("se_waic<-", "Model", function(x, value) {
   x
 })
 
-#### p_eff
+# p_eff
 setGeneric("p_eff", function(x) standardGeneric("p_eff"))
 
 setGeneric("p_eff<-", function(x, value) standardGeneric("p_eff<-"))
@@ -185,7 +187,7 @@ setMethod("p_eff<-", "Model", function(x, value) {
   x
 })
 
-#### lpd
+# lpd
 setGeneric("lpd", function(x) standardGeneric("lpd"))
 
 setGeneric("lpd<-", function(x, value) standardGeneric("lpd<-"))
@@ -197,7 +199,7 @@ setMethod("lpd<-", "Model", function(x, value) {
   x
 })
 
-#### extra
+# extra
 setGeneric("extra", function(x) standardGeneric("extra"))
 
 setGeneric("extra<-", function(x, value) standardGeneric("extra<-"))
@@ -209,7 +211,7 @@ setMethod("extra<-", "Model", function(x, value) {
   x
 })
 
-#' Helper function (constructor) for Model class.
+# Helper function (constructor) for Model class.
 Model <- function(ndocs, nchain = 1, mu0 = NaN, sigma0 = NaN,
                   eta_start = NaN, eta = NaN, loglike = NaN, logpost = NaN,
                   waic = NaN, se_waic = NaN, p_eff = NaN, lpd = NaN) {
@@ -232,7 +234,7 @@ Model <- function(ndocs, nchain = 1, mu0 = NaN, sigma0 = NaN,
       lpd = lpd)
 }
 
-#' Validator function for Model class
+# Validator function for Model class
 setValidity("Model", function(object) {
   if ( (object@nchain != NROW(object@eta)) |
        (object@nchain != length(object@loglike)) |
