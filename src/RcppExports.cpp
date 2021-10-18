@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // count_topic_word
 arma::mat count_topic_word(uint16_t K, uint32_t V, const arma::umat& doc_topic, const arma::umat& doc_word);
 RcppExport SEXP _psychtm_count_topic_word(SEXP KSEXP, SEXP VSEXP, SEXP doc_topicSEXP, SEXP doc_wordSEXP) {
