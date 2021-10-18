@@ -11,6 +11,7 @@ Depends: R (>= 3.3.0)
 Imports:
     label.switching,
     methods,
+    rlang,
     Rcpp,
     RcppArmadillo,
     RcppProgress,
