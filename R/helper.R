@@ -87,6 +87,8 @@
 #' @param return_assignments A logical (default = \code{FALSE}): If
 #'   \code{TRUE}, returns an N x \eqn{max N_d} x M array of topic assignments
 #'   in slot @topics. CAUTION: this can be memory-intensive.
+#' @param correct_ls Run Stephens (2000) label switching correct algorithm on
+#'   posterior? (default = \code{TRUE}).
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   \code{FALSE}).
 #' @param display_progress Should percent progress of sampler be displayed
