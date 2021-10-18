@@ -100,6 +100,9 @@ Only used for \code{model = "slda_logit"} and
 \code{TRUE}, returns an N x \eqn{max N_d} x M array of topic assignments
 in slot @topics. CAUTION: this can be memory-intensive.}
 
+\item{correct_ls}{Run Stephens (2000) label switching correct algorithm on
+posterior? (default = \code{TRUE}).}
+
 \item{verbose}{Should parameter draws be output during sampling? (default:
 \code{FALSE}).}
 

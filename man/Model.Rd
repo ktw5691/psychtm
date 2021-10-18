@@ -2,8 +2,176 @@
 % Please edit documentation in R/model-class.R
 \name{Model}
 \alias{Model}
+\alias{ndocs}
+\alias{ndocs,Model-method}
+\alias{ndocs<-}
+\alias{ndocs<-,Model-method}
+\alias{nchain}
+\alias{nchain,Model-method}
+\alias{nchain<-}
+\alias{nchain<-,Model-method}
+\alias{mu0}
+\alias{mu0,Model-method}
+\alias{mu0<-}
+\alias{mu0<-,Model-method}
+\alias{sigma0}
+\alias{sigma0,Model-method}
+\alias{sigma0<-}
+\alias{sigma0<-,Model-method}
+\alias{eta_start}
+\alias{eta_start,Model-method}
+\alias{eta_start<-}
+\alias{eta_start<-,Model-method}
+\alias{eta}
+\alias{eta,Model-method}
+\alias{eta<-}
+\alias{eta<-,Model-method}
+\alias{loglike}
+\alias{loglike,Model-method}
+\alias{loglike<-}
+\alias{loglike<-,Model-method}
+\alias{logpost}
+\alias{logpost,Model-method}
+\alias{logpost<-,Model-method}
+\alias{waic}
+\alias{waic,Model-method}
+\alias{waic<-}
+\alias{waic<-,Model-method}
+\alias{se_waic}
+\alias{se_waic,Model-method}
+\alias{se_waic<-}
+\alias{se_waic<-,Model-method}
+\alias{p_eff}
+\alias{p_eff,Model-method}
+\alias{p_eff<-}
+\alias{p_eff<-,Model-method}
+\alias{lpd}
+\alias{lpd,Model-method}
+\alias{lpd<-}
+\alias{lpd<-,Model-method}
+\alias{extra}
+\alias{extra,Model-method}
+\alias{extra<-}
+\alias{extra<-,Model-method}
 \title{Model class}
 \usage{
+Model(
+  ndocs,
+  nchain = 1,
+  mu0 = NaN,
+  sigma0 = NaN,
+  eta_start = NaN,
+  eta = NaN,
+  loglike = NaN,
+  logpost = NaN,
+  waic = NaN,
+  se_waic = NaN,
+  p_eff = NaN,
+  lpd = NaN
+)
+
+ndocs(x)
+
+\S4method{ndocs}{Model}(x)
+
+ndocs(x) <- value
+
+\S4method{ndocs}{Model}(x) <- value
+
+nchain(x)
+
+\S4method{nchain}{Model}(x)
+
+nchain(x) <- value
+
+\S4method{nchain}{Model}(x) <- value
+
+mu0(x)
+
+\S4method{mu0}{Model}(x)
+
+mu0(x) <- value
+
+\S4method{mu0}{Model}(x) <- value
+
+sigma0(x)
+
+\S4method{sigma0}{Model}(x)
+
+sigma0(x) <- value
+
+\S4method{sigma0}{Model}(x) <- value
+
+eta_start(x)
+
+\S4method{eta_start}{Model}(x)
+
+eta_start(x) <- value
+
+\S4method{eta_start}{Model}(x) <- value
+
+eta(x)
+
+\S4method{eta}{Model}(x)
+
+eta(x) <- value
+
+\S4method{eta}{Model}(x) <- value
+
+loglike(x)
+
+\S4method{loglike}{Model}(x)
+
+loglike(x) <- value
+
+\S4method{loglike}{Model}(x) <- value
+
+logpost(x)
+
+\S4method{logpost}{Model}(x)
+
+\S4method{logpost}{Model}(x) <- value
+
+waic(x)
+
+\S4method{waic}{Model}(x)
+
+waic(x) <- value
+
+\S4method{waic}{Model}(x) <- value
+
+se_waic(x)
+
+\S4method{se_waic}{Model}(x)
+
+se_waic(x) <- value
+
+\S4method{se_waic}{Model}(x) <- value
+
+p_eff(x)
+
+\S4method{p_eff}{Model}(x)
+
+p_eff(x) <- value
+
+\S4method{p_eff}{Model}(x) <- value
+
+lpd(x)
+
+\S4method{lpd}{Model}(x)
+
+lpd(x) <- value
+
+\S4method{lpd}{Model}(x) <- value
+
+extra(x)
+
+\S4method{extra}{Model}(x)
+
+extra(x) <- value
+
+\S4method{extra}{Model}(x) <- value
+
 Model(
   ndocs,
   nchain = 1,

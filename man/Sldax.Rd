@@ -2,16 +2,55 @@
 % Please edit documentation in R/sldax-class.R
 \name{Sldax}
 \alias{Sldax}
-\title{An S4 class to represent a sLDAX general model.}
+\alias{topics,Sldax-method}
+\alias{topics<-,Sldax-method}
+\alias{theta,Sldax-method}
+\alias{theta<-,Sldax-method}
+\alias{beta_,Sldax-method}
+\alias{beta_<-,Sldax-method}
+\alias{gamma_,Sldax-method}
+\alias{gamma_<-,Sldax-method}
+\alias{alpha,Sldax-method}
+\alias{alpha<-,Sldax-method}
+\alias{ntopics,Sldax-method}
+\alias{ntopics<-,Sldax-method}
+\alias{nvocab,Sldax-method}
+\alias{nvocab<-,Sldax-method}
+\title{Sldax class}
 \usage{
 Sldax(nvocab, topics, theta, beta, ntopics = 2, alpha = 0.1, gamma = 1.01, ...)
 
-Sldax(nvocab, topics, theta, beta, ntopics = 2, alpha = 0.1, gamma = 1.01, ...)
+\S4method{topics}{Sldax}(x)
+
+\S4method{topics}{Sldax}(x) <- value
+
+\S4method{theta}{Sldax}(x)
+
+\S4method{theta}{Sldax}(x) <- value
+
+\S4method{beta_}{Sldax}(x)
+
+\S4method{beta_}{Sldax}(x) <- value
+
+\S4method{gamma_}{Sldax}(x)
+
+\S4method{gamma_}{Sldax}(x) <- value
+
+\S4method{alpha}{Sldax}(x)
+
+\S4method{alpha}{Sldax}(x) <- value
+
+\S4method{ntopics}{Sldax}(x)
+
+\S4method{ntopics}{Sldax}(x) <- value
+
+\S4method{nvocab}{Sldax}(x)
+
+\S4method{nvocab}{Sldax}(x) <- value
 }
 \description{
-An S4 class to represent a sLDAX general model.
-
-Helper function (constructor) for Sldax class.
+An S4 class to represent a sLDAX general model. Inherits from
+  \code{\linkS4class{Mlr}} and \code{\linkS4class{Logistic}}.
 }
 \section{Slots}{
 

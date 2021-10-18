@@ -12,8 +12,6 @@
 documents (rows).}
 
 \item{alpha_}{The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.}
-
-\item{m}{Number of samples}
 }
 \value{
 A D x K matrix \eqn{\Theta}.

@@ -2,21 +2,31 @@
 % Please edit documentation in R/logistic-class.R
 \name{Logistic}
 \alias{Logistic}
-\title{An S4 class to represent a logistic regression model.}
+\alias{proposal_sd}
+\alias{proposal_sd,Logistic-method}
+\alias{proposal_sd<-}
+\alias{proposal_sd<-,Logistic-method}
+\title{Logistic class}
 \usage{
 Logistic(proposal_sd = NaN, ...)
+
+proposal_sd(x)
+
+\S4method{proposal_sd}{Logistic}(x)
+
+proposal_sd(x) <- value
+
+\S4method{proposal_sd}{Logistic}(x) <- value
 
 Logistic(proposal_sd = NaN, ...)
 }
 \description{
-An S4 class to represent a logistic regression model.
-
-Helper function (constructor) for Logistic class.
+S4 class for a logistic regression model. Inherits from \code{\linkS4class{Model}}.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{proposal_sd}}{A (p + 1) x 1 vector of proposal scales for
-Metropolis-Hastings sampling of eta.}
+\item{\code{proposal_sd}}{A vector of p + 1 proposal scales/standard deviations for
+sampling of p + 1 regression coefficients by Metropolis-Hastings.}
 }}
 

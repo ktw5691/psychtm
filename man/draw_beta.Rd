@@ -12,8 +12,6 @@
 (topics: columns; words: rows).}
 
 \item{gamma_}{The hyperparameter on the Dirichlet prior for \eqn{\beta_k}.}
-
-\item{m}{Number of samples}
 }
 \value{
 A K x V matrix \eqn{B}.

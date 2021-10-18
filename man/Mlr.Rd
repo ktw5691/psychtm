@@ -2,16 +2,50 @@
 % Please edit documentation in R/mlr-class.R
 \name{Mlr}
 \alias{Mlr}
-\title{An S4 class to represent a regression model.}
+\alias{sigma2}
+\alias{sigma2,Mlr-method}
+\alias{sigma2<-}
+\alias{sigma2<-,Mlr-method}
+\alias{a0}
+\alias{a0,Mlr-method}
+\alias{a0<-}
+\alias{a0<-,Mlr-method}
+\alias{b0}
+\alias{b0,Mlr-method}
+\alias{b0<-}
+\alias{b0<-,Mlr-method}
+\title{Mlr class}
 \usage{
 Mlr(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...)
+
+sigma2(x)
+
+\S4method{sigma2}{Mlr}(x)
+
+sigma2(x) <- value
+
+\S4method{sigma2}{Mlr}(x) <- value
+
+a0(x)
+
+\S4method{a0}{Mlr}(x)
+
+a0(x) <- value
+
+\S4method{a0}{Mlr}(x) <- value
+
+b0(x)
+
+\S4method{b0}{Mlr}(x)
+
+b0(x) <- value
+
+\S4method{b0}{Mlr}(x) <- value
 
 Mlr(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...)
 }
 \description{
-An S4 class to represent a regression model.
-
-Helper function (constructor) for Mlr class.
+S4 class for a regression model. Inherits from \code{\linkS4class{Model}}.
 }
 \section{Slots}{
 
