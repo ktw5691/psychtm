@@ -27,7 +27,7 @@ LinkingTo: Rcpp,
            RcppArmadillo,
            RcppProgress (>= 0.4.2)
 BugReports: https://github.com/ktw5691/psychtm/issues
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Encoding: UTF-8
 SystemRequirements: C++11
 Collate:
