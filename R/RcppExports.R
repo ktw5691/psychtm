@@ -26,7 +26,6 @@
 #' @title Sample \eqn{B} from full conditional distribution
 #'
 #' @name draw_beta
-#' @param m Number of samples
 #' @param wz_co A K x V matrix of counts of word-topic co-occurrences
 #'   (topics: columns; words: rows).
 #' @param gamma_ The hyperparameter on the Dirichlet prior for \eqn{\beta_k}.
@@ -53,7 +52,6 @@
 #' @title Sample \eqn{\Theta} from full conditional distribution
 #'
 #' @name draw_theta
-#' @param m Number of samples
 #' @param z_count A D x K matrix of counts of topic draws (columns) in
 #'   documents (rows).
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.

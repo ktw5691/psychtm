@@ -5,7 +5,6 @@
 //' @title Sample \eqn{\Theta} from full conditional distribution
 //'
 //' @name draw_theta
-//' @param m Number of samples
 //' @param z_count A D x K matrix of counts of topic draws (columns) in
 //'   documents (rows).
 //' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.

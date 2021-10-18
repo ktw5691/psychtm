@@ -5,7 +5,6 @@
 //' @title Sample \eqn{B} from full conditional distribution
 //'
 //' @name draw_beta
-//' @param m Number of samples
 //' @param wz_co A K x V matrix of counts of word-topic co-occurrences
 //'   (topics: columns; words: rows).
 //' @param gamma_ The hyperparameter on the Dirichlet prior for \eqn{\beta_k}.
