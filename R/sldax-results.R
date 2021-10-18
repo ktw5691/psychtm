@@ -215,6 +215,7 @@ setMethod("get_zbar",
 )
 
 #' @rdname sldax-gettop-methods
+#' @importFrom rlang .data
 setMethod("gg_coef",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat, errorbw) {
@@ -258,7 +259,7 @@ setMethod("gg_coef",
               dplyr::ungroup(
                 dplyr::mutate(
                   dplyr::rowwise(coefs),
-                  sig = dplyr::if_else(lbcl > 0 | ubcl < 0, "Yes", "No"))),
+                  sig = dplyr::if_else(.data$lbcl > 0 | .data$ubcl < 0, "Yes", "No"))),
               sig = factor(sig))
 
             ggp <- ggplot2::ggplot(
