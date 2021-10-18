@@ -1,8 +1,15 @@
+#' Sldax class
+#'
+#' @name Sldax
 #' @include mlr-class.R logistic-class.R
 NULL
 
-#' An S4 class to represent a sLDAX general model.
+#' Sldax class
 #'
+#' An S4 class to represent a sLDAX general model. Inherits from
+#'   \code{\linkS4class{Mlr}} and \code{\linkS4class{Logistic}}.
+#' @name Sldax
+#' @rdname Sldax
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @slot ntopics The number of topics for the LDA model (default: 2).
 #' @slot alpha A numeric prior hyperparameter for theta.
@@ -32,86 +39,105 @@ Sldax <- setClass("Sldax",
   )
 )
 
-#### topics
+# topics
 setGeneric("topics", function(x) standardGeneric("topics"))
+
+#' @rdname Sldax
+setMethod("topics", "Sldax", function(x) x@topics)
 
 setGeneric("topics<-", function(x, value) standardGeneric("topics<-"))
 
-setMethod("topics", "Sldax", function(x) x@topics)
-
+#' @rdname Sldax
 setMethod("topics<-", "Sldax", function(x, value) {
   x@topics <- value
   x
 })
 
-#### theta
+# theta
 setGeneric("theta", function(x) standardGeneric("theta"))
+
+#' @rdname Sldax
+setMethod("theta", "Sldax", function(x) x@theta)
 
 setGeneric("theta<-", function(x, value) standardGeneric("theta<-"))
 
-setMethod("theta", "Sldax", function(x) x@theta)
-
+#' @rdname Sldax
 setMethod("theta<-", "Sldax", function(x, value) {
   x@theta <- value
   x
 })
 
-#### beta
+# beta
 setGeneric("beta_", function(x) standardGeneric("beta_"))
+
+#' @rdname Sldax
+setMethod("beta_", "Sldax", function(x) x@beta)
 
 setGeneric("beta_<-", function(x, value) standardGeneric("beta_<-"))
 
-setMethod("beta_", "Sldax", function(x) x@beta)
-
+#' @rdname Sldax
 setMethod("beta_<-", "Sldax", function(x, value) {
   x@beta <- value
   x
 })
 
-#### gamma
+# gamma
 setGeneric("gamma_", function(x) standardGeneric("gamma_"))
-setGeneric("gamma_<-", function(x, value) standardGeneric("gamma_<-"))
+
+#' @rdname Sldax
 setMethod("gamma_", "Sldax", function(x) x@gamma)
+
+setGeneric("gamma_<-", function(x, value) standardGeneric("gamma_<-"))
+
+#' @rdname Sldax
 setMethod("gamma_<-", "Sldax", function(x, value) {
   x@gamma <- value
   x
 })
 
-#### alpha
+# alpha
 setGeneric("alpha", function(x) standardGeneric("alpha"))
-setGeneric("alpha<-", function(x, value) standardGeneric("alpha<-"))
+
+#' @rdname Sldax
 setMethod("alpha", "Sldax", function(x) x@alpha)
+
+setGeneric("alpha<-", function(x, value) standardGeneric("alpha<-"))
+
+#' @rdname Sldax
 setMethod("alpha<-", "Sldax", function(x, value) {
   x@alpha <- value
   x
 })
 
-#### ntopics
+# ntopics
 setGeneric("ntopics", function(x) standardGeneric("ntopics"))
+
+#' @rdname Sldax
+setMethod("ntopics", "Sldax", function(x) x@ntopics)
 
 setGeneric("ntopics<-", function(x, value) standardGeneric("ntopics<-"))
 
-setMethod("ntopics", "Sldax", function(x) x@ntopics)
-
+#' @rdname Sldax
 setMethod("ntopics<-", "Sldax", function(x, value) {
   x@ntopics <- value
   x
 })
 
-#### nvocab
+# nvocab
 setGeneric("nvocab", function(x) standardGeneric("nvocab"))
+
+#' @rdname Sldax
+setMethod("nvocab", "Sldax", function(x) x@nvocab)
 
 setGeneric("nvocab<-", function(x, value) standardGeneric("nvocab<-"))
 
-setMethod("nvocab", "Sldax", function(x) x@nvocab)
-
+#' @rdname Sldax
 setMethod("nvocab<-", "Sldax", function(x, value) {
   x@nvocab <- value
   x
 })
 
-#' Helper function (constructor) for Sldax class.
-#'
+# Helper function (constructor) for Sldax class.
 Sldax <- function(nvocab, topics, theta, beta, ntopics = 2.0, alpha = 0.1,
                   gamma = 1.01, ...) {
   super <- Model(...)

@@ -1,7 +1,7 @@
 #' Model class
 #'
 #' An S4 super class to represent a regression-like model.
-#'
+#' @rdname Model
 #' @slot ndocs The number of documents/observations.
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot mu0 A (p + 1) x 1 matrix of prior means for eta.
@@ -56,162 +56,214 @@ Model <- setClass("Model",
 )
 
 # ndocs
+#' @rdname Model
 setGeneric("ndocs", function(x) standardGeneric("ndocs"))
 
-setGeneric("ndocs<-", function(x, value) standardGeneric("ndocs<-"))
-
+#' @rdname Model
 setMethod("ndocs", "Model", function(x) x@ndocs)
 
+#' @rdname Model
+setGeneric("ndocs<-", function(x, value) standardGeneric("ndocs<-"))
+
+#' @rdname Model
 setMethod("ndocs<-", "Model", function(x, value) {
   x@ndocs <- value
   x
 })
 
 # nchain
+#' @rdname Model
 setGeneric("nchain", function(x) standardGeneric("nchain"))
 
-setGeneric("nchain<-", function(x, value) standardGeneric("nchain<-"))
-
+#' @rdname Model
 setMethod("nchain", "Model", function(x) x@nchain)
 
+#' @rdname Model
+setGeneric("nchain<-", function(x, value) standardGeneric("nchain<-"))
+
+#' @rdname Model
 setMethod("nchain<-", "Model", function(x, value) {
   x@nchain <- value
   x
 })
 
 # mu0
+#' @rdname Model
 setGeneric("mu0", function(x) standardGeneric("mu0"))
 
-setGeneric("mu0<-", function(x, value) standardGeneric("mu0<-"))
-
+#' @rdname Model
 setMethod("mu0", "Model", function(x) x@mu0)
 
+#' @rdname Model
+setGeneric("mu0<-", function(x, value) standardGeneric("mu0<-"))
+
+#' @rdname Model
 setMethod("mu0<-", "Model", function(x, value) {
   x@mu0 <- value
   x
 })
 
 # sigma0
+#' @rdname Model
 setGeneric("sigma0", function(x) standardGeneric("sigma0"))
 
-setGeneric("sigma0<-", function(x, value) standardGeneric("sigma0<-"))
-
+#' @rdname Model
 setMethod("sigma0", "Model", function(x) x@sigma0)
 
+#' @rdname Model
+setGeneric("sigma0<-", function(x, value) standardGeneric("sigma0<-"))
+
+#' @rdname Model
 setMethod("sigma0<-", "Model", function(x, value) {
   x@sigma0 <- value
   x
 })
 
 # eta_start
+#' @rdname Model
 setGeneric("eta_start", function(x) standardGeneric("eta_start"))
 
-setGeneric("eta_start<-", function(x, value) standardGeneric("eta_start<-"))
-
+#' @rdname Model
 setMethod("eta_start", "Model", function(x) x@eta_start)
 
+#' @rdname Model
+setGeneric("eta_start<-", function(x, value) standardGeneric("eta_start<-"))
+
+#' @rdname Model
 setMethod("eta_start<-", "Model", function(x, value) {
   x@eta_start <- value
   x
 })
 
 # eta
+#' @rdname Model
 setGeneric("eta", function(x) standardGeneric("eta"))
 
-setGeneric("eta<-", function(x, value) standardGeneric("eta<-"))
-
+#' @rdname Model
 setMethod("eta", "Model", function(x) x@eta)
 
+#' @rdname Model
+setGeneric("eta<-", function(x, value) standardGeneric("eta<-"))
+
+#' @rdname Model
 setMethod("eta<-", "Model", function(x, value) {
   x@eta <- value
   x
 })
 
 # loglike
+#' @rdname Model
 setGeneric("loglike", function(x) standardGeneric("loglike"))
 
-setGeneric("loglike<-", function(x, value) standardGeneric("loglike<-"))
-
+#' @rdname Model
 setMethod("loglike", "Model", function(x) x@loglike)
 
+#' @rdname Model
+setGeneric("loglike<-", function(x, value) standardGeneric("loglike<-"))
+
+#' @rdname Model
 setMethod("loglike<-", "Model", function(x, value) {
   x@loglike <- value
   x
 })
 
 # logpost
+#' @rdname Model
 setGeneric("logpost", function(x) standardGeneric("logpost"))
+
+#' @rdname Model
+setMethod("logpost", "Model", function(x) x@logpost)
 
 setGeneric("logpost<-", function(x, value) standardGeneric("logpost<-"))
 
-setMethod("logpost", "Model", function(x) x@logpost)
-
+#' @rdname Model
 setMethod("logpost<-", "Model", function(x, value) {
   x@logpost <- value
   x
 })
 
 # waic
+#' @rdname Model
 setGeneric("waic", function(x) standardGeneric("waic"))
 
-setGeneric("waic<-", function(x, value) standardGeneric("waic<-"))
-
+#' @rdname Model
 setMethod("waic", "Model", function(x) x@waic)
 
+#' @rdname Model
+setGeneric("waic<-", function(x, value) standardGeneric("waic<-"))
+
+#' @rdname Model
 setMethod("waic<-", "Model", function(x, value) {
   x@waic <- value
   x
 })
 
 # se_waic
+#' @rdname Model
 setGeneric("se_waic", function(x) standardGeneric("se_waic"))
 
-setGeneric("se_waic<-", function(x, value) standardGeneric("se_waic<-"))
-
+#' @rdname Model
 setMethod("se_waic", "Model", function(x) x@se_waic)
 
+#' @rdname Model
+setGeneric("se_waic<-", function(x, value) standardGeneric("se_waic<-"))
+
+#' @rdname Model
 setMethod("se_waic<-", "Model", function(x, value) {
   x@se_waic <- value
   x
 })
 
 # p_eff
+#' @rdname Model
 setGeneric("p_eff", function(x) standardGeneric("p_eff"))
 
-setGeneric("p_eff<-", function(x, value) standardGeneric("p_eff<-"))
-
+#' @rdname Model
 setMethod("p_eff", "Model", function(x) x@p_eff)
 
+#' @rdname Model
+setGeneric("p_eff<-", function(x, value) standardGeneric("p_eff<-"))
+
+#' @rdname Model
 setMethod("p_eff<-", "Model", function(x, value) {
   x@p_eff <- value
   x
 })
 
 # lpd
+#' @rdname Model
 setGeneric("lpd", function(x) standardGeneric("lpd"))
 
-setGeneric("lpd<-", function(x, value) standardGeneric("lpd<-"))
-
+#' @rdname Model
 setMethod("lpd", "Model", function(x) x@lpd)
 
+#' @rdname Model
+setGeneric("lpd<-", function(x, value) standardGeneric("lpd<-"))
+
+#' @rdname Model
 setMethod("lpd<-", "Model", function(x, value) {
   x@lpd <- value
   x
 })
 
 # extra
+#' @rdname Model
 setGeneric("extra", function(x) standardGeneric("extra"))
 
-setGeneric("extra<-", function(x, value) standardGeneric("extra<-"))
-
+#' @rdname Model
 setMethod("extra", "Model", function(x) x@extra)
 
+#' @rdname Model
+setGeneric("extra<-", function(x, value) standardGeneric("extra<-"))
+
+#' @rdname Model
 setMethod("extra<-", "Model", function(x, value) {
   x@extra <- value
   x
 })
 
 # Helper function (constructor) for Model class.
+#' @rdname Model
 Model <- function(ndocs, nchain = 1, mu0 = NaN, sigma0 = NaN,
                   eta_start = NaN, eta = NaN, loglike = NaN, logpost = NaN,
                   waic = NaN, se_waic = NaN, p_eff = NaN, lpd = NaN) {

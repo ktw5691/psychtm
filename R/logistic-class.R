@@ -1,10 +1,13 @@
 #' @include model-class.R
 NULL
 
-#' An S4 class to represent a logistic regression model.
+#' Logistic class
 #'
-#' @slot proposal_sd A (p + 1) x 1 vector of proposal scales for
-#'   Metropolis-Hastings sampling of eta.
+#' S4 class for a logistic regression model. Inherits from \code{\linkS4class{Model}}.
+#' @name Logistic
+#' @rdname Logistic
+#' @slot proposal_sd A vector of p + 1 proposal scales/standard deviations for
+#'   sampling of p + 1 regression coefficients by Metropolis-Hastings.
 Logistic <- setClass("Logistic",
   contains = "Model",
   slots = c(
@@ -15,19 +18,28 @@ Logistic <- setClass("Logistic",
   )
 )
 
-#### proposal_sd
+# proposal_sd slot generic
+#' @rdname Logistic
 setGeneric("proposal_sd", function(x) standardGeneric("proposal_sd"))
 
-setGeneric("proposal_sd<-", function(x, value) standardGeneric("proposal_sd<-"))
-
+# Slot \code{@proposal_sd} generic accessor
+#' @rdname Logistic
 setMethod("proposal_sd", "Logistic", function(x) x@proposal_sd)
 
+# Slot \code{@proposal_sd} generic setter function
+#' @rdname Logistic
+setGeneric("proposal_sd<-", function(x, value) standardGeneric("proposal_sd<-"))
+
+# Slot \code{@proposal_sd} setter method
+#' @rdname Logistic
 setMethod("proposal_sd<-", "Logistic", function(x, value) {
   x@proposal_sd <- value
+  validObject(x)
   x
 })
 
-#' Helper function (constructor) for Logistic class.
+# Logistic helper function (constructor) for Logistic class.
+#' @rdname Logistic
 Logistic <- function(proposal_sd = NaN, ...) {
   super <- Model(...)
   proposal_sd <- as.double(proposal_sd)
@@ -40,4 +52,5 @@ Logistic <- function(proposal_sd = NaN, ...) {
 }
 
 #' Validator function for Logistic class
+#' @rdname Logistic
 #' TODO
