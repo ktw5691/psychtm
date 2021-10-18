@@ -6,3 +6,4 @@
 .Rprofile
 ^codecov\.yml$
 ^LICENSE\.md$
+^README.Rmd
