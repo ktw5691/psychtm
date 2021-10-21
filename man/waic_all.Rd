@@ -13,7 +13,7 @@ waic_all(iter, l_pred)
 }
 \value{
 Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
-  the effective number of parameters.
+the effective number of parameters.
 }
 \description{
 Compute WAIC for all outcomes.

@@ -8,7 +8,7 @@
 }
 \value{
 The contribution of y_d (its predictive posterior likelihood variance)
-  to the effective number of parameters.
+to the effective number of parameters.
 }
 \description{
 Contribution to effective number of parameters for WAIC from observation y_d

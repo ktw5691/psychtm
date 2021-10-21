@@ -13,7 +13,7 @@ waic_diff(l_pred1, l_pred2)
 }
 \value{
 A vector of (1) the difference in WAIC (on the deviance scale)
-  between models and (2) the standard error of the difference in WAIC.
+between models and (2) the standard error of the difference in WAIC.
 }
 \description{
 Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.
