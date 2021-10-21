@@ -8,7 +8,7 @@
 //' with the maximum length of a document in the corpus equal to max(\eqn{N_d})
 //' and a vocabulary of \eqn{V} unique terms in the corpus.
 //'
-//' Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
+//' Indices in `doc_topic` and `doc_word` where no word exists in the
 //' document must be set to 0.
 //'
 //' @name count_topic_word
