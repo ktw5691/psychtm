@@ -15,7 +15,7 @@
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
 //' @param thin The period of iterations to keep after the burn-in period
-//'   (default: 1).
+//'   (default: `1`).
 //' @param y A D x 1 vector of outcomes to be predicted.
 //' @param x A D x (p + 1) matrix of additional predictors.
 //' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression
@@ -24,15 +24,15 @@
 //'   prior on the regression coefficients.
 //' @param eta_start A (p + 1) x 1 vector of starting values for the
 //'   regression coefficients.
-//' @param a0 The shape parameter for the prior on sigma2 (default: 0.001)
-//' @param b0 The scale parameter for the prior on sigma2 (default: 0.001)
+//' @param a0 The shape parameter for the prior on sigma2 (default: `0.001`)
+//' @param b0 The scale parameter for the prior on sigma2 (default: `0.001`)
 //' @param verbose Should parameter draws be output during sampling? (default:
-//'   \code{FALSE}).
+//'   `false`).
 //' @param display_progress Should percent progress of sampler be displayed
-//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-//'   \code{display_progress} be set to \code{TRUE} at any given time.
+//'   (default: `false`). Recommended that only one of `verbose` and
+//'   `display_progress` be set to `true` at any given time.
 //'
-//' @return An object of class \code{Mlr}.
+//' @return An object of class [`Mlr`][Mlr-class].
 //' @export
 // [[Rcpp::export(.gibbs_mlr_cpp)]]
 Rcpp::S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,

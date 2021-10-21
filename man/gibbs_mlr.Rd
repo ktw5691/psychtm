@@ -20,18 +20,18 @@ gibbs_mlr(
 )
 }
 \arguments{
-\item{formula}{An object of class \code{\link[stats]{formula}}: a symbolic
+\item{formula}{An object of class \code{\link[stats:formula]{formula}}: a symbolic
 description of the model to be fitted.}
 
 \item{data}{An optional data frame containing the variables in the model.}
 
-\item{m}{The number of iterations to run the Gibbs sampler (default: 100).}
+\item{m}{The number of iterations to run the Gibbs sampler (default: \code{100}).}
 
 \item{burn}{The number of iterations to discard as the burn-in period
-(default: 0).}
+(default: \code{0}).}
 
 \item{thin}{The period of iterations to keep after the burn-in period
-(default: 1).}
+(default: \code{1}).}
 
 \item{mu0}{An optional p x 1 mean vector for the prior on the regression
 coefficients. See 'Details'.}
@@ -39,9 +39,9 @@ coefficients. See 'Details'.}
 \item{sigma0}{A p x p variance-covariance matrix for the prior on the
 regression coefficients. See 'Details'.}
 
-\item{a0}{The shape parameter for the prior on sigma2 (default: 0.001).}
+\item{a0}{The shape parameter for the prior on sigma2 (default: \code{0.001}).}
 
-\item{b0}{The scale parameter for the prior on sigma2 (default: 0.001).}
+\item{b0}{The scale parameter for the prior on sigma2 (default: \code{0.001}).}
 
 \item{eta_start}{A p x 1 vector of starting values for the regression
 coefficients.}
@@ -54,10 +54,10 @@ coefficients.}
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
 \value{
-An object of class \code{\linkS4class{Mlr}}.
+An object of class \code{\link[=Mlr-class]{Mlr}}.
 }
 \description{
-\code{gibbs_mlr} is used to fit a Bayesian linear regression model using
+\code{gibbs_mlr()} is used to fit a Bayesian linear regression model using
 Gibbs sampling.
 }
 \details{

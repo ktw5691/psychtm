@@ -33,18 +33,18 @@ gibbs_sldax(
 )
 }
 \arguments{
-\item{formula}{An object of class \code{\link[stats]{formula}}: a symbolic
+\item{formula}{An object of class \code{\link[stats:formula]{formula}}: a symbolic
 description of the model to be fitted.}
 
 \item{data}{An optional data frame containing the variables in the model.}
 
-\item{m}{The number of iterations to run the Gibbs sampler (default: 100).}
+\item{m}{The number of iterations to run the Gibbs sampler (default: \code{100}).}
 
 \item{burn}{The number of iterations to discard as the burn-in period
-(default: 0).}
+(default: \code{0}).}
 
 \item{thin}{The period of iterations to keep after the burn-in period
-(default: 1).}
+(default: \code{1}).}
 
 \item{docs}{A D x max(\eqn{N_d}) matrix of word indices for all documents.}
 
@@ -64,15 +64,15 @@ topic proportions will be sampled. CAUTION: This can be memory-intensive.}
 
 \item{interaction_xcol}{EXPERIMENTAL: The column number of the design matrix for
 the additional predictors for which an interaction with the \eqn{K} topics is
-desired (default: \eqn{-1L}, no interaction). Currently only supports a single
+desired (default: \code{-1L}, no interaction). Currently only supports a single
 continuous predictor or a two-category categorical predictor represented as a
 single dummy-coded column.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
-(default: 1.0).}
+(default: \code{1.0}).}
 
 \item{gamma_}{The hyper-parameter for the prior on the topic-specific
-vocabulary probabilities (default: 1.0).}
+vocabulary probabilities (default: \code{1.0}).}
 
 \item{mu0}{An optional q x 1 mean vector for the prior on the regression
 coefficients. See 'Details'.}
@@ -80,9 +80,9 @@ coefficients. See 'Details'.}
 \item{sigma0}{A q x q variance-covariance matrix for the prior on the
 regression coefficients. See 'Details'.}
 
-\item{a0}{The shape parameter for the prior on sigma2 (default: 0.001).}
+\item{a0}{The shape parameter for the prior on sigma2 (default: \code{0.001}).}
 
-\item{b0}{The scale parameter for the prior on sigma2 (default: 0.001).}
+\item{b0}{The scale parameter for the prior on sigma2 (default: \code{0.001}).}
 
 \item{eta_start}{A q x 1 vector of starting values for the
 regression coefficients.}
@@ -94,11 +94,11 @@ order; if \code{FALSE}, no constraints will be applied.}
 \item{proposal_sd}{The proposal standard deviations for drawing the
 regression coefficients, N(0, proposal_sd(j)), \eqn{j = 1, \ldots, q}.
 Only used for \code{model = "slda_logit"} and
-\code{model = "sldax_logit"} (default: 2.38 for all coefficients).}
+\code{model = "sldax_logit"} (default: \code{2.38} for all coefficients).}
 
 \item{return_assignments}{A logical (default = \code{FALSE}): If
 \code{TRUE}, returns an N x \eqn{max N_d} x M array of topic assignments
-in slot @topics. CAUTION: this can be memory-intensive.}
+in slot \verb{@topics}. CAUTION: this can be memory-intensive.}
 
 \item{correct_ls}{Run Stephens (2000) label switching correct algorithm on
 posterior? (default = \code{TRUE}).}
@@ -111,10 +111,10 @@ posterior? (default = \code{TRUE}).}
 \code{display_progress} be set to \code{TRUE} at any given time.}
 }
 \value{
-An object of class \code{\linkS4class{Sldax}}.
+An object of class \code{\link[=Sldax-class]{Sldax}}.
 }
 \description{
-\code{gibbs_sldax} is used to fit both supervised and unsupervised topic models.
+\code{gibbs_sldax()} is used to fit both supervised and unsupervised topic models.
 }
 \details{
 The number of regression coefficients q in supervised topic models is
@@ -131,8 +131,7 @@ the length of \code{mu0} (\eqn{q}) and/or the number of rows and columns of
 values for \code{eta_start}, be sure that the length of \code{eta_start} is
 correct.
 
-For \code{model}, one of \code{c("lda", "slda", "sldax", "slda_logit",
-"sldax_logit")} are possible. \code{"lda"}: unsupervised topic model;
+For \code{model}, one of \code{c("lda", "slda", "sldax", "slda_logit", "sldax_logit")} are possible. \code{"lda"}: unsupervised topic model;
 \code{"slda"}: supervised topic model with a continuous outcome;
 \code{"sldax"}: supervised topic model with a continuous outcome and
 additional predictors of the outcome; \code{"slda_logit"}: supervised topic
@@ -145,7 +144,7 @@ For \code{mu0}, the first \eqn{p} elements correspond to coefficients for the
 \eqn{p + 1} to \eqn{p + K} correspond to coefficients for the \eqn{K} topics,
 and elements \eqn{p + K + 1} to \eqn{p + 2K - 1} correspond to coefficients
 for the interaction (if any) between one additional predictor and the \eqn{K}
-topics. By default, we use a vector of \eqn{q} 0s.
+topics. By default, we use a vector of \eqn{q} \code{0}s.
 
 For \code{sigma0}, the first \eqn{p} rows/columns correspond to coefficients
 for the \eqn{p} additional predictors (if none, \eqn{p = 0}), while
@@ -154,7 +153,7 @@ rows/columns \eqn{p + 1} to \eqn{p + K} correspond to coefficients for the
 correspond to coefficients for the interaction (if any) between one
 additional predictor and the \eqn{K} topics. By default, we use an identity
 matrix for \code{model = "slda"} and \code{model = "sldax"} and a diagonal
-matrix with diagonal elements (variances) of 6.25 for
+matrix with diagonal elements (variances) of \code{6.25} for
 \code{model = "slda_logit"} and \code{model = "sldax_logit"}.
 }
 \seealso{

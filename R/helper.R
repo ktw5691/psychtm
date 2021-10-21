@@ -1,101 +1,101 @@
 #' Fit supervised or unsupervised topic models (sLDAX or LDA)
 #'
-#' \code{gibbs_sldax} is used to fit both supervised and unsupervised topic models.
+#' `gibbs_sldax()` is used to fit both supervised and unsupervised topic models.
 #'
 #' The number of regression coefficients q in supervised topic models is
 #' determined as follows: For the sLDA model with only the \eqn{K} topics as
 #' predictors, \eqn{q = K}; for the sLDAX model with \eqn{K} topics and \eqn{p}
 #' additional predictors, there are two possibilities: (1) If no interaction
 #' between an additional covariate and the \eqn{K} topics is desired
-#' (default: \code{interaction_xcol = -1L}), \eqn{q = p + K}; (2) if an
+#' (default: `interaction_xcol = -1L`), \eqn{q = p + K}; (2) if an
 #' interaction between an additional covariate and the \eqn{K} topics is desired
-#' (e.g., \code{interaction_xcol = 1}), \eqn{q = p + 2K - 1}. If you supply
-#' custom values for prior parameters \code{mu0} or \code{sigma0}, be sure that
-#' the length of \code{mu0} (\eqn{q}) and/or the number of rows and columns of
-#' \code{sigma0} (\eqn{q \times q}) are correct. If you supply custom starting
-#' values for \code{eta_start}, be sure that the length of \code{eta_start} is
+#' (e.g., `interaction_xcol = 1`), \eqn{q = p + 2K - 1}. If you supply
+#' custom values for prior parameters `mu0` or `sigma0`, be sure that
+#' the length of `mu0` (\eqn{q}) and/or the number of rows and columns of
+#' `sigma0` (\eqn{q \times q}) are correct. If you supply custom starting
+#' values for `eta_start`, be sure that the length of `eta_start` is
 #' correct.
 #'
-#' For \code{model}, one of \code{c("lda", "slda", "sldax", "slda_logit",
-#' "sldax_logit")} are possible. \code{"lda"}: unsupervised topic model;
-#' \code{"slda"}: supervised topic model with a continuous outcome;
-#' \code{"sldax"}: supervised topic model with a continuous outcome and
-#' additional predictors of the outcome; \code{"slda_logit"}: supervised topic
-#' model with a dichotomous outcome (0/1); \code{"sldax_logit"}: supervised
+#' For `model`, one of `c("lda", "slda", "sldax", "slda_logit",
+#' "sldax_logit")` are possible. `"lda"`: unsupervised topic model;
+#' `"slda"`: supervised topic model with a continuous outcome;
+#' `"sldax"`: supervised topic model with a continuous outcome and
+#' additional predictors of the outcome; `"slda_logit"`: supervised topic
+#' model with a dichotomous outcome (0/1); `"sldax_logit"`: supervised
 #' topic model with a dichotomous outcome (0/1) and additional predictors of the
 #' outcome.
 #'
-#' For \code{mu0}, the first \eqn{p} elements correspond to coefficients for the
+#' For `mu0`, the first \eqn{p} elements correspond to coefficients for the
 #' \eqn{p} additional predictors (if none, \eqn{p = 0}), while elements
 #' \eqn{p + 1} to \eqn{p + K} correspond to coefficients for the \eqn{K} topics,
 #' and elements \eqn{p + K + 1} to \eqn{p + 2K - 1} correspond to coefficients
 #' for the interaction (if any) between one additional predictor and the \eqn{K}
-#' topics. By default, we use a vector of \eqn{q} 0s.
+#' topics. By default, we use a vector of \eqn{q} `0`s.
 #'
-#' For \code{sigma0}, the first \eqn{p} rows/columns correspond to coefficients
+#' For `sigma0`, the first \eqn{p} rows/columns correspond to coefficients
 #' for the \eqn{p} additional predictors (if none, \eqn{p = 0}), while
 #' rows/columns \eqn{p + 1} to \eqn{p + K} correspond to coefficients for the
 #' \eqn{K} topics, and rows/columns \eqn{p + K + 1} to \eqn{p + 2K - 1}
 #' correspond to coefficients for the interaction (if any) between one
 #' additional predictor and the \eqn{K} topics. By default, we use an identity
-#' matrix for \code{model = "slda"} and \code{model = "sldax"} and a diagonal
-#' matrix with diagonal elements (variances) of 6.25 for
-#' \code{model = "slda_logit"} and \code{model = "sldax_logit"}.
+#' matrix for `model = "slda"` and `model = "sldax"` and a diagonal
+#' matrix with diagonal elements (variances) of `6.25` for
+#' `model = "slda_logit"` and `model = "sldax_logit"`.
 #'
-#' @param formula An object of class \code{\link[stats]{formula}}: a symbolic
+#' @param formula An object of class [`formula`][stats::formula]: a symbolic
 #' description of the model to be fitted.
 #' @param data An optional data frame containing the variables in the model.
-#' @param m The number of iterations to run the Gibbs sampler (default: 100).
+#' @param m The number of iterations to run the Gibbs sampler (default: `100`).
 #' @param burn The number of iterations to discard as the burn-in period
-#'   (default: 0).
+#'   (default: `0`).
 #' @param thin The period of iterations to keep after the burn-in period
-#'   (default: 1).
+#'   (default: `1`).
 #' @param docs A D x max(\eqn{N_d}) matrix of word indices for all documents.
 #' @param V The number of unique terms in the vocabulary.
 #' @param K The number of topics.
 #' @param model A string denoting the type of model to fit. See 'Details'.
-#'   (default: \code{"lda"}).
-#' @param sample_beta A logical (default = \code{TRUE}): If \code{TRUE}, the
+#'   (default: `"lda"`).
+#' @param sample_beta A logical (default = `TRUE`): If `TRUE`, the
 #'   topic-vocabulary distributions are sampled from their full conditional
 #'   distribution.
-#' @param sample_theta A logical (default = \code{TRUE}): If \code{TRUE}, the
+#' @param sample_theta A logical (default = `TRUE`): If `TRUE`, the
 #'   topic proportions will be sampled. CAUTION: This can be memory-intensive.
 #' @param interaction_xcol EXPERIMENTAL: The column number of the design matrix for
 #'   the additional predictors for which an interaction with the \eqn{K} topics is
-#'   desired (default: \eqn{-1L}, no interaction). Currently only supports a single
+#'   desired (default: `-1L`, no interaction). Currently only supports a single
 #'   continuous predictor or a two-category categorical predictor represented as a
 #'   single dummy-coded column.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
-#'   (default: 1.0).
+#'   (default: `1.0`).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
-#'   vocabulary probabilities (default: 1.0).
+#'   vocabulary probabilities (default: `1.0`).
 #' @param mu0 An optional q x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A q x q variance-covariance matrix for the prior on the
 #'   regression coefficients. See 'Details'.
-#' @param a0 The shape parameter for the prior on sigma2 (default: 0.001).
-#' @param b0 The scale parameter for the prior on sigma2 (default: 0.001).
+#' @param a0 The shape parameter for the prior on sigma2 (default: `0.001`).
+#' @param b0 The scale parameter for the prior on sigma2 (default: `0.001`).
 #' @param eta_start A q x 1 vector of starting values for the
 #'   regression coefficients.
-#' @param constrain_eta A logical (default = \code{FALSE}): If \code{TRUE}, the
+#' @param constrain_eta A logical (default = `FALSE`): If `TRUE`, the
 #'   regression coefficients will be constrained so that they are in descending
-#'   order; if \code{FALSE}, no constraints will be applied.
+#'   order; if `FALSE`, no constraints will be applied.
 #' @param proposal_sd The proposal standard deviations for drawing the
 #'   regression coefficients, N(0, proposal_sd(j)), \eqn{j = 1, \ldots, q}.
-#'   Only used for \code{model = "slda_logit"} and
-#'   \code{model = "sldax_logit"} (default: 2.38 for all coefficients).
-#' @param return_assignments A logical (default = \code{FALSE}): If
-#'   \code{TRUE}, returns an N x \eqn{max N_d} x M array of topic assignments
-#'   in slot @topics. CAUTION: this can be memory-intensive.
+#'   Only used for `model = "slda_logit"` and
+#'   `model = "sldax_logit"` (default: `2.38` for all coefficients).
+#' @param return_assignments A logical (default = `FALSE`): If
+#'   `TRUE`, returns an N x \eqn{max N_d} x M array of topic assignments
+#'   in slot `@topics`. CAUTION: this can be memory-intensive.
 #' @param correct_ls Run Stephens (2000) label switching correct algorithm on
-#'   posterior? (default = \code{TRUE}).
+#'   posterior? (default = `TRUE`).
 #' @param verbose Should parameter draws be output during sampling? (default:
-#'   \code{FALSE}).
+#'   `FALSE`).
 #' @param display_progress Should percent progress of sampler be displayed
-#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#'   (default: `FALSE`). Recommended that only one of `verbose` and
+#'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class \code{\linkS4class{Sldax}}.
+#' @return An object of class [`Sldax`][Sldax-class].
 #' @family Gibbs sampler
 gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         docs, V, K = 2L,
@@ -143,12 +143,10 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
       model <- model[1]
     }
     if (!model %in% c("lda", "slda", "sldax", "slda_logit", "sldax_logit")) {
-      print(model)
-      stop("'model' not recognized")
+      stop("'model' ", model, " not recognized")
     }
   } else {
-    print(model)
-    stop("'model' not recognized")
+    stop("'model' ", model, " not recognized")
   }
   model <- switch(model,
                   lda = 1L,
@@ -172,9 +170,10 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
       x <- model.matrix(mt, mf)
       if ("(Intercept)" %in% dimnames(x)[[2]]) {
         ip <- match("(Intercept)", dimnames(x)[[2]])
-        x <- x[, -ip]
+        # Carefully avoid implicit coercion to numeric vector (loses dimnames)
+        x <- x[, -ip, drop = FALSE]
       }
-      x <- as.matrix(x) # If y ~ 1 supplied, x has dims D x 0
+      x <- as.matrix(x, ncol) # If y ~ 1 supplied, x has dims D x 0
       if (dim(x)[2] == 0 & model %in% c(3, 5))
         stop("Design matrix 'x' has 0 columns.
               Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as
@@ -365,7 +364,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
       # relabel_out$permutations is Nchain x K array of permutation indices
       relabel_out = stephens(aperm(theta(res), c(3, 1, 2)), maxiter = 100) # First arg needs to be Nchain x D x K array
       if (relabel_out$iterations >= 100) {
-        cat("Relabeling failed to converge, no label switching correction applied.")
+        warning("Relabeling failed to converge, no label switching correction applied.")
       } else {
         # Permute theta
         perm_theta <- permute.mcmc(aperm(theta(res), c(3, 2, 1)), relabel_out$permutations) # First arg needs to be Nchain x K x npar array; npar won't be swapped, but rows (K) will be permuted
@@ -421,37 +420,37 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 
 #' Fit linear regression model
 #'
-#' \code{gibbs_mlr} is used to fit a Bayesian linear regression model using
+#' `gibbs_mlr()` is used to fit a Bayesian linear regression model using
 #' Gibbs sampling.
 #'
-#' For \code{mu0}, by default, we use a vector of \eqn{p} 0s for \eqn{p}
+#' For `mu0`, by default, we use a vector of \eqn{p} 0s for \eqn{p}
 #' regression coefficients.
 #'
-#' For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} identity matrix.
+#' For `sigma0`, by default, we use a \eqn{p} x \eqn{p} identity matrix.
 #'
-#' @param formula An object of class \code{\link[stats]{formula}}: a symbolic
+#' @param formula An object of class [`formula`][stats::formula]: a symbolic
 #' description of the model to be fitted.
 #' @param data An optional data frame containing the variables in the model.
-#' @param m The number of iterations to run the Gibbs sampler (default: 100).
+#' @param m The number of iterations to run the Gibbs sampler (default: `100`).
 #' @param burn The number of iterations to discard as the burn-in period
-#'   (default: 0).
+#'   (default: `0`).
 #' @param thin The period of iterations to keep after the burn-in period
-#'   (default: 1).
+#'   (default: `1`).
 #' @param mu0 An optional p x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A p x p variance-covariance matrix for the prior on the
 #'   regression coefficients. See 'Details'.
-#' @param a0 The shape parameter for the prior on sigma2 (default: 0.001).
-#' @param b0 The scale parameter for the prior on sigma2 (default: 0.001).
+#' @param a0 The shape parameter for the prior on sigma2 (default: `0.001`).
+#' @param b0 The scale parameter for the prior on sigma2 (default: `0.001`).
 #' @param eta_start A p x 1 vector of starting values for the regression
 #'   coefficients.
 #' @param verbose Should parameter draws be output during sampling? (default:
-#'   \code{FALSE}).
+#'   `FALSE`).
 #' @param display_progress Should percent progress of sampler be displayed
-#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#'   (default: `FALSE`). Recommended that only one of `verbose` and
+#'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class \code{\linkS4class{Mlr}}.
+#' @return An object of class [`Mlr`][Mlr-class].
 #' @family Gibbs sampler
 gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
                       mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
@@ -525,23 +524,23 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 
 #' Fit logistic regression model
 #'
-#' \code{gibbs_logistic} is used to fit a Bayesian logistic regression model
+#' `gibbs_logistic()` is used to fit a Bayesian logistic regression model
 #' using Gibbs sampling.
 #'
-#' For \code{mu0}, by default, we use a vector of \eqn{p} 0s for \eqn{p}
+#' For `mu0`, by default, we use a vector of \eqn{p} `0`s for \eqn{p}
 #' regression coefficients.
 #'
-#' For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} diagonal matrix
-#' with diagonal elements (variances) of 6.25.
+#' For `sigma0`, by default, we use a \eqn{p} x \eqn{p} diagonal matrix
+#' with diagonal elements (variances) of `6.25`.
 #'
-#' @param formula An object of class \code{\link[stats]{formula}}: a symbolic
+#' @param formula An object of class [`formula`][stats::formula]: a symbolic
 #' description of the model to be fitted.
 #' @param data An optional data frame containing the variables in the model.
-#' @param m The number of iterations to run the Gibbs sampler (default: 100).
+#' @param m The number of iterations to run the Gibbs sampler (default: `100`).
 #' @param burn The number of iterations to discard as the burn-in period
-#'   (default: 0).
+#'   (default: `0`).
 #' @param thin The period of iterations to keep after the burn-in period
-#'   (default: 1).
+#'   (default: `1`).
 #' @param mu0 An optional p x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A p x p variance-covariance matrix for the prior on the
@@ -549,15 +548,15 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 #' @param eta_start A p x 1 vector of starting values for the
 #'   regression coefficients.
 #' @param proposal_sd The proposal standard deviations for drawing the
-#'   regression coefficients, N(0, proposal_sd(j)), \eqn{j = 1, \ldots, p}
-#'   (default: 2.38 for all coefficients).
+#'   regression coefficients, N(0, `proposal_sd`(j)), \eqn{j = 1, \ldots, p}
+#'   (default: `2.38` for all coefficients).
 #' @param verbose Should parameter draws be output during sampling? (default:
-#'   \code{FALSE}).
+#'   `FALSE`).
 #' @param display_progress Should percent progress of sampler be displayed
-#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#'   (default: `FALSE`). Recommended that only one of `verbose` and
+#'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class \code{\linkS4class{Logistic}}.
+#' @return An object of class [`Logistic`][Logistic-class].
 #' @family Gibbs sampler
 gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
                            mu0 = NULL, sigma0 = NULL,
@@ -646,4 +645,53 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
   })
 
   return(res_out)
+}
+
+#' Prepare documents in a data frame for modeling using [`gibbs_sldax()`][gibbs_sldax()]
+#'
+#' `prep_docs()` takes documents stored as a column of a data frame and
+#'   converts them into a list containing a matrix representation of documents
+#'   and vocabulary character vector for modeling.
+#'
+#' @param data A data frame containing a column of documents.
+#' @param col A character string denoting the column of documents in `data`.
+#' @param lower Should all terms be converted to lowercase? (default: `TRUE`).
+#'
+#' @return A list with two components:
+#'   `documents` A matrix of term uses with one row per document and one
+#'   column per term position up to the number of terms in the longest document;
+#'   `vocab` A character vector of unique terms in the documents.
+#'
+#' @note This function does not perform further data preprocessing such as
+#'   stop-word removal. It is assumed that the unit of analysis is each term, so
+#'   this function will not be appropriate for other units of analysis such as
+#'   n-grams or sentences.
+prep_docs <- function(data, col, lower = TRUE) {
+
+
+
+  if (missing(data)) missing_msg(data)
+  if (missing(col)) missing_msg(col)
+  if (!check_logical(lower)) stop("'lower' is not an TRUE/FALSE")
+  # Check for missing values in data
+  if (any(is.na(data))) stop("Cannot handle missing values in 'data'")
+
+  ndoc <- NROW(data)
+  if (ndoc < 1L) stop("`data$col` appears to contain zero documents")
+
+  text_prep <- lda::lexicalize(unlist(data[, col]), lower = lower)
+
+  # Get length of longest document
+  doc_lens <- sapply(text_prep$documents, NCOL)
+  # Integer matrix
+  docs <- matrix(0L, nrow = ndoc, ncol = max(doc_lens))
+  for (d in seq_len(ndoc)) {
+    len <- doc_lens[d]
+    # Change from 0-based indexing to 1-based indexing for terms:
+    #   0 represents an unused term position for `gibbs_sldax()` and
+    #   1 represents the first term in the corpus (represents the second term in
+    #   the `lda` package)
+    docs[d, seq_len(len)] <- text_prep$documents[[d]][1L, ] + 1L
+  }
+  return(list(documents = docs, vocab = text_prep$vocab))
 }

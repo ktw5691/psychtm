@@ -42,7 +42,7 @@
 \item{burn}{The number of iterations to discard as the burn-in period.}
 
 \item{thin}{The period of iterations to keep after the burn-in period
-(default: 1).}
+(default: \code{1}).}
 
 \item{K}{The number of topics.}
 
@@ -69,23 +69,23 @@ regression coefficients. The first p elements correspond to predictors
 in X, while the last K elements correspond to the K topic means.}
 
 \item{proposal_sd}{The proposal standard deviation for drawing the
-regression coefficients, N(0, proposal_sd) (default: 0.2).}
+regression coefficients, N(0, \code{proposal_sd}) (default: \code{0.2}).}
 
 \item{interaction_xcol}{The column number of the design matrix for the
 additional predictors for which an interaction with the \eqn{K} topics is
-desired (default: \eqn{-1L}, no interaction). Currently only supports a
+desired (default: \code{-1L}, no interaction). Currently only supports a
 single continuous predictor or a two-category categorical predictor
 represented as a single dummy-coded column.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
-(default: 1.0).}
+(default: \code{1.0}).}
 
 \item{gamma_}{The hyper-parameter for the prior on the topic-specific
-vocabulary probabilities (default: 1.0).}
+vocabulary probabilities (default: \code{1.0}).}
 
 \item{constrain_eta}{A logical (default = \code{false}): If \code{true}, the
 regression coefficients will be constrained so that they are in descending
-order; if \code{FALSE}, no constraints will be applied.}
+order; if \code{false}, no constraints will be applied.}
 
 \item{sample_beta}{A logical (default = \code{true}): If \code{true}, the
 topic-vocabulary distributions are sampled from their full conditional
@@ -96,10 +96,10 @@ topic proportions are sampled from their full conditional distribution.}
 
 \item{return_assignments}{A logical (default = \code{false}): If
 \code{true}, returns an N x \eqn{max N_d} x M array of topic assignments
-in slot @topics. CAUTION: this can be memory-intensive.}
+in slot \verb{@topics}. CAUTION: this can be memory-intensive.}
 
 \item{verbose}{Should parameter draws be output during sampling? (default:
-\code{False}).}
+\code{false}).}
 
 \item{display_progress}{Should percent progress of sampler be displayed
 (default: \code{false}). Recommended that only one of \code{verbose} and

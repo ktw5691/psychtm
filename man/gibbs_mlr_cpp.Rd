@@ -26,7 +26,7 @@
 \item{burn}{The number of iterations to discard as the burn-in period.}
 
 \item{thin}{The period of iterations to keep after the burn-in period
-(default: 1).}
+(default: \code{1}).}
 
 \item{y}{A D x 1 vector of outcomes to be predicted.}
 
@@ -41,19 +41,19 @@ prior on the regression coefficients.}
 \item{eta_start}{A (p + 1) x 1 vector of starting values for the
 regression coefficients.}
 
-\item{a0}{The shape parameter for the prior on sigma2 (default: 0.001)}
+\item{a0}{The shape parameter for the prior on sigma2 (default: \code{0.001})}
 
-\item{b0}{The scale parameter for the prior on sigma2 (default: 0.001)}
+\item{b0}{The scale parameter for the prior on sigma2 (default: \code{0.001})}
 
 \item{verbose}{Should parameter draws be output during sampling? (default:
-\code{FALSE}).}
+\code{false}).}
 
 \item{display_progress}{Should percent progress of sampler be displayed
-(default: \code{FALSE}). Recommended that only one of \code{verbose} and
-\code{display_progress} be set to \code{TRUE} at any given time.}
+(default: \code{false}). Recommended that only one of \code{verbose} and
+\code{display_progress} be set to \code{true} at any given time.}
 }
 \value{
-An object of class \code{Mlr}.
+An object of class \code{\link[=Mlr-class]{Mlr}}.
 }
 \description{
 Collapsed Gibbs sampler for multiple linear regression

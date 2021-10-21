@@ -15,7 +15,7 @@
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
 //' @param thin The period of iterations to keep after the burn-in period
-//'   (default: 1).
+//'   (default: `1`).
 //' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 //' @param x A D x p matrix of additional predictors (no column of 1s for
 //'   intercept).
@@ -25,14 +25,14 @@
 //' @param eta_start A (p + 1) x 1 vector of starting values for the
 //'   regression coefficients.
 //' @param proposal_sd The proposal standard deviation for drawing the
-//'   regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).
+//'   regression coefficients, N(0, `proposal_sd`) (default: `2.38, ..., 2.38`).
 //' @param verbose Should parameter draws be output during sampling? (default:
-//'   \code{FALSE}).
+//'   `false`).
 //' @param display_progress Should percent progress of sampler be displayed
-//'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-//'   \code{display_progress} be set to \code{TRUE} at any given time.
+//'   (default: `false`). Recommended that only one of `verbose` and
+//'   `display_progress` be set to `true` at any given time.
 //'
-//' @return An object of class \code{Logistic}.
+//' @return An object of class [`Logistic`][Logistic-class].
 //' @export
 // [[Rcpp::export(.gibbs_logistic_cpp)]]
 Rcpp::S4 gibbs_logistic_cpp(uint32_t m, uint32_t burn, uint32_t thin,

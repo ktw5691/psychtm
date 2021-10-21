@@ -25,7 +25,7 @@
 \item{burn}{The number of iterations to discard as the burn-in period.}
 
 \item{thin}{The period of iterations to keep after the burn-in period
-(default: 1).}
+(default: \code{1}).}
 
 \item{y}{A D x 1 vector of binary outcomes (0/1) to be predicted.}
 
@@ -41,17 +41,17 @@ on the regression coefficients.}
 regression coefficients.}
 
 \item{proposal_sd}{The proposal standard deviation for drawing the
-regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).}
+regression coefficients, N(0, \code{proposal_sd}) (default: \verb{2.38, ..., 2.38}).}
 
 \item{verbose}{Should parameter draws be output during sampling? (default:
-\code{FALSE}).}
+\code{false}).}
 
 \item{display_progress}{Should percent progress of sampler be displayed
-(default: \code{FALSE}). Recommended that only one of \code{verbose} and
-\code{display_progress} be set to \code{TRUE} at any given time.}
+(default: \code{false}). Recommended that only one of \code{verbose} and
+\code{display_progress} be set to \code{true} at any given time.}
 }
 \value{
-An object of class \code{Logistic}.
+An object of class \code{\link[=Logistic-class]{Logistic}}.
 }
 \description{
 Collapsed Gibbs sampler for logistic regression
