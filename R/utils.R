@@ -1,7 +1,7 @@
 #' Check for integer argument
 #'
 #' @param x Argument to check.
-#' @param tol Tolerance (default: sqrt(.Machine$double.eps))
+#' @param tol Tolerance (default: `sqrt(.Machine$double.eps)`)
 is.whole_number <- function(x, tol = sqrt(.Machine$double.eps)) {
   return(abs(x - round(x)) < tol)
 }
@@ -9,7 +9,7 @@ is.whole_number <- function(x, tol = sqrt(.Machine$double.eps)) {
 #' Check for non-negative integer
 #'
 #' @param x Argument to check.
-#' @param tol Tolerance (default: sqrt(.Machine$double.eps))
+#' @param tol Tolerance (default: `sqrt(.Machine$double.eps)`)
 is.non_negative_integer <- function(x, tol = sqrt(.Machine$double.eps)) {
   return(abs(x - round(x)) < tol & x >= 0)
 }
@@ -17,7 +17,7 @@ is.non_negative_integer <- function(x, tol = sqrt(.Machine$double.eps)) {
 #' Check for positive integer
 #'
 #' @param x Argument to check.
-#' @param tol Tolerance (default: sqrt(.Machine$double.eps))
+#' @param tol Tolerance (default: `sqrt(.Machine$double.eps)`)
 is.positive_integer <- function(x, tol = sqrt(.Machine$double.eps)) {
   return(abs(x - round(x)) < tol & x > 0)
 }

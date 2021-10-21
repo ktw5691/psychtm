@@ -9,7 +9,7 @@ is.whole_number(x, tol = sqrt(.Machine$double.eps))
 \arguments{
 \item{x}{Argument to check.}
 
-\item{tol}{Tolerance (default: sqrt(.Machine$double.eps))}
+\item{tol}{Tolerance (default: \code{sqrt(.Machine$double.eps)})}
 }
 \description{
 Check for integer argument
