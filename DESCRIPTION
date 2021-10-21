@@ -2,13 +2,14 @@ Package: psychtm
 Type: Package
 Title: Text Mining for Psychological Research
 Version: 2021.1
-Date: 2021-10-18
+Date: 2021-10-21
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
 Description: Supports Bayesian topic modeling using the SLDAX framework.
 License: GPL-3
 Depends: R (>= 3.3.0)
 Imports:
+    coda (>= 0.4),
     label.switching,
     methods,
     rlang,
@@ -21,6 +22,7 @@ Suggests:
     covr,
     dplyr,
     ggplot2,
+    lda,
     testthat,
     rmarkdown
 LinkingTo: Rcpp,
@@ -28,10 +30,12 @@ LinkingTo: Rcpp,
            RcppProgress (>= 0.4.2)
 BugReports: https://github.com/ktw5691/psychtm/issues
 RoxygenNote: 7.1.2
+Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
 SystemRequirements: C++11
 Collate:
     'RcppExports.R'
+    'data.R'
     'helper.R'
     'model-class.R'
     'logistic-class.R'
@@ -42,3 +46,4 @@ Collate:
     'sldax-results.R'
     'utils.R'
 VignetteBuilder: knitr
+LazyData: true
