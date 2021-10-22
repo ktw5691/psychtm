@@ -11,6 +11,8 @@
 //' @param eta A q x 1 vector of regression coefficients.
 //'
 //' @return A draw for \eqn{\sigma^2}.
+//'
+//' @noRd
 long double draw_sigma2(float a0, float b0,
                         const arma::mat& w, const arma::colvec& y,
                         const arma::colvec& eta) {

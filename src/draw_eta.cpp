@@ -15,6 +15,8 @@
 //'   coefficients.
 //'
 //' @return A q x 1 vector of draws of eta.
+//'
+//' @noRd
 arma::colvec draw_eta_norm(const arma::mat& w, const arma::vec& y,
                            long double sigma2, const arma::vec& mu0,
                            const arma::mat& sigma0) {
@@ -44,6 +46,8 @@ arma::colvec draw_eta_norm(const arma::mat& w, const arma::vec& y,
 //' @param accept A vector of the number of accepted draws of eta.
 //'
 //' @return A q x 1 vector of draws for eta.
+//'
+//' @noRd
 arma::colvec draw_eta_logit(const arma::mat& w, const arma::colvec& y,
                             const arma::colvec& eta_prev,
                             const arma::colvec& mu0, const arma::mat& sigma0,

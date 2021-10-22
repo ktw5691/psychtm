@@ -6,6 +6,8 @@
 //' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods).
 //' @return The contribution of y_d (its predictive posterior likelihood variance)
 //'   to the effective number of parameters.
+//'
+//' @noRd
 double pwaic_d(const arma::colvec& like_pred) {
 
   // Get variance of log-predictive likelihood

@@ -10,6 +10,8 @@
 //' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 //'
 //' @return A V x 1 vector of estimates for \eqn{\beta_k}.
+//'
+//' @noRd
 // [[Rcpp::export(.draw_betak)]]
 arma::mat draw_betak(const arma::rowvec& wz_co, float gamma_) {
 

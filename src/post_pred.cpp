@@ -11,6 +11,8 @@
 //' @param sigma2 The residual variance.
 //'
 //' @return Posterior predictive likelihood.
+//'
+//' @noRd
 arma::rowvec post_pred_norm(const arma::colvec& y, const arma::mat& w,
                             const arma::colvec& eta, double sigma2) {
 
@@ -29,6 +31,8 @@ arma::rowvec post_pred_norm(const arma::colvec& y, const arma::mat& w,
 //' @param w A D x q matrix of additional predictors.
 //' @param eta A q x 1 vector of regression coefficients.
 //' @return Predictive posterior likelihood of all D observations.
+//'
+//' @noRd
 arma::rowvec post_pred_logit(const arma::colvec& y, const arma::mat& w, const arma::colvec& eta) {
 
   const uint16_t D = w.n_rows;

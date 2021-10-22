@@ -67,6 +67,8 @@
 //' @param display_progress Should percent progress of sampler be displayed
 //'   (default: `false`). Recommended that only one of `verbose` and
 //'   `display_progress` be set to `true` at any given time.
+//'
+//' @noRd
 // [[Rcpp::export(.gibbs_sldax_cpp)]]
 Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    uint32_t m, uint32_t burn, uint32_t thin,

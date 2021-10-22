@@ -12,6 +12,8 @@
 //'   regression coefficients.
 //'
 //' @return The current log-posterior.
+//'
+//' @noRd
 double get_lpost_eta(double ll, const arma::colvec& eta,
                      const arma::colvec& mu0, const arma::mat& sigma0) {
 
@@ -39,6 +41,8 @@ double get_lpost_eta(double ll, const arma::colvec& eta,
 //' @param b0 The scale parameter for the prior on sigma2.
 //'
 //' @return The current log-posterior contribution.
+//'
+//' @noRd
 double get_lpost_mlr(double ll,
                      const arma::colvec& eta, double sigma2,
                      const arma::colvec& mu0, const arma::mat& sigma0,
@@ -65,6 +69,8 @@ double get_lpost_mlr(double ll,
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions.
 //'
 //' @return The current log-posterior contribution.
+//'
+//' @noRd
 double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
                      double gamma_, double alpha_) {
 
@@ -105,6 +111,8 @@ double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
 //' @param b0 The scale parameter for the prior on sigma2.
 //'
 //' @return The current log-posterior.
+//'
+//' @noRd
 double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
                            const arma::mat& theta, const arma::mat& beta,
                            const arma::colvec& mu0, const arma::mat& sigma0,
@@ -133,6 +141,8 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions.
 //'
 //' @return The current log-posterior.
+//'
+//' @noRd
 double get_lpost_slda_logit(double ll, const arma::colvec& eta,
                             const arma::mat& theta, const arma::mat& beta,
                             const arma::colvec& mu0, const arma::mat& sigma0,
@@ -157,6 +167,8 @@ double get_lpost_slda_logit(double ll, const arma::colvec& eta,
 //'   coefficients.
 //'
 //' @return The full conditional log-posterior density of eta.
+//'
+//' @noRd
 double eta_logpost_logit(const arma::mat& w, const arma::colvec& y,
                          const arma::vec& eta,
                          const arma::vec& mu0, const arma::mat& sigma0) {

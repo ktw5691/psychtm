@@ -7,6 +7,8 @@
 //' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 //'
 //' @return A K x 1 vector of estimate for \eqn{\theta_d}.
+//'
+//' @noRd
 // [[Rcpp::export(.est_thetad)]]
 arma::rowvec est_thetad(const arma::rowvec& z_count, float alpha_) {
 

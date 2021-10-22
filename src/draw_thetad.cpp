@@ -9,6 +9,8 @@
 //' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 //'
 //' @return A K x 1 vector draw of \eqn{\theta_d}.
+//'
+//' @noRd
 // [[Rcpp::export(.draw_thetad)]]
 arma::mat draw_thetad(const arma::rowvec& z_count, float alpha_) {
 
