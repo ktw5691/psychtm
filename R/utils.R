@@ -22,6 +22,9 @@ is.positive_integer <- function(x, tol = sqrt(.Machine$double.eps)) {
   return(abs(x - round(x)) < tol & x > 0)
 }
 
+#' Check for missing argument
+#'
+#' @param x Argument to check.
 missing_msg <- function(x) {
   stop(paste0('\"', x, '\" argument is missing.'), call. = FALSE)
 }
