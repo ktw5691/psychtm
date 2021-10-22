@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Draw sigma2 from full conditional posterior for sLDA/sLDAX/MLR
+//' @title Draw sigma2 from full conditional posterior for SLDA/SLDAX/MLR
 //'
 //' @name draw_sigma2
 //' @param a0 The prior shape parameter for \eqn{\sigma^2}.

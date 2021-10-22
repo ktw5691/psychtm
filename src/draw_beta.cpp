@@ -10,7 +10,6 @@
 //' @param gamma_ The hyperparameter on the Dirichlet prior for \eqn{\beta_k}.
 //'
 //' @return A K x V matrix \eqn{B}.
-//' @export
 // [[Rcpp::export(.draw_beta)]]
 
 arma::mat draw_beta(const arma::mat& wz_co, float gamma_) {

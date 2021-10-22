@@ -19,7 +19,6 @@
 //' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
 //'
 //' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
-//' @export
 // [[Rcpp::export(.count_topic_word)]]
 arma::mat count_topic_word(uint16_t K, uint32_t V,
                            const arma::umat& doc_topic,

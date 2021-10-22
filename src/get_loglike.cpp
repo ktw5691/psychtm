@@ -87,7 +87,7 @@ double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
   return ll_temp;
 }
 
-//' @title Log-likelihood for sLDA/sLDAX model
+//' @title Log-likelihood for SLDA/SLDAX model
 //'
 //' @name get_ll_slda_norm
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -115,7 +115,7 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' @title Log-likelihood for logistic sLDA/sLDAX model
+//' @title Log-likelihood for logistic SLDA/SLDAX model
 //'
 //' @name get_ll_slda_logit
 //' @param y A D x 1 vector of outcomes to be predicted.

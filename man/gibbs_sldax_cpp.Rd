@@ -3,7 +3,7 @@
 \name{gibbs_sldax_cpp}
 \alias{gibbs_sldax_cpp}
 \alias{.gibbs_sldax_cpp}
-\title{Collapsed Gibbs sampler for the sLDA-X model}
+\title{Collapsed Gibbs sampler for the SLDAX model}
 \usage{
 .gibbs_sldax_cpp(
   docs,
@@ -106,5 +106,5 @@ in slot \verb{@topics}. CAUTION: this can be memory-intensive.}
 \code{display_progress} be set to \code{true} at any given time.}
 }
 \description{
-Collapsed Gibbs sampler for the sLDA-X model
+Collapsed Gibbs sampler for the SLDAX model
 }

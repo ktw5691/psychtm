@@ -10,7 +10,6 @@
 //' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 //'
 //' @return A D x K matrix \eqn{\Theta}.
-//' @export
 // [[Rcpp::export(.draw_theta)]]
 arma::mat draw_theta(const arma::mat& z_count, float alpha_) {
   uint32_t D = z_count.n_rows;

@@ -32,8 +32,7 @@
 //'   (default: `false`). Recommended that only one of `verbose` and
 //'   `display_progress` be set to `true` at any given time.
 //'
-//' @return An object of class [`Mlr`][Mlr-class].
-//' @export
+//' @return An object of class `Mlr`.
 // [[Rcpp::export(.gibbs_mlr_cpp)]]
 Rcpp::S4 gibbs_mlr_cpp(uint32_t m, uint32_t burn, uint32_t thin,
                        const arma::colvec& y, const arma::mat& x,

@@ -2,7 +2,7 @@
 
 #include "get_loglike.h"
 
-//' @title Posterior predictive likelihood for sLDA/sLDAX/MLR
+//' @title Posterior predictive likelihood for SLDA/SLDAX/MLR
 //'
 //' @name post_pred_norm
 //' @parm y A D x 1 vector of outcomes.
@@ -22,7 +22,7 @@ arma::rowvec post_pred_norm(const arma::colvec& y, const arma::mat& w,
   return exp(loglike_pred.t());
 }
 
-//' @title Posterior predictive likelihood for logistic sLDA/sLDAX/regression
+//' @title Posterior predictive likelihood for logistic SLDA/SLDAX/regression
 //'
 //' @name post_pred_logit
 //' @parm y A D x 1 vector of outcomes.

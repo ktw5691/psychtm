@@ -16,7 +16,7 @@
 #include <progress.hpp>
 #include <progress_bar.hpp>
 
-//' @title Collapsed Gibbs sampler for the sLDA-X model
+//' @title Collapsed Gibbs sampler for the SLDAX model
 //'
 //' @name gibbs_sldax_cpp
 //' @param m The number of iterations to run the Gibbs sampler.
@@ -67,7 +67,6 @@
 //' @param display_progress Should percent progress of sampler be displayed
 //'   (default: `false`). Recommended that only one of `verbose` and
 //'   `display_progress` be set to `true` at any given time.
-//' @export
 // [[Rcpp::export(.gibbs_sldax_cpp)]]
 Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    uint32_t m, uint32_t burn, uint32_t thin,
@@ -231,7 +230,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
   arma::colvec eta(q);
   arma::colvec etac(q);
 
-  // For supervised models sLDA/sLDAX, set up regression coefficients
+  // For supervised models SLDA/SLDAX, set up regression coefficients
   if (constrain_eta) {
     if (model == sldax || model == sldax_logit) {
       // Constrain starting values of eta to be in descending order

@@ -87,7 +87,7 @@ double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
   return ll + beta_contrib + theta_contrib;
 }
 
-//' @title Log-posterior for sLDA/sLDAX model
+//' @title Log-posterior for SLDA/SLDAX model
 //'
 //' @name get_lpost_slda_norm
 //' @param ll A double of the current log-likelihood.
@@ -118,7 +118,7 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
   return lp_temp;
 }
 
-//' @title Log-posterior for logistic sLDA/sLDAX model
+//' @title Log-posterior for logistic SLDA/SLDAX model
 //'
 //' @name get_lpost_slda_logit
 //' @param ll A double of the current log-likelihood.
@@ -145,7 +145,7 @@ double get_lpost_slda_logit(double ll, const arma::colvec& eta,
   return lp_temp;
 }
 
-//' @title Compute full conditional log-posterior of eta for logistic sLDA/sLDAX/regression
+//' @title Compute full conditional log-posterior of eta for logistic SLDA/SLDAX/regression
 //'
 //' @name eta_logpost_logit
 //' @param w A D x q matrix containing a predictor model matrix of assumed form

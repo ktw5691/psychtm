@@ -51,7 +51,7 @@ regression coefficients, N(0, \code{proposal_sd}) (default: \verb{2.38, ..., 2.3
 \code{display_progress} be set to \code{true} at any given time.}
 }
 \value{
-An object of class \code{\link[=Logistic-class]{Logistic}}.
+An object of class Logistic.
 }
 \description{
 Collapsed Gibbs sampler for logistic regression

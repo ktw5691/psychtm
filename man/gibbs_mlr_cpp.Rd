@@ -53,7 +53,7 @@ regression coefficients.}
 \code{display_progress} be set to \code{true} at any given time.}
 }
 \value{
-An object of class \code{\link[=Mlr-class]{Mlr}}.
+An object of class \code{Mlr}.
 }
 \description{
 Collapsed Gibbs sampler for multiple linear regression
