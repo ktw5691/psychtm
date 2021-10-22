@@ -1,11 +1,10 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# psychtm Package for Text Mining in Psychological Research
+# psychtm: A package for text mining in psychological research
 
-[![Project Status: WIP – Initial development is in progress, but there
-has not yet been a stable, usable release suitable for the
-public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![Project Status:
+WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Travis Build
 Status](https://travis-ci.com/ktw5691/psychtm.svg?branch=master)](https://travis-ci.com/ktw5691/psychtm)
 [![covr
@@ -20,9 +19,9 @@ codecov](https://codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](h
 -   Estimate SLDAX, SLDA, and regression models with support for both
     continuous and dichotomous outcomes
 
--   Model fit assessment using coherence and exclusivity metrics
+-   Bayesian posterior inference
 
--   Model comparison of supervised models using WAIC
+-   Model fit assessment using coherence and exclusivity metrics
 
 ## How to Cite the Package
 
@@ -71,14 +70,19 @@ devtools::install_github("ktw5691/psychtm@devel")
 ## Limitations
 
 -   This package should be considered beta software and is still under
-    active development: use at your own risk
--   Documentation is also expected to be expanded and modified in future
-    releases. See the **Getting Help** section below.
--   This package uses a Gibbs sampling algorithm that currently can be
-    memory-intensive for a large corpus; future developments are planned
-    to better scale to larger corpora
+    active development: use at your own risk.
+-   Documentation will be expanded in future releases. See the **Getting
+    Help** section below.
+-   This package uses a Gibbs sampling algorithm that can be
+    memory-intensive for a large corpus.
 
 ## Getting Help
+
+-   Check out the vignette(s) for a good starting point:
+
+``` r
+browseVignettes("psychtm")
+```
 
 -   If you think you have found a bug, please [open
     issues](https://github.com/ktw5691/psychtm/issues) and provide a
