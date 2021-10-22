@@ -1,7 +1,6 @@
-#' @include sldax-class.R sldax-generic-functions.R
+#' @include aaa-classes.R aaa-generics.R
 NULL
 
-#' @rdname sldax-gettop-methods
 setMethod("est_beta",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat) {
@@ -17,7 +16,6 @@ setMethod("est_beta",
           }
 )
 
-#' @rdname sldax-gettop-methods
 setMethod("est_theta",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat) {
@@ -33,7 +31,6 @@ setMethod("est_theta",
           }
 )
 
-#' @rdname sldax-gettop-methods
 setMethod("get_coherence",
           c(beta_ = "matrix", docs = "matrix"),
           function(beta_, docs, nwords) {
@@ -76,7 +73,6 @@ setMethod("get_coherence",
           }
 )
 
-#' @rdname sldax-gettop-methods
 setMethod("get_exclusivity",
           c(beta_ = "matrix"),
           function(beta_, nwords, weight) {
@@ -110,7 +106,6 @@ setMethod("get_exclusivity",
           }
 )
 
-#' @rdname sldax-gettop-methods
 setMethod("get_toptopics",
           c(theta = "matrix"),
           function(theta, ntopics) {
@@ -139,7 +134,7 @@ setMethod("get_toptopics",
           }
 )
 
-#' @rdname sldax-gettop-methods
+#' @rdname sldax-summary
 setMethod("get_topwords",
           c(beta_ = "matrix", nwords = "numeric", vocab = "character"),
           function(beta_, nwords, vocab, method) {
@@ -180,7 +175,6 @@ setMethod("get_topwords",
           }
 )
 
-#' @rdname sldax-gettop-methods
 setMethod("get_zbar",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin) {
@@ -214,101 +208,66 @@ setMethod("get_zbar",
           }
 )
 
-#' @rdname sldax-gettop-methods
-#' @importFrom rlang .data
-setMethod("gg_coef",
-          c(mcmc_fit = "Sldax"),
-          function(mcmc_fit, burn, thin, stat, errorbw) {
+setMethod("post_regression",
+          c(mcmc_fit = "Mlr"),
+          function(mcmc_fit) {
 
-            if (!requireNamespace("dplyr", quietly = TRUE)) {
-              stop("Package \"dplyr\" needed for this function to work.
-                    Please install it.",
-                   call. = FALSE)
-            }
-            if (!requireNamespace("ggplot2", quietly = TRUE)) {
-              stop("Package \"ggplot2\" needed for this function to work.
+            m <- nchain(mcmc_fit)
+            burn <- extra(mcmc_fit)$call$burn
+            thin <- extra(mcmc_fit)$call$thin
+
+            mcmc_out <- coda::mcmc(cbind(eta(mcmc_fit), sigma2(mcmc_fit)),
+                                   start = burn + 1, thin = thin)
+            colnames(mcmc_out)[ncol(mcmc_out)] <- "sigma2"
+
+            return(mcmc_out)
+          }
+)
+
+setMethod("post_regression",
+          c(mcmc_fit = "Logistic"),
+          function(mcmc_fit) {
+
+            m <- nchain(mcmc_fit)
+            burn <- extra(mcmc_fit)$call$burn
+            thin <- extra(mcmc_fit)$call$thin
+
+            return(coda::mcmc(eta(mcmc_fit), start = burn + 1, thin = thin))
+          }
+)
+
+setMethod("post_regression",
+          c(mcmc_fit = "Sldax"),
+          function(mcmc_fit) {
+
+            if (!requireNamespace("lda", quietly = TRUE)) {
+              stop("Package \"lda\" needed for this function to work.
                     Please install it.",
                    call. = FALSE)
             }
 
             m <- nchain(mcmc_fit)
-            keep_index <- seq(burn + 1, m, thin)
+            burn <- extra(mcmc_fit)$call$burn
+            thin <- extra(mcmc_fit)$call$thin
 
-            if (stat == "mean") {
-              eta <- colMeans(eta(mcmc_fit)[keep_index, ])
+            # Obtain topic coefficient contrasts
+            k <- ntopics(mcmc_fit)
+            cm <- (diag(k, nrow = k) - matrix(rep(1, k ^ 2), nrow = k)) / (k - 1)
+            # Number of predictors NOT INCLUDING topics
+            n_covs <- ncol(eta(mcmc_fit)) - k
+            # Topic "effects" or contrasts
+            effectm <- crossprod(t(eta(mcmc_fit))[seq(n_covs + 1, n_covs + k), ], cm)
+            colnames(effectm) <- paste0("effect_t", seq_len(k))
+
+            if (extra(mcmc_fit)$call$model %in% c("slda", "sldax")) {
+              mcmc_out <- coda::mcmc(cbind(eta(mcmc_fit), effectm, sigma2(mcmc_fit)),
+                                     start = burn + 1, thin = thin)
+              colnames(mcmc_out)[ncol(mcmc_out)] <- "sigma2"
+            } else {
+              mcmc_out <- coda::mcmc(cbind(eta(mcmc_fit), effectm),
+                                     start = burn + 1, thin = thin)
             }
-            if (stat == "median") {
-              eta <- apply(eta(mcmc_fit)[keep_index, ], 2, median)
-            }
 
-            varnames <- colnames(eta(mcmc_fit))
-
-            # Regression coefficients for each topic
-            coefs <- tibble::tibble(
-              coef = eta,
-              lbcl = apply(eta(mcmc_fit)[keep_index, ], 2, quantile, .025),
-              ubcl = apply(eta(mcmc_fit)[keep_index, ], 2, quantile, .975))
-
-            names(coefs) <- c("est", "lbcl", "ubcl")
-            coefs <- cbind(
-              coefs, varnames = factor(varnames,
-                                       varnames[order(coefs$est, coefs$lbcl)]))
-            coefs <- coefs[order(coefs$est), ]
-
-            coefs <- dplyr::mutate(
-              dplyr::ungroup(
-                dplyr::mutate(
-                  dplyr::rowwise(coefs),
-                  sig = dplyr::if_else(.data$lbcl > 0 | .data$ubcl < 0, "Yes", "No"))),
-              sig = factor(sig))
-
-            ggp <- ggplot2::ggplot(
-              coefs, ggplot2::aes_string(x = "varnames", y = "est",
-                                         color = "sig"))
-            ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_point())
-            ggp <- ggplot2::`%+%`(
-              ggp, ggplot2::geom_errorbar(
-                width = errorbw, ggplot2::aes_string(ymin = "lbcl",
-                                                     ymax = "ubcl")))
-            ggp <- ggplot2::`%+%`(ggp, ggplot2::geom_hline(yintercept = 0))
-            ggp <- ggplot2::`%+%`(ggp, ggplot2::theme_bw())
-            ggp <- ggplot2::`%+%`(
-              ggp, ggplot2::scale_color_discrete("Non-Zero"))
-            ggp <- ggplot2::`%+%`(ggp, ggplot2::xlab("Predictor"))
-            ggp <- ggplot2::`%+%`(ggp, ggplot2::ylab("Posterior Estimate"))
-            ggp <- ggplot2::`%+%`(
-              ggp, ggplot2::theme(axis.text.x = ggplot2::element_text(
-                size = 10, angle = 57.5, hjust = 1), legend.position = "left"))
-            return(ggp)
+            return(mcmc_out)
           }
 )
-
-#' Compute term-scores for each word-topic pair
-#'
-#' For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
-#' A. N. Srivastava & M. Sahami (Eds.), Text mining: Classification, clustering,
-#' and applications. Chapman and Hall/CRC.
-#'
-#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
-#'   for each of \eqn{K} topics.
-#'
-#' @return A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
-#' @export
-term_score <- function(beta_) {
-
-  if (missing(beta_)) stop("Please supply a matrix to 'beta_'.")
-  if (!is.matrix(beta_)) stop("Please supply a matrix to 'beta_'.")
-  if (any(beta_ < 0.0 | beta_ > 1.0))
-    stop("Entries of 'beta_' must be between 0.0 and 1.0.")
-  sum_rowsum_beta <- sum(rowSums(beta_))
-  K <- NROW(beta_)
-  tol <- 0.001
-  if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
-    stop("Rows of 'beta_' must each sum to 1.0.")
-
-  ldenom <- apply(log(beta_), 2, sum) / K # Sum logs over topics (rows)
-  mdenom <- matrix(ldenom, nrow = K, ncol = NCOL(beta_), byrow = TRUE)
-  tscore <- beta_ * (log(beta_) - mdenom)
-
-  return(tscore)
-}

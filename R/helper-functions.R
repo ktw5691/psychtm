@@ -1,10 +1,10 @@
-#' Fit supervised or unsupervised topic models (sLDAX or LDA)
+#' Fit supervised or unsupervised topic models (SLDAX or LDA)
 #'
 #' `gibbs_sldax()` is used to fit both supervised and unsupervised topic models.
 #'
 #' The number of regression coefficients q in supervised topic models is
-#' determined as follows: For the sLDA model with only the \eqn{K} topics as
-#' predictors, \eqn{q = K}; for the sLDAX model with \eqn{K} topics and \eqn{p}
+#' determined as follows: For the SLDA model with only the \eqn{K} topics as
+#' predictors, \eqn{q = K}; for the SLDAX model with \eqn{K} topics and \eqn{p}
 #' additional predictors, there are two possibilities: (1) If no interaction
 #' between an additional covariate and the \eqn{K} topics is desired
 #' (default: `interaction_xcol = -1L`), \eqn{q = p + K}; (2) if an
@@ -706,4 +706,34 @@ prep_docs <- function(data, col, lower = TRUE) {
     docs[d, seq_len(len)] <- text_prep$documents[[d]][1L, ] + 1L
   }
   return(list(documents = docs, vocab = text_prep$vocab))
+}
+
+#' Compute term-scores for each word-topic pair
+#'
+#' For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
+#' A. N. Srivastava & M. Sahami (Eds.), Text mining: Classification, clustering,
+#' and applications. Chapman and Hall/CRC.
+#'
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of \eqn{V} vocabulary probabilities
+#'   for each of \eqn{K} topics.
+#'
+#' @return A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
+#' @export
+term_score <- function(beta_) {
+
+  if (missing(beta_)) stop("Please supply a matrix to 'beta_'.")
+  if (!is.matrix(beta_)) stop("Please supply a matrix to 'beta_'.")
+  if (any(beta_ < 0.0 | beta_ > 1.0))
+    stop("Entries of 'beta_' must be between 0.0 and 1.0.")
+  sum_rowsum_beta <- sum(rowSums(beta_))
+  K <- NROW(beta_)
+  tol <- 0.001
+  if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
+    stop("Rows of 'beta_' must each sum to 1.0.")
+
+  ldenom <- apply(log(beta_), 2, sum) / K # Sum logs over topics (rows)
+  mdenom <- matrix(ldenom, nrow = K, ncol = NCOL(beta_), byrow = TRUE)
+  tscore <- beta_ * (log(beta_) - mdenom)
+
+  return(tscore)
 }
