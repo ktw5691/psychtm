@@ -18,6 +18,8 @@
 #' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
 #'
 #' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
+#'
+#' @noRd
 .count_topic_word <- function(K, V, doc_topic, doc_word) {
     .Call(`_psychtm_count_topic_word`, K, V, doc_topic, doc_word)
 }
@@ -30,6 +32,8 @@
 #' @param gamma_ The hyperparameter on the Dirichlet prior for \eqn{\beta_k}.
 #'
 #' @return A K x V matrix \eqn{B}.
+#'
+#' @noRd
 .draw_beta <- function(wz_co, gamma_) {
     .Call(`_psychtm_draw_beta`, wz_co, gamma_)
 }
@@ -42,6 +46,8 @@
 #' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 #'
 #' @return A V x 1 vector of estimates for \eqn{\beta_k}.
+#'
+#' @noRd
 .draw_betak <- function(wz_co, gamma_) {
     .Call(`_psychtm_draw_betak`, wz_co, gamma_)
 }
@@ -54,6 +60,8 @@
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 #'
 #' @return A D x K matrix \eqn{\Theta}.
+#'
+#' @noRd
 .draw_theta <- function(z_count, alpha_) {
     .Call(`_psychtm_draw_theta`, z_count, alpha_)
 }
@@ -65,6 +73,8 @@
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 #'
 #' @return A K x 1 vector draw of \eqn{\theta_d}.
+#'
+#' @noRd
 .draw_thetad <- function(z_count, alpha_) {
     .Call(`_psychtm_draw_thetad`, z_count, alpha_)
 }
@@ -77,6 +87,8 @@
 #' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 #'
 #' @return A V x 1 vector of estimates for \eqn{\beta_k}.
+#'
+#' @noRd
 .est_betak <- function(wz_co, gamma_) {
     .Call(`_psychtm_est_betak`, wz_co, gamma_)
 }
@@ -88,6 +100,8 @@
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 #'
 #' @return A K x 1 vector of estimate for \eqn{\theta_d}.
+#'
+#' @noRd
 .est_thetad <- function(z_count, alpha_) {
     .Call(`_psychtm_est_thetad`, z_count, alpha_)
 }
@@ -116,6 +130,8 @@
 #'   `display_progress` be set to `true` at any given time.
 #'
 #' @return An object of class Logistic.
+#'
+#' @noRd
 .gibbs_logistic_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_logistic_cpp`, m, burn, thin, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
 }
@@ -144,6 +160,8 @@
 #'   `display_progress` be set to `true` at any given time.
 #'
 #' @return An object of class `Mlr`.
+#'
+#' @noRd
 .gibbs_mlr_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_mlr_cpp`, m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
 }
@@ -199,6 +217,8 @@
 #' @param display_progress Should percent progress of sampler be displayed
 #'   (default: `false`). Recommended that only one of `verbose` and
 #'   `display_progress` be set to `true` at any given time.
+#'
+#' @noRd
 .gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 1.0, gamma_ = 1.0, constrain_eta = FALSE, sample_beta = TRUE, sample_theta = TRUE, return_assignments = FALSE, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, sample_beta, sample_theta, return_assignments, verbose, display_progress)
 }
@@ -209,6 +229,8 @@
 #' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods).
 #' @return The contribution of y_d (its predictive posterior likelihood variance)
 #'   to the effective number of parameters.
+#'
+#' @noRd
 NULL
 
 #' @title WAIC for observation y_d
