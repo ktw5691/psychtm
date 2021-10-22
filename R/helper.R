@@ -43,7 +43,7 @@
 #' `model = "slda_logit"` and `model = "sldax_logit"`.
 #'
 #' @param formula An object of class [`formula`][stats::formula]: a symbolic
-#' description of the model to be fitted.
+#'   description of the model to be fitted.
 #' @param data An optional data frame containing the variables in the model.
 #' @param m The number of iterations to run the Gibbs sampler (default: `100`).
 #' @param burn The number of iterations to discard as the burn-in period
@@ -95,8 +95,10 @@
 #'   (default: `FALSE`). Recommended that only one of `verbose` and
 #'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class [`Sldax`][Sldax-class].
+#' @return An object of class \linkS4class{Sldax}.
 #' @family Gibbs sampler
+#'
+#' @export
 gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         docs, V, K = 2L,
                         model = c("lda", "slda", "sldax",
@@ -362,25 +364,25 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
     correct_label_switch <- FALSE
     if (correct_ls) {
       # relabel_out$permutations is Nchain x K array of permutation indices
-      relabel_out = stephens(aperm(theta(res), c(3, 1, 2)), maxiter = 100) # First arg needs to be Nchain x D x K array
+      relabel_out = label.switching::stephens(aperm(theta(res), c(3, 1, 2)), maxiter = 100) # First arg needs to be Nchain x D x K array
       if (relabel_out$iterations >= 100) {
         warning("Relabeling failed to converge, no label switching correction applied.")
       } else {
         # Permute theta
-        perm_theta <- permute.mcmc(aperm(theta(res), c(3, 2, 1)), relabel_out$permutations) # First arg needs to be Nchain x K x npar array; npar won't be swapped, but rows (K) will be permuted
+        perm_theta <- label.switching::permute.mcmc(aperm(theta(res), c(3, 2, 1)), relabel_out$permutations) # First arg needs to be Nchain x K x npar array; npar won't be swapped, but rows (K) will be permuted
         perm_theta <- aperm(perm_theta$output, c(3, 2, 1)) # Return to D x K x Nchain format
         theta(res) <- perm_theta
         rm(perm_theta)
 
         # Permute beta
-        perm_beta <- permute.mcmc(aperm(beta_(res), c(3, 1, 2)), relabel_out$permutations)
+        perm_beta <- label.switching::permute.mcmc(aperm(beta_(res), c(3, 1, 2)), relabel_out$permutations)
         perm_beta <- aperm(perm_beta$output, c(2, 3, 1)) # Return to K x V x Nchain format
         beta_(res) <- perm_beta
         rm(perm_beta)
 
         if (model != 1) { # Skip for LDA model
           # Permute eta for topics
-          perm_eta <- permute.mcmc(array(eta(res)[, seq(p + 1, q_)], dim = c(nchain(res), K, 1)), relabel_out$permutations)
+          perm_eta <- label.switching::permute.mcmc(array(eta(res)[, seq(p + 1, q_)], dim = c(nchain(res), K, 1)), relabel_out$permutations)
           perm_eta <- array(perm_eta$output, c(nchain(res), K))
           eta(res)[, seq(p + 1, q_)] <- perm_eta
           rm(perm_eta)
@@ -450,8 +452,10 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   (default: `FALSE`). Recommended that only one of `verbose` and
 #'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class [`Mlr`][Mlr-class].
+#' @return An object of class \linkS4class{Mlr}.
 #' @family Gibbs sampler
+#'
+#' @export
 gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
                       mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
                       eta_start = NULL,
@@ -556,8 +560,10 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   (default: `FALSE`). Recommended that only one of `verbose` and
 #'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class [`Logistic`][Logistic-class].
+#' @return An object of class \linkS4class{Logistic}.
 #' @family Gibbs sampler
+#'
+#' @export
 gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
                            mu0 = NULL, sigma0 = NULL,
                            eta_start = NULL, proposal_sd = NULL,
@@ -666,9 +672,15 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   stop-word removal. It is assumed that the unit of analysis is each term, so
 #'   this function will not be appropriate for other units of analysis such as
 #'   n-grams or sentences.
+#'
+#' @export
 prep_docs <- function(data, col, lower = TRUE) {
 
-
+  if (!requireNamespace("lda", quietly = TRUE)) {
+    stop("Package \"lda\" needed for this function to work.
+                    Please install it.",
+         call. = FALSE)
+  }
 
   if (missing(data)) missing_msg(data)
   if (missing(col)) missing_msg(col)
