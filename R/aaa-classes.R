@@ -1,10 +1,5 @@
-########----------------------------------------------------------------########
-########              S4 class definitions for package                  ########
-########----------------------------------------------------------------########
-
-#' Model class
+#' An S4 super class to represent a regression-like model
 #'
-#' An S4 super class to represent a regression-like model.
 #' @slot ndocs The number of documents/observations.
 #' @slot nchain The number of iterations of the Gibbs sampler.
 #' @slot mu0 A (p + 1) x 1 matrix of prior means for eta.
@@ -41,47 +36,48 @@
 #' @param x An `Model` object.
 #' @param value A value to assign to a slot for `x`
 #'
+#' @name Model-class
+#' @rdname Model-class
 #' @keywords classes
-#' @export
-Model <- setClass("Model",
-                  slots = c(
-                    ndocs       = "numeric",
-                    nchain      = "numeric",
-                    mu0         = "numeric",
-                    sigma0      = "matrix",
-                    eta_start   = "numeric",
-                    eta         = "matrix",
-                    loglike     = "numeric",
-                    logpost     = "numeric",
-                    waic        = "numeric",
-                    se_waic     = "numeric",
-                    p_eff       = "numeric",
-                    lpd         = "matrix",
-                    extra       = "list"),
-                  prototype = list(
-                    ndocs = NA_real_,
-                    nchain = NA_real_,
-                    mu0 = NA_real_,
-                    sigma0 = matrix(NA_real_),
-                    eta_start = NA_real_,
-                    eta = matrix(NA_real_),
-                    loglike = NA_real_,
-                    logpost = NA_real_,
-                    waic = NA_real_,
-                    se_waic = NA_real_,
-                    p_eff = NA_real_,
-                    lpd = matrix(NA_real_),
-                    extra = list(time_elapsed = NA_real_,
-                                 start_time = NA_real_,
-                                 end_time = NA_real_,
-                                 corrected_label_switching = FALSE,
-                                 call = NA_character_)
-                  )
+#' @exportClass Model
+setClass("Model",
+         slots = c(
+           ndocs       = "numeric",
+           nchain      = "numeric",
+           mu0         = "numeric",
+           sigma0      = "matrix",
+           eta_start   = "numeric",
+           eta         = "matrix",
+           loglike     = "numeric",
+           logpost     = "numeric",
+           waic        = "numeric",
+           se_waic     = "numeric",
+           p_eff       = "numeric",
+           lpd         = "matrix",
+           extra       = "list"),
+         prototype = list(
+           ndocs = NA_real_,
+           nchain = NA_real_,
+           mu0 = NA_real_,
+           sigma0 = matrix(NA_real_),
+           eta_start = NA_real_,
+           eta = matrix(NA_real_),
+           loglike = NA_real_,
+           logpost = NA_real_,
+           waic = NA_real_,
+           se_waic = NA_real_,
+           p_eff = NA_real_,
+           lpd = matrix(NA_real_),
+           extra = list(time_elapsed = NA_real_,
+                        start_time = NA_real_,
+                        end_time = NA_real_,
+                        corrected_label_switching = FALSE,
+                        call = NA_character_)
+         )
 )
 
-#' Mlr class
+#' S4 class for a regression model that inherits from [Model-class].
 #'
-#' S4 class for a regression model. Inherits from \linkS4class{Model}.
 #' @slot a0 A prior shape hyperparameter for sigma2.
 #' @slot b0 A prior rate hyperparameter for sigma2.
 #' @slot sigma2 A nchain x 1 numeric vector of draws of the residual variance.
@@ -94,24 +90,25 @@ Model <- setClass("Model",
 #' @param ...	additional arguments to be passed to the low level regression
 #'   fitting functions (see below).
 #'
+#' @name Mlr-class
+#' @rdname Mlr-class
 #' @keywords classes
-#' @export
-Mlr <- setClass("Mlr",
-                contains = "Model",
-                slots = c(
-                  a0          = "numeric",
-                  b0          = "numeric",
-                  sigma2      = "numeric"),
-                prototype = list(
-                  a0 = NA_real_,
-                  b0 = NA_real_,
-                  sigma2 = NA_real_
-                )
+#' @exportClass Mlr
+setClass("Mlr",
+         contains = "Model",
+         slots = c(
+           a0          = "numeric",
+           b0          = "numeric",
+           sigma2      = "numeric"),
+         prototype = list(
+           a0 = NA_real_,
+           b0 = NA_real_,
+           sigma2 = NA_real_
+         )
 )
 
-#' Logistic class
+#' S4 class for a logistic regression model that inherits from [Model-class]
 #'
-#' S4 class for a logistic regression model. Inherits from \linkS4class{Model}.
 #' @slot proposal_sd A vector of p + 1 proposal scales/standard deviations for
 #'   sampling of p + 1 regression coefficients by Metropolis-Hastings.
 #' @param proposal_sd A vector of p + 1 proposal scales/standard deviations for
@@ -121,21 +118,21 @@ Mlr <- setClass("Mlr",
 #' @param ...	additional arguments to be passed to the low level regression
 #'   fitting functions (see below).
 #'
-#' @export
-Logistic <- setClass("Logistic",
-                     contains = "Model",
-                     slots = c(
-                       proposal_sd = "numeric"
-                     ),
-                     prototype = list(
-                       proposal_sd = NA_real_
-                     )
+#' @name Logistic-class
+#' @rdname Logistic-class
+#' @keywords classes
+#' @exportClass Logistic
+setClass("Logistic",
+         contains = "Model",
+         slots = c(
+           proposal_sd = "numeric"
+         ),
+         prototype = list(
+           proposal_sd = NA_real_
+         )
 )
 
-#' Sldax Class
-#'
-#' S4 class to represent a SLDAX general model. Inherits from \linkS4class{Mlr}
-#'   and \linkS4class{Logistic}.
+#' S4 class to represent a SLDAX general model that inherits from [Mlr-class] and [Logistic-class].
 #'
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @param nvocab The number of terms in the corpus vocabulary.
@@ -158,25 +155,27 @@ Logistic <- setClass("Logistic",
 #' @param ...	additional arguments to be passed to the low level regression
 #'   fitting functions (see below).
 #'
+#' @name Sldax-class
+#' @rdname Sldax-class
 #' @keywords classes
-#' @export
-Sldax <- setClass("Sldax",
-                  contains = c("Mlr", "Logistic"),
-                  slots = c(
-                    nvocab      = "numeric",
-                    ntopics     = "numeric",
-                    alpha       = "numeric",
-                    gamma       = "numeric",
-                    topics      = "array",
-                    theta       = "array",
-                    beta        = "array"),
-                  prototype = list(
-                    nvocab = NA_real_,
-                    ntopics = NA_real_,
-                    alpha = NA_real_,
-                    gamma = NA_real_,
-                    topics = array(NA_real_, dim = c(1, 2, 1)),
-                    theta = array(NA_real_, dim = c(1, 2, 1)),
-                    beta = array(NA_real_, dim = c(2, 2, 1))
-                  )
+#' @exportClass Sldax
+setClass("Sldax",
+         contains = c("Mlr", "Logistic"),
+         slots = c(
+           nvocab      = "numeric",
+           ntopics     = "numeric",
+           alpha       = "numeric",
+           gamma       = "numeric",
+           topics      = "array",
+           theta       = "array",
+           beta        = "array"),
+         prototype = list(
+           nvocab = NA_real_,
+           ntopics = NA_real_,
+           alpha = NA_real_,
+           gamma = NA_real_,
+           topics = array(NA_real_, dim = c(1, 2, 1)),
+           theta = array(NA_real_, dim = c(1, 2, 1)),
+           beta = array(NA_real_, dim = c(2, 2, 1))
+         )
 )

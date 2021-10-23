@@ -1,3 +1,5 @@
+#' Generic function to plot regression coefficients for `Sldax` objects
+#'
 #' @param errorbw Positive control parameter for the width of the +/- 2
 #'   posterior standard error bars (default: `0.5`).
 #'
@@ -41,6 +43,7 @@ setGeneric("gg_coef",
 )
 
 #' @importFrom rlang .data
+#' @rdname sldax-summary
 setMethod("gg_coef",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat, errorbw) {

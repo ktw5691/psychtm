@@ -95,7 +95,7 @@
 #'   (default: `FALSE`). Recommended that only one of `verbose` and
 #'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class \linkS4class{Sldax}.
+#' @return An object of class [Sldax-class].
 #' @family Gibbs sampler
 #'
 #' @export
@@ -452,7 +452,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   (default: `FALSE`). Recommended that only one of `verbose` and
 #'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class \linkS4class{Mlr}.
+#' @return An object of class [Mlr-class].
 #' @family Gibbs sampler
 #'
 #' @export
@@ -560,7 +560,7 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   (default: `FALSE`). Recommended that only one of `verbose` and
 #'   `display_progress` be set to `TRUE` at any given time.
 #'
-#' @return An object of class \linkS4class{Logistic}.
+#' @return An object of class [Logistic-class].
 #' @family Gibbs sampler
 #'
 #' @export

@@ -1,6 +1,7 @@
 #' @include aaa-classes.R aaa-generics.R
 NULL
 
+#' @rdname sldax-summary
 setMethod("est_beta",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat) {
@@ -16,6 +17,7 @@ setMethod("est_beta",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("est_theta",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin, stat) {
@@ -31,6 +33,7 @@ setMethod("est_theta",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("get_coherence",
           c(beta_ = "matrix", docs = "matrix"),
           function(beta_, docs, nwords) {
@@ -73,6 +76,7 @@ setMethod("get_coherence",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("get_exclusivity",
           c(beta_ = "matrix"),
           function(beta_, nwords, weight) {
@@ -106,6 +110,7 @@ setMethod("get_exclusivity",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("get_toptopics",
           c(theta = "matrix"),
           function(theta, ntopics) {
@@ -175,6 +180,7 @@ setMethod("get_topwords",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("get_zbar",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit, burn, thin) {
@@ -208,6 +214,7 @@ setMethod("get_zbar",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("post_regression",
           c(mcmc_fit = "Mlr"),
           function(mcmc_fit) {
@@ -224,6 +231,7 @@ setMethod("post_regression",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("post_regression",
           c(mcmc_fit = "Logistic"),
           function(mcmc_fit) {
@@ -236,6 +244,7 @@ setMethod("post_regression",
           }
 )
 
+#' @rdname sldax-summary
 setMethod("post_regression",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit) {

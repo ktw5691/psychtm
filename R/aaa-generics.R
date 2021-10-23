@@ -1,243 +1,287 @@
+#' @include aaa-classes.R
+NULL
+
 ########----------------------------------------------------------------########
 ########                            Model Class                         ########
 ########----------------------------------------------------------------########
 
-# ndocs
-#' @rdname Model
+#' Create generic `ndocs` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("ndocs", function(x) standardGeneric("ndocs"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("ndocs", "Model", function(x) x@ndocs)
 
-#' @rdname Model
+#' Create generic `ndocs<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("ndocs<-", function(x, value) standardGeneric("ndocs<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("ndocs<-", "Model", function(x, value) {
   x@ndocs <- value
   x
 })
 
-# nchain
-#' @rdname Model
+#' Create generic `chain` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("nchain", function(x) standardGeneric("nchain"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("nchain", "Model", function(x) x@nchain)
 
-#' @rdname Model
+#' Create generic `nchain<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("nchain<-", function(x, value) standardGeneric("nchain<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("nchain<-", "Model", function(x, value) {
   x@nchain <- value
   x
 })
 
-# mu0
-#' @rdname Model
+#' Create generic `mu0` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("mu0", function(x) standardGeneric("mu0"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("mu0", "Model", function(x) x@mu0)
 
-#' @rdname Model
+#' Create generic `mu0<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("mu0<-", function(x, value) standardGeneric("mu0<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("mu0<-", "Model", function(x, value) {
   x@mu0 <- value
   x
 })
 
-# sigma0
-#' @rdname Model
+#' Create generic `sigma0` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("sigma0", function(x) standardGeneric("sigma0"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("sigma0", "Model", function(x) x@sigma0)
 
-#' @rdname Model
+#' Create generic `sigma0<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("sigma0<-", function(x, value) standardGeneric("sigma0<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("sigma0<-", "Model", function(x, value) {
   x@sigma0 <- value
   x
 })
 
-# eta_start
-#' @rdname Model
+#' Create generic `eta_start` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("eta_start", function(x) standardGeneric("eta_start"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("eta_start", "Model", function(x) x@eta_start)
 
-#' @rdname Model
+#' Create generic `eta_start<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("eta_start<-", function(x, value) standardGeneric("eta_start<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("eta_start<-", "Model", function(x, value) {
   x@eta_start <- value
   x
 })
 
-# eta
-#' @rdname Model
+#' Create generic `eta` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("eta", function(x) standardGeneric("eta"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("eta", "Model", function(x) x@eta)
 
-#' @rdname Model
+#' Create generic `eta<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("eta<-", function(x, value) standardGeneric("eta<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("eta<-", "Model", function(x, value) {
   x@eta <- value
   x
 })
 
-# loglike
-#' @rdname Model
+#' Create generic `loglike` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("loglike", function(x) standardGeneric("loglike"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("loglike", "Model", function(x) x@loglike)
 
-#' @rdname Model
+#' Create generic `loglike<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("loglike<-", function(x, value) standardGeneric("loglike<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("loglike<-", "Model", function(x, value) {
   x@loglike <- value
   x
 })
 
-# logpost
-#' @rdname Model
+#' Create generic `logpost` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("logpost", function(x) standardGeneric("logpost"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("logpost", "Model", function(x) x@logpost)
 
-#' @rdname Model
+#' Create generic `logpost<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("logpost<-", function(x, value) standardGeneric("logpost<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("logpost<-", "Model", function(x, value) {
   x@logpost <- value
   x
 })
 
-# waic
-#' @rdname Model
+#' Create generic `waic` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("waic", function(x) standardGeneric("waic"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("waic", "Model", function(x) x@waic)
 
-#' @rdname Model
+#' Create generic `waic<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("waic<-", function(x, value) standardGeneric("waic<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("waic<-", "Model", function(x, value) {
   x@waic <- value
   x
 })
 
+#' Create generic `se_waic` function for class
+#'
 # se_waic
-#' @rdname Model
+#' @rdname Model-class
 #' @export
 setGeneric("se_waic", function(x) standardGeneric("se_waic"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("se_waic", "Model", function(x) x@se_waic)
 
-#' @rdname Model
+#' Create generic `se_waic<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("se_waic<-", function(x, value) standardGeneric("se_waic<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("se_waic<-", "Model", function(x, value) {
   x@se_waic <- value
   x
 })
 
-# p_eff
-#' @rdname Model
+#' Create generic `p_eff` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("p_eff", function(x) standardGeneric("p_eff"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("p_eff", "Model", function(x) x@p_eff)
 
-#' @rdname Model
+#' Create generic `p_eff<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("p_eff<-", function(x, value) standardGeneric("p_eff<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("p_eff<-", "Model", function(x, value) {
   x@p_eff <- value
   x
 })
 
-# lpd
-#' @rdname Model
+#' Create generic `lpd` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("lpd", function(x) standardGeneric("lpd"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("lpd", "Model", function(x) x@lpd)
 
-#' @rdname Model
+#' Create generic `lpd<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("lpd<-", function(x, value) standardGeneric("lpd<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("lpd<-", "Model", function(x, value) {
   x@lpd <- value
   x
 })
 
-# extra
-#' @rdname Model
+#' Create generic `extra` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("extra", function(x) standardGeneric("extra"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("extra", "Model", function(x) x@extra)
 
-#' @rdname Model
+#' Create generic `extra<-` function for class
+#'
+#' @rdname Model-class
 #' @export
 setGeneric("extra<-", function(x, value) standardGeneric("extra<-"))
 
-#' @rdname Model
+#' @rdname Model-class
 setMethod("extra<-", "Model", function(x, value) {
   x@extra <- value
   x
 })
 
-# Helper function (constructor) for Model class.
-#' @rdname Model
+#' Helper function (constructor) for `Model` class
+#'
+#' @rdname Model-class
 Model <- function(ndocs, nchain = 1, mu0 = NaN, sigma0 = NaN,
                   eta_start = NaN, eta = NaN, loglike = NaN, logpost = NaN,
                   waic = NaN, se_waic = NaN, p_eff = NaN, lpd = NaN) {
@@ -260,7 +304,7 @@ Model <- function(ndocs, nchain = 1, mu0 = NaN, sigma0 = NaN,
       lpd = lpd)
 }
 
-# Validator function for Model class
+# Validator function for `Model` class
 setValidity("Model", function(object) {
   if ( (object@nchain != NROW(object@eta)) |
        (object@nchain != length(object@loglike)) |
@@ -286,53 +330,72 @@ setValidity("Model", function(object) {
 ########                             Mlr Class                          ########
 ########----------------------------------------------------------------########
 
-#' @rdname Mlr
+#' Create generic `sigma2` function for class
+#'
+#' @rdname Mlr-class
+#' @export
 setGeneric("sigma2", function(x) standardGeneric("sigma2"))
 
-#' @rdname Mlr
+#' @rdname Mlr-class
 setMethod("sigma2", "Mlr", function(x) x@sigma2)
 
-#' @rdname Mlr
+#' Create generic `sigma2<-` function for class
+#'
+#' @rdname Mlr-class
+#' @export
 setGeneric("sigma2<-", function(x, value) standardGeneric("sigma2<-"))
 
-#' @rdname Mlr
+#' @rdname Mlr-class
 setMethod("sigma2<-", "Mlr", function(x, value) {
   x@sigma2 <- value
   x
 })
 
-#' @rdname Mlr
+#' Create generic `a0` function for class
+#'
+#' @rdname Mlr-class
+#' @export
 setGeneric("a0", function(x) standardGeneric("a0"))
 
-#' @rdname Mlr
+#' @rdname Mlr-class
 setMethod("a0", "Mlr", function(x) x@a0)
 
-#' @rdname Mlr
+#' Create generic `a0<-` function for class
+#'
+#' @rdname Mlr-class
+#' @export
 setGeneric("a0<-", function(x, value) standardGeneric("a0<-"))
 
-#' @rdname Mlr
+#' @rdname Mlr-class
 setMethod("a0<-", "Mlr", function(x, value) {
   x@a0 <- value
   x
 })
 
-#' @rdname Mlr
+#' Create generic `b0` function for class
+#'
+#' @rdname Mlr-class
+#' @export
 setGeneric("b0", function(x) standardGeneric("b0"))
 
-#' @rdname Mlr
+#' @rdname Mlr-class
 setMethod("b0", "Mlr", function(x) x@b0)
 
-#' @rdname Mlr
+#' Create generic `b0<-` function for class
+#'
+#' @rdname Mlr-class
+#' @export
 setGeneric("b0<-", function(x, value) standardGeneric("b0<-"))
 
-#' @rdname Mlr
+#' @rdname Mlr-class
 setMethod("b0<-", "Mlr", function(x, value) {
   x@b0 <- value
   x
 })
 
-# Helper function (constructor) for Mlr class.
-#' @rdname Mlr
+#' Helper function (constructor) for `Mlr` class
+#'
+#' @rdname Mlr-class
 Mlr <- function(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...) {
   super <- Model(...)
   a0 <- as.double(a0)
@@ -350,28 +413,32 @@ Mlr <- function(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...) {
 ########                          Logistic Class                        ########
 ########----------------------------------------------------------------########
 
-#' Slot `@proposal_sd` generic
-#' @rdname Logistic
+#' Create generic `proposal_sd` function for class
+#'
+#' @rdname Logistic-class
+#' @export
 setGeneric("proposal_sd", function(x) standardGeneric("proposal_sd"))
 
 #' Slot `@proposal_sd` generic accessor
-#' @rdname Logistic
+#' @rdname Logistic-class
 setMethod("proposal_sd", "Logistic", function(x) x@proposal_sd)
 
-#' Slot `@proposal_sd` generic setter function
-#' @rdname Logistic
+#' Create generic `proposal_sd<-` function for class
+#'
+#' @rdname Logistic-class
+#' @export
 setGeneric("proposal_sd<-", function(x, value) standardGeneric("proposal_sd<-"))
 
-#' Slot `@proposal_sd` setter method
-#' @rdname Logistic
+#' @rdname Logistic-class
 setMethod("proposal_sd<-", "Logistic", function(x, value) {
   x@proposal_sd <- value
   validObject(x)
   x
 })
 
-#' Logistic helper function (constructor) for `Logistic` class.
-#' @rdname Logistic
+#' Logistic helper function (constructor) for `Logistic` class
+#'
+#' @rdname Logistic-class
 Logistic <- function(proposal_sd = NaN, ...) {
   super <- Model(...)
   proposal_sd <- as.double(proposal_sd)
@@ -387,105 +454,156 @@ Logistic <- function(proposal_sd = NaN, ...) {
 ########                            Sldax Class                         ########
 ########----------------------------------------------------------------########
 
-# topics
+#' Create generic `topics` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("topics", function(x) standardGeneric("topics"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("topics", "Sldax", function(x) x@topics)
 
+#' Create generic `topics<-` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("topics<-", function(x, value) standardGeneric("topics<-"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("topics<-", "Sldax", function(x, value) {
   x@topics <- value
   x
 })
 
-# theta
+#' Create generic `theta` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("theta", function(x) standardGeneric("theta"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("theta", "Sldax", function(x) x@theta)
 
+#' Create generic `theta<-` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("theta<-", function(x, value) standardGeneric("theta<-"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("theta<-", "Sldax", function(x, value) {
   x@theta <- value
   x
 })
 
-# beta
+#' Create generic `beta_` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("beta_", function(x) standardGeneric("beta_"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("beta_", "Sldax", function(x) x@beta)
 
+#' Create generic `beta_<-` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("beta_<-", function(x, value) standardGeneric("beta_<-"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("beta_<-", "Sldax", function(x, value) {
   x@beta <- value
   x
 })
 
-# gamma
+#' Create generic `gamma_` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("gamma_", function(x) standardGeneric("gamma_"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("gamma_", "Sldax", function(x) x@gamma)
 
+#' Create generic `gamma_<-` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("gamma_<-", function(x, value) standardGeneric("gamma_<-"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("gamma_<-", "Sldax", function(x, value) {
   x@gamma <- value
   x
 })
 
-# alpha
+#' Create generic `alpha` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("alpha", function(x) standardGeneric("alpha"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("alpha", "Sldax", function(x) x@alpha)
 
+#' Create generic `alpha<-` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("alpha<-", function(x, value) standardGeneric("alpha<-"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("alpha<-", "Sldax", function(x, value) {
   x@alpha <- value
   x
 })
 
-# ntopics
+#' Create generic `ntopics` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("ntopics", function(x) standardGeneric("ntopics"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("ntopics", "Sldax", function(x) x@ntopics)
 
+#' Create generic `ntopics<-` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("ntopics<-", function(x, value) standardGeneric("ntopics<-"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("ntopics<-", "Sldax", function(x, value) {
   x@ntopics <- value
   x
 })
 
-# nvocab
+#' Create generic `nvocab` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("nvocab", function(x) standardGeneric("nvocab"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("nvocab", "Sldax", function(x) x@nvocab)
 
+#' Create generic `nvocab<-` function for class
+#'
+#' @rdname Sldax-class
+#' @export
 setGeneric("nvocab<-", function(x, value) standardGeneric("nvocab<-"))
 
-#' @rdname Sldax
+#' @rdname Sldax-class
 setMethod("nvocab<-", "Sldax", function(x, value) {
   x@nvocab <- value
   x
 })
 
-# Helper function (constructor) for Sldax class.
+#' Logistic helper function (constructor) for `Sldax` class
+#'
+#' @rdname Sldax-class
 Sldax <- function(nvocab, topics, theta, beta, ntopics = 2.0, alpha = 1.0,
                   gamma = 1.0, ...) {
   super <- Model(...)
@@ -529,7 +647,9 @@ Sldax <- function(nvocab, topics, theta, beta, ntopics = 2.0, alpha = 1.0,
 #' @name sldax-summary
 NULL
 
-#' @param mcmc_fit An object of class \linkS4class{Sldax}.
+#' Create generic `est_beta` function for class
+#'
+#' @param mcmc_fit An object of class [Sldax-class].
 #' @param burn The number of draws to discard as a burn-in period (default: `0`).
 #' @param thin The number of draws to skip as a thinning period (default: `1`; i.e., no thinning).
 #' @param stat The summary statistic to use on the posterior draws (default: `"mean"`).
@@ -567,6 +687,8 @@ setGeneric("est_beta",
            }
 )
 
+#' Create generic `est_theta` function for class
+#'
 #' @rdname sldax-summary
 #' @export
 setGeneric("est_theta",
@@ -601,10 +723,12 @@ setGeneric("est_theta",
            }
 )
 
+#' Create generic `get_coherence` function for class
+#'
 #' @param beta_ A \eqn{K} x \eqn{V} matrix of word-topic probabilities. Can be
 #'   computed using [`est_beta()`][est_beta()]. Each row sums to 1.
 #' @param docs The \eqn{D} x max(\eqn{N_d}) matrix of documents (word indices)
-#'   used to fit the \linkS4class{Sldax} model.
+#'   used to fit the [Sldax-class] model.
 #' @param nwords The number of highest-probability words per topic to consider where
 #'   \eqn{M \le V} and \eqn{V} is the size of the corpus vocabulary. (default: `10`)
 #'
@@ -635,6 +759,8 @@ setGeneric("get_coherence",
            }
 )
 
+#' Create generic `get_exclusivity` function for class
+#'
 #' @param weight The weight (between 0 and 1) to give to exclusivity (near 1) vs. frequency (near 0). (default: `0.7`)
 #'
 #' @rdname sldax-summary
@@ -665,6 +791,8 @@ setGeneric("get_exclusivity",
            }
 )
 
+#' Create generic `get_toptopics` function for class
+#'
 #' @param theta A D x K matrix of K topic proportions for all D documents.
 #' @param ntopics The number of topics to retrieve (default: all topics).
 #'
@@ -690,6 +818,8 @@ setGeneric("get_toptopics",
            }
 )
 
+#' Create generic `get_topwords` function for class
+#'
 #' @param nwords The number of words to retrieve (default: all).
 #' @param vocab A character vector of length V containing the vocabulary.
 #' @param method If `"termscore"`, use term scores (similar to tf-idf). If
@@ -740,6 +870,8 @@ setGeneric("get_topwords",
            }
 )
 
+#' Create generic `get_zbar` function for class
+#'
 #' @rdname sldax-summary
 #' @export
 setGeneric("get_zbar",
@@ -764,7 +896,7 @@ setGeneric("get_zbar",
            }
 )
 
-#' Summarize regression relationships for objects of class [Mlr-class]
+#' Generic function to summarize regression relationships for `Mlr`, `Logistic`, or `Sldax` objects
 #'
 #' For SLDA or SLDAX models, label switching is handled during estimation in the
 #' [`gibbs_sldax()`][gibbs_sldax()] function with argument `correct_ls`, so it

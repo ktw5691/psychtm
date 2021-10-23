@@ -12,7 +12,17 @@
 \alias{get_zbar}
 \alias{post_regression}
 \alias{gg_coef}
+\alias{gg_coef,Sldax-method}
+\alias{est_beta,Sldax-method}
+\alias{est_theta,Sldax-method}
+\alias{get_coherence,matrix,matrix-method}
+\alias{get_exclusivity,matrix-method}
+\alias{get_toptopics,matrix-method}
 \alias{get_topwords,matrix,numeric,character-method}
+\alias{get_zbar,Sldax-method}
+\alias{post_regression,Mlr-method}
+\alias{post_regression,Logistic-method}
+\alias{post_regression,Sldax-method}
 \title{Summary functions for objects of class \linkS4class{Sldax}}
 \usage{
 est_beta(mcmc_fit, burn = 0, thin = 1, stat = "mean")
@@ -33,7 +43,27 @@ post_regression(mcmc_fit)
 
 gg_coef(mcmc_fit, burn = 0L, thin = 1L, stat = "mean", errorbw = 0.5)
 
+\S4method{gg_coef}{Sldax}(mcmc_fit, burn = 0L, thin = 1L, stat = "mean", errorbw = 0.5)
+
+\S4method{est_beta}{Sldax}(mcmc_fit, burn = 0, thin = 1, stat = "mean")
+
+\S4method{est_theta}{Sldax}(mcmc_fit, burn = 0, thin = 1, stat = "mean")
+
+\S4method{get_coherence}{matrix,matrix}(beta_, docs, nwords = 10)
+
+\S4method{get_exclusivity}{matrix}(beta_, nwords = 10, weight = 0.7)
+
+\S4method{get_toptopics}{matrix}(theta, ntopics)
+
 \S4method{get_topwords}{matrix,numeric,character}(beta_, nwords, vocab, method = "termscore")
+
+\S4method{get_zbar}{Sldax}(mcmc_fit, burn = 0L, thin = 1L)
+
+\S4method{post_regression}{Mlr}(mcmc_fit)
+
+\S4method{post_regression}{Logistic}(mcmc_fit)
+
+\S4method{post_regression}{Sldax}(mcmc_fit)
 }
 \arguments{
 \item{mcmc_fit}{An object of class \linkS4class{Sldax}.}
