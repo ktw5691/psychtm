@@ -1,11 +1,15 @@
 Package: psychtm
 Type: Package
-Title: Text Mining for Psychological Research
+Title: Text Mining Methods for Psychological Research
 Version: 2021.1
-Date: 2021-10-21
+Date: 2021-10-23
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
-Description: Supports Bayesian topic modeling using the SLDAX framework.
+Description: A package for text mining methods for psychological research.
+    The `psychtm` package provides estimation, summarization, and
+    goodness-of-fit functions for topic models including Latent Dirichlet
+    Allocation (LDA), supervised LDA, and supervised LDA with covariates using
+    Bayesian estimation and posterior inference via Markov Chain Monte Carlo.
 License: GPL-3
 Depends: R (>= 3.3.0)
 Imports:
