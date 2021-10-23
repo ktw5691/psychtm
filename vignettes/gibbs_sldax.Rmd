@@ -49,7 +49,7 @@ str(docs_vocab$vocab)
 vocab_len <- length(docs_vocab$vocab)
 ```
 
-We can also inspect the structure of the `documents` matrix created by `prep_docs()`. Notice that we have `r nrow(docs_vocab$documents)` rows --- the same as the number of rows in our original data frame `teacher_rate` --- and `r col(docs_vocab$documents)` columns --- corresponding to the number of terms or words in the longest document in our data.
+We can also inspect the structure of the `documents` matrix created by `prep_docs()`. Notice that we have `r nrow(docs_vocab$documents)` rows --- the same as the number of rows in our original data frame `teacher_rate` --- and `r ncol(docs_vocab$documents)` columns --- corresponding to the number of terms or words in the longest document in our data.
 
 ```{r}
 str(docs_vocab$documents)
