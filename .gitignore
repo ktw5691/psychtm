@@ -8,3 +8,4 @@ src/*.dll
 *.config
 .Rproj.user/*
 inst/doc
+.DS_Store
