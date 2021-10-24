@@ -144,7 +144,7 @@ fit_sldax <- gibbs_sldax(rating ~ I(grade - 1), data = teacher_rate,
                          K = 3, model = "sldax", display_progress = TRUE)
 ```
 
-Topic proportion and topic--word probabilities can be summarized with the same functions as demonstrated above in the section on LDA. Here we illustrate summarization of the regression relationships added by specifying an SLDAX model. The `post_regression()` function constructs a `coda::mcmc` object that can be further manipulated by the methods in the [`coda`](https://cran.r-project.org/web/packages/coda/index.html) R package (Plummer et al., 2006) such as `summary.mcmc()` as shown below. The burn-in length and thinning period are automatically reflected in these posterior summaries.
+Topic proportion and topic--word probabilities can be summarized with the same functions as demonstrated above in the section on LDA. Here we illustrate summarization of the regression relationships added by specifying an SLDAX model. The `post_regression()` function constructs a `coda::mcmc` object that can be further manipulated by the methods in the [`coda`](https://CRAN.R-project.org/package=coda) R package (Plummer et al., 2006) such as `summary.mcmc()` as shown below. The burn-in length and thinning period are automatically reflected in these posterior summaries.
 
 The results of `summary()` provide the posterior mean estimates, corresponding posterior standard deviations, Bayesian credible intervals, and the standard error and autocorrelation-adjusted standard error of the posterior mean estimates. See `?coda:::summary.mcmc` for further information .
 
