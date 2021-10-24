@@ -2,10 +2,10 @@ Package: psychtm
 Type: Package
 Title: Text Mining Methods for Psychological Research
 Version: 2021.1
-Date: 2021-10-23
+Date: 2021-10-24
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
-Description: A package for text mining methods for psychological research.
+Description: Provides text mining methods for social science research.
     The `psychtm` package provides estimation, summarization, and
     goodness-of-fit functions for topic models including Latent Dirichlet
     Allocation (LDA), supervised LDA, and supervised LDA with covariates using
@@ -18,7 +18,6 @@ Imports:
     methods,
     rlang,
     Rcpp,
-    RcppArmadillo,
     RcppProgress,
     tibble
 Suggests:
