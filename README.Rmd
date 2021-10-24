@@ -10,7 +10,7 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.path = "README-")
 
 # psychtm: A package for text mining in psychological research
 
-[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![Travis Build Status](https://travis-ci.com/ktw5691/psychtm.svg?branch=master)](https://app.travis-ci.com/github/ktw5691/psychtm) [![covr codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm)
+[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![Travis Build Status](https://www.travis-ci.com/ktw5691/psychtm.svg?branch=master)](https://app.travis-ci.com/github/ktw5691/psychtm) [![covr codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm)
 
 ## Package Features
 

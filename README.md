@@ -6,9 +6,9 @@
 [![Project Status:
 WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Travis Build
-Status](https://travis-ci.com/ktw5691/psychtm.svg?branch=master)](https://travis-ci.com/ktw5691/psychtm)
+Status](https://www.travis-ci.com/ktw5691/psychtm.svg?branch=master)](https://app.travis-ci.com/github/ktw5691/psychtm)
 [![covr
-codecov](https://codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://codecov.io/gh/ktw5691/psychtm)
+codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm)
 
 ## Package Features
 
@@ -39,7 +39,7 @@ structural and measurement model of text and covariates. *PsyArXiv*.
     command line use, be sure to select the option to install Rtools to
     their path.
 -   Mac users will have to download
-    [Xcode](https://itunes.apple.com/ca/app/xcode/id497799835?mt=12) and
+    [Xcode](https://apps.apple.com/ca/app/xcode/id497799835?mt=12) and
     its related Command Line Tools (found within Xcode’s Preference Pane
     under Downloads/Components).
 -   Most Linux distributions should already have up-to-date compilers
