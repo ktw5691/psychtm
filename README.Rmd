@@ -11,17 +11,19 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
+set.seed(1)
 ```
 
 # psychtm: A package for text mining in psychological research
 
 <!-- badges: start -->
-[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![covr codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm)
+[![Project Status: WIP](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#wip)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
+[![`covr` codecov](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token=hpAkicQFxg)](https://codecov.io/gh/ktw5691/psychtm)
 <!-- badges: end -->
 
-The goal of psychtm is to make text mining models and methods accessible for social science researchers, particularly those within psychology. This package allows users to
+The goal of `psychtm` is to make text mining models and methods accessible for social science researchers, particularly those within psychology. This package allows users to
 
 -   Perform Bayesian estimation of the SLDAX model and popular models subsumed by the SLDAX model, including the SLDA model, LDA model, and regression models;
 
@@ -68,7 +70,7 @@ fit_sldax <- gibbs_sldax(rating ~ I(grade - 1),
                          data = teacher_rate,
                          docs = docs_vocab$documents,
                          V = vocab_len,
-                         K = 3,
+                         K = 2,
                          model = "sldax")
 eta_post <- post_regression(fit_sldax)
 ```

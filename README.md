@@ -6,15 +6,15 @@
 <!-- badges: start -->
 
 [![Project Status:
-WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![covr
-codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm)
+WIP](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#wip)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
+[![`covr`
+codecov](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token=hpAkicQFxg)](https://codecov.io/gh/ktw5691/psychtm)
 <!-- badges: end -->
 
-The goal of psychtm is to make text mining models and methods accessible
-for social science researchers, particularly those within psychology.
-This package allows users to
+The goal of `psychtm` is to make text mining models and methods
+accessible for social science researchers, particularly those within
+psychology. This package allows users to
 
 -   Perform Bayesian estimation of the SLDAX model and popular models
     subsumed by the SLDAX model, including the SLDA model, LDA model,
@@ -67,7 +67,7 @@ fit_sldax <- gibbs_sldax(rating ~ I(grade - 1),
                          data = teacher_rate,
                          docs = docs_vocab$documents,
                          V = vocab_len,
-                         K = 3,
+                         K = 2,
                          model = "sldax")
 eta_post <- post_regression(fit_sldax)
 ```
@@ -83,27 +83,23 @@ summary(eta_post)
 #> 1. Empirical mean and standard deviation for each variable,
 #>    plus standard error of the mean:
 #> 
-#>                  Mean       SD  Naive SE Time-series SE
-#> I(grade - 1) -0.26447 0.008505 0.0008505      0.0005087
-#> topic1        4.81556 0.068277 0.0068277      0.0143247
-#> topic2        4.73025 0.071178 0.0071178      0.0131204
-#> topic3        4.59128 0.230035 0.0230035      0.1336056
-#> effect_t1     0.15480 0.142195 0.0142195      0.0628737
-#> effect_t2     0.02683 0.164625 0.0164625      0.0784209
-#> effect_t3    -0.18163 0.260353 0.0260353      0.1515511
-#> sigma2        1.14072 0.024834 0.0024834      0.0024834
+#>                 Mean       SD  Naive SE Time-series SE
+#> I(grade - 1) -0.2656 0.007307 0.0007307      0.0007307
+#> topic1        4.6165 0.122216 0.0122216      0.0804883
+#> topic2        4.8189 0.034301 0.0034301      0.0034301
+#> effect_t1    -0.2024 0.134106 0.0134106      0.0884898
+#> effect_t2     0.2024 0.134106 0.0134106      0.0884898
+#> sigma2        1.1422 0.028296 0.0028296      0.0028296
 #> 
 #> 2. Quantiles for each variable:
 #> 
-#>                 2.5%      25%       50%       75%   97.5%
-#> I(grade - 1) -0.2826 -0.27008 -0.264742 -0.258232 -0.2487
-#> topic1        4.7019  4.76530  4.816858  4.853650  4.9594
-#> topic2        4.5897  4.68463  4.721874  4.786010  4.8427
-#> topic3        4.0576  4.43925  4.659748  4.759582  4.8644
-#> effect_t1    -0.1079  0.05395  0.135724  0.254635  0.4519
-#> effect_t2    -0.2498 -0.08630 -0.009826  0.133714  0.3969
-#> effect_t3    -0.7557 -0.36032 -0.105162 -0.005648  0.1440
-#> sigma2        1.0924  1.12802  1.141213  1.155407  1.1908
+#>                  2.5%     25%     50%     75%    97.5%
+#> I(grade - 1) -0.27849 -0.2711 -0.2659 -0.2601 -0.25175
+#> topic1        4.34365  4.5709  4.6584  4.6945  4.76228
+#> topic2        4.75032  4.7994  4.8181  4.8420  4.87593
+#> effect_t1    -0.51412 -0.2639 -0.1828 -0.1086 -0.01216
+#> effect_t2     0.01216  0.1086  0.1828  0.2639  0.51412
+#> sigma2        1.08793  1.1245  1.1445  1.1599  1.20649
 ```
 
 For a more detailed example of the key functionality of this package,
