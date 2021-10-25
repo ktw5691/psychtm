@@ -34,6 +34,7 @@ LinkingTo: Rcpp (>= 0.11.0),
 BugReports: https://github.com/ktw5691/psychtm/issues
 RoxygenNote: 7.1.2
 Roxygen: list(markdown = TRUE)
+Language: en-US
 Encoding: UTF-8
 SystemRequirements: C++11
 Collate:
