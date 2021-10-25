@@ -16,7 +16,9 @@ knitr::opts_chunk$set(
 # psychtm: A package for text mining in psychological research
 
 <!-- badges: start -->
-[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![Travis Build Status](https://www.travis-ci.com/ktw5691/psychtm.svg?branch=master)](https://app.travis-ci.com/github/ktw5691/psychtm) [![covr codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm)
+[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
+[![covr codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/master/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm)
+[![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
 <!-- badges: end -->
 
 The goal of psychtm is to make text mining models and methods accessible for social science researchers, particularly those within psychology. This package allows users to
