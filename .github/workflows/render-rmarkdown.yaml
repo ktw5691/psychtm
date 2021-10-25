@@ -23,8 +23,10 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v1
 
-      - name: Install rmarkdown and psychtm
-        run: Rscript -e 'install.packages("rmarkdown", "psychtm")'
+      - name: Install rmarkdown, remotes, and psychtm
+        run: Rscript -e 'install.packages("rmarkdown")'
+        run: Rscript -e 'install.packages("remotes")'
+        run: Rscript -e 'remotes::install_github("ktw5691/psychtm@devel")'
 
       - name: Render Rmarkdown files
         run: |
