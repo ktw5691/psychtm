@@ -33,10 +33,23 @@ The goal of psychtm is to make text mining models and methods accessible for soc
 
 You can install the development version of psychtm like so:
 
-``` r
+-   If necessary, first install the `devtools` R package
 
+``` r
+install.packages("devtools")
 ```
 
+### Option 1: Install the latest stable version from Github
+
+``` r
+devtools::install_github("ktw5691/psychtm")
+```
+
+### Option 2: Install the latest development snapshot
+
+``` r
+devtools::install_github("ktw5691/psychtm@devel")
+```
 
 ## Example
 
@@ -71,26 +84,6 @@ browseVignettes("psychtm")
 ## How to Cite the Package
 
 Wilcox, K. T., Jacobucci, R., Zhang, Z., Ammerman, B. A. (2021). Supervised latent Dirichlet allocation with covariates: A Bayesian structural and measurement model of text and covariates. *PsyArXiv*. <https://doi.org/10.31234/osf.io/62tc3>
-
-## Installation
-
--   If necessary, first install the `devtools` R package
-
-```{r devtools-install, eval = FALSE}
-install.packages("devtools")
-```
-
-### Option 1: Install the latest stable version from Github
-
-```{r gh-installation, eval = FALSE}
-devtools::install_github("ktw5691/psychtm")
-```
-
-### Option 2: Install the latest development snapshot
-
-```{r gh-installation2, eval = FALSE}
-devtools::install_github("ktw5691/psychtm@devel")
-```
 
 ### Common Troubleshooting
 
