@@ -23,8 +23,8 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v1
 
-      - name: Install rmarkdown
-        run: Rscript -e 'install.packages("rmarkdown")'
+      - name: Install rmarkdown and psychtm
+        run: Rscript -e 'install.packages("rmarkdown", "psychtm")'
 
       - name: Render Rmarkdown files
         run: |
