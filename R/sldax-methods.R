@@ -220,11 +220,13 @@ setMethod("post_regression",
           function(mcmc_fit) {
 
             m <- nchain(mcmc_fit)
-            burn <- extra(mcmc_fit)$call$burn
-            thin <- extra(mcmc_fit)$call$thin
+            burn <- extra(mcmc_fit)$call[["burn"]] # Avoid partial matching
+            if (is.null(burn)) burn <- 0L # Default in `gibbs_sldax()` is `0`
+            thin <- extra(mcmc_fit)$call[["thin"]] # Avoid partial matching
+            if (is.null(thin)) thin <- 1L  # Default in `gibbs_sldax()` is `1`
 
             mcmc_out <- coda::mcmc(cbind(eta(mcmc_fit), sigma2(mcmc_fit)),
-                                   start = burn + 1, thin = thin)
+                                   start = burn + 1L, thin = thin)
             colnames(mcmc_out)[ncol(mcmc_out)] <- "sigma2"
 
             return(mcmc_out)
@@ -237,8 +239,10 @@ setMethod("post_regression",
           function(mcmc_fit) {
 
             m <- nchain(mcmc_fit)
-            burn <- extra(mcmc_fit)$call$burn
-            thin <- extra(mcmc_fit)$call$thin
+            burn <- extra(mcmc_fit)$call[["burn"]] # Avoid partial matching
+            if (is.null(burn)) burn <- 0L # Default in `gibbs_sldax()` is `0`
+            thin <- extra(mcmc_fit)$call[["thin"]] # Avoid partial matching
+            if (is.null(thin)) thin <- 1L  # Default in `gibbs_sldax()` is `1`
 
             return(coda::mcmc(eta(mcmc_fit), start = burn + 1, thin = thin))
           }
@@ -249,15 +253,11 @@ setMethod("post_regression",
           c(mcmc_fit = "Sldax"),
           function(mcmc_fit) {
 
-            if (!requireNamespace("lda", quietly = TRUE)) {
-              stop("Package \"lda\" needed for this function to work.
-                    Please install it.",
-                   call. = FALSE)
-            }
-
             m <- nchain(mcmc_fit)
-            burn <- extra(mcmc_fit)$call$burn
-            thin <- extra(mcmc_fit)$call$thin
+            burn <- extra(mcmc_fit)$call[["burn"]] # Avoid partial matching
+            if (is.null(burn)) burn <- 0L # Default in `gibbs_sldax()` is `0`
+            thin <- extra(mcmc_fit)$call[["thin"]] # Avoid partial matching
+            if (is.null(thin)) thin <- 1L  # Default in `gibbs_sldax()` is `1`
 
             # Obtain topic coefficient contrasts
             k <- ntopics(mcmc_fit)
