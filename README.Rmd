@@ -79,7 +79,7 @@ summary(eta_post)
 
 For a more detailed example of the key functionality of this package, explore the vignette(s) for a good starting point:
 
-```{r vignette, eval = FALSE}
+``` r
 browseVignettes("psychtm")
 ```
 
