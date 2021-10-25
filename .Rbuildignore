@@ -2,7 +2,6 @@
 ^\.Rproj\.user$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\.travis\.yml$
 .Rprofile
 ^codecov\.yml$
 ^LICENSE\.md$
