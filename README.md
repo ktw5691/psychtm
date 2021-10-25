@@ -5,8 +5,9 @@
 
 <!-- badges: start -->
 
-[![Project Status:
-WIP](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#wip)
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
 [![`covr`
 codecov](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token=hpAkicQFxg)](https://codecov.io/gh/ktw5691/psychtm)
