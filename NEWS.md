@@ -4,15 +4,42 @@
 
 ## Major changes
 
-* 
+* Requires R packages:
+  * Requires `coda` v0.4 or higher.
+  * Requires `Rcpp` v0.11.0 or higher.
+  * Requires `tibble` v2.1.3 or higher.
+* Added a vignette to illustrate package use.
+* Added example data set `teacher_rate` for demonstration in vignette.
+* New function `prep_docs()` to prepare documents in a data frame for modeling with `gibbs_sldax()`.
+* New function `post_regression()` to summarize regression relationships for objects of class `Mlr`, `Logistic`, or `Sldax`.
 
 ## Minor changes
 
 * Added a `NEWS.md` file to track changes to the package.
+* Suggests R packages:
+  * Suggests `spelling`.
+  * Suggests `knitr` v1.22 or higher.
+  * Suggests `lda`
+  * Suggests `testthat` v3.0.2 or higher.
+  * Suggests `rmarkdown`.
+* Uses `roxygen2` v7.1.2 with Markdown support for documentation.
+* Expanded and improved documentation.
+* Remove user-facing documentation in man/ for internal functions.
+* Language for package now listed as `en-US`.
+* S4 class definitions moved to a single file.
+* S4 generic functions moved to a single file.
+* S4 methods for `Sldax` objects moved to a separate file.
+* Deprecated `gg_coef()`; this function will be removed in a future release.
+* More consistent use of `stop()` and `warning()` in the event of errors or warnings instead of `print()` and `cat()`.
+* Improved README.
+* Added CITATION information.
 
 ## Bug fixes
 
-* 
+* Fixed namespace issues for importing and exporting packages, methods, and functions.
+* Corrected bug when fitting an SLDAX model with only a single predictor where variable names were accidentally omitted.
+* Fixed bug where `get_zbar.Sldax()` was missing a return statement.
+* Makevars.win no longer asks for `OpenMP` as `OpenMP` is not currently used.
 
 # psychtm 2020.9-alpha
 
