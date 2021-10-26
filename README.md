@@ -11,6 +11,8 @@ developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.re
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
 [![`covr`
 codecov](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token=hpAkicQFxg)](https://codecov.io/gh/ktw5691/psychtm)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm)
 <!-- badges: end -->
 
 The goal of `psychtm` is to make text mining models and methods
@@ -26,9 +28,15 @@ psychology. This package allows users to
 
 ## Installation
 
-You can install the development version of `psychtm`:
+Once on CRAN, install the package as usual:
 
--   If necessary, first install the `devtools` R package
+``` r
+install.packages("psychtm")
+```
+
+Alternatively, you can install the most current development version:
+
+-   If necessary, first install the `devtools` R package,
 
 ``` r
 install.packages("devtools")
