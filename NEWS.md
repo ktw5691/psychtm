@@ -31,6 +31,7 @@
 * S4 methods for `Sldax` objects moved to a separate file.
 * Deprecated `gg_coef()`; this function will be removed in a future release.
 * More consistent use of `stop()` and `warning()` in the event of errors or warnings instead of `print()` and `cat()`.
+* More consistent use of `Rcpp_cout` and `Rcpp_cerr` for printing messages and errors from compiled functions.
 * Improved README.
 * Added CITATION information.
 
