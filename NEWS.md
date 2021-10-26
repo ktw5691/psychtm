@@ -11,7 +11,7 @@
 * Added a vignette to illustrate package use.
 * Added example data set `teacher_rate` for demonstration in vignette.
 * New function `prep_docs()` to prepare documents in a data frame for modeling with `gibbs_sldax()`.
-* New function `post_regression()` to summarize regression relationships for objects of class `Mlr`, `Logistic`, or `Sldax`.
+* New function `post_regression()` to summarize regression relationships for objects of class `Mlr`, `Logistic`, or `Sldax`: closes #7.
 
 ## Minor changes
 
