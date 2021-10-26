@@ -58,7 +58,7 @@
 
 ## Non-breaking Changes
 
-* Fixes to Travis CI build config.
+* Fixes to Travis CI build configuration file.
 * Updated README.
 
 # psychtm 2020.5-alpha
@@ -106,7 +106,7 @@
 
 ## New Features
 
-* Fixed error in `gibbs_*()` functions where interrupting the process (e.g., hitting Esc while running) and then trying to run these functions again would fail with the error `ERROR: there is already an InterruptableProgressMonitor instance defined`.
+* Fixed error in `gibbs_*()` functions where interrupting the process (e.g., hitting the `Esc` key while running) and then trying to run these functions again would fail with the error `ERROR: there is already an InterruptableProgressMonitor instance defined`.
 
 ## Breaking Changes
 
