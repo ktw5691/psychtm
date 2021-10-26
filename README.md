@@ -17,20 +17,16 @@ The goal of `psychtm` is to make text mining models and methods
 accessible for social science researchers, particularly those within
 psychology. This package allows users to
 
--   Perform Bayesian estimation of the SLDAX model and popular models
-    subsumed by the SLDAX model, including the SLDA model, LDA model,
-    and regression models;
+-   Estimate the SLDAX topic model and popular models subsumed by SLDAX,
+    including SLDA, LDA, and regression models;
 
--   Estimate SLDAX, SLDA, and regression models with support for both
-    continuous and dichotomous outcomes;
-
--   Obtain Bayesian posterior inferences;
+-   Obtain posterior inferences;
 
 -   Assess model fit using coherence and exclusivity metrics.
 
 ## Installation
 
-You can install the development version of psychtm like so:
+You can install the development version of `psychtm`:
 
 -   If necessary, first install the `devtools` R package
 
