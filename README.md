@@ -14,7 +14,7 @@ codecov](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token
 <!-- badges: end -->
 
 The goal of `psychtm` is to make text mining models and methods
-accessible for social science researchers, particularly those within
+accessible for social science researchers, particularly within
 psychology. This package allows users to
 
 -   Estimate the SLDAX topic model and popular models subsumed by SLDAX,
@@ -113,7 +113,7 @@ Supervised latent Dirichlet allocation with covariates: A Bayesian
 structural and measurement model of text and covariates. *PsyArXiv*.
 <https://doi.org/10.31234/osf.io/62tc3>
 
-### Common Troubleshooting
+## Common Troubleshooting
 
 Ensure that appropriate `C++` compilers are installed on your computer:
 

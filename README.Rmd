@@ -22,7 +22,7 @@ set.seed(1)
 [![`covr` codecov](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token=hpAkicQFxg)](https://codecov.io/gh/ktw5691/psychtm)
 <!-- badges: end -->
 
-The goal of `psychtm` is to make text mining models and methods accessible for social science researchers, particularly those within psychology. This package allows users to
+The goal of `psychtm` is to make text mining models and methods accessible for social science researchers, particularly within psychology. This package allows users to
 
 -   Estimate the SLDAX topic model and popular models subsumed by SLDAX, including SLDA, LDA, and regression models;
 
@@ -86,7 +86,7 @@ browseVignettes("psychtm")
 
 Wilcox, K. T., Jacobucci, R., Zhang, Z., Ammerman, B. A. (2021). Supervised latent Dirichlet allocation with covariates: A Bayesian structural and measurement model of text and covariates. *PsyArXiv*. <https://doi.org/10.31234/osf.io/62tc3>
 
-### Common Troubleshooting
+## Common Troubleshooting
 
 Ensure that appropriate `C++` compilers are installed on your computer:
 
