@@ -6,10 +6,10 @@ Date: 2021-10-26
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre"))
 Description: Provides text mining methods for social science research.
-    The `psychtm` package provides estimation, summarization, and
+    The `psychtm` package implements estimation, inference, summarization, and
     goodness-of-fit functions for topic models including Latent Dirichlet
     Allocation (LDA), supervised LDA, and supervised LDA with covariates using
-    Bayesian estimation and posterior inference via Markov Chain Monte Carlo.
+    Bayesian Markov Chain Monte Carlo.
 License: GPL-3
 Depends: R (>= 3.3.0)
 Imports:
