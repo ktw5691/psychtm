@@ -1,7 +1,18 @@
 # psychtm 2021.1
 
 * Initial release for [CRAN](https://CRAN.R-project.org/).
+
+## Major changes
+
+* 
+
+## Minor changes
+
 * Added a `NEWS.md` file to track changes to the package.
+
+## Bug fixes
+
+* 
 
 # psychtm 2020.9-alpha
 
