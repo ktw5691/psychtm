@@ -3,6 +3,20 @@
 #' @param errorbw Positive control parameter for the width of the +/- 2
 #'   posterior standard error bars (default: `0.5`).
 #'
+#' @return A `ggplot` object.
+#'
+#' @examples
+#' library(lda) # Required if using `prep_docs()`
+#' data(teacher_rate)  # Synthetic student ratings of instructors
+#' docs_vocab <- prep_docs(teacher_rate, "doc")
+#' vocab_len <- length(docs_vocab$vocab)
+#' m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
+#'                   data = teacher_rate,
+#'                   docs = docs_vocab$documents,
+#'                   V = vocab_len,
+#'                   K = 2,
+#'                   model = "sldax")
+#' gg_coef(m1)
 #' @rdname sldax-summary
 #' @export
 setGeneric("gg_coef",
