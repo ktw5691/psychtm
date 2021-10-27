@@ -18,3 +18,11 @@ between models and (2) the standard error of the difference in WAIC.
 \description{
 Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.
 }
+\examples{
+data(teacher_rate)
+fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 100)
+fit_mlr2 <- gibbs_mlr(rating ~ grade + I(grade^2), data = teacher_rate, m = 100)
+# Returns (1) D = WAIC(fit_mlr2) - WAIC(fit_mlr) and (2) SE(D)
+#   Suggests that a linear relationship is preferable
+waic_diff(t(lpd(fit_mlr2)), t(lpd(fit_mlr)))
+}

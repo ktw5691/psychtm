@@ -43,7 +43,7 @@ double waic_d(const arma::colvec& like_pred, double p_effd) {
 //' @examples
 //' data(teacher_rate)
 //' fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 5)
-//' waic_all(iter = 5, t(fit_mlr@lpd))
+//' waic_all(iter = 5, t(lpd(fit_mlr)))
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector waic_all(uint32_t iter, const arma::mat& l_pred) {
@@ -81,6 +81,14 @@ Rcpp::NumericVector waic_all(uint32_t iter, const arma::mat& l_pred) {
 //'
 //' @return A vector of (1) the difference in WAIC (on the deviance scale)
 //'   between models and (2) the standard error of the difference in WAIC.
+//'
+//' @examples
+//' data(teacher_rate)
+//' fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 100)
+//' fit_mlr2 <- gibbs_mlr(rating ~ grade + I(grade^2), data = teacher_rate, m = 100)
+//' # Returns (1) D = WAIC(fit_mlr2) - WAIC(fit_mlr) and (2) SE(D)
+//' #   Suggests that a linear relationship is preferable
+//' waic_diff(t(lpd(fit_mlr2)), t(lpd(fit_mlr)))
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector waic_diff(const arma::mat& l_pred1, const arma::mat& l_pred2) {

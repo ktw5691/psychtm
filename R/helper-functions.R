@@ -98,6 +98,16 @@
 #' @return An object of class [Sldax-class].
 #' @family Gibbs sampler
 #'
+#' @examples
+#' library(lda) # Required if using `prep_docs()`
+#'
+#' data(teacher_rate)  # Synthetic student ratings of instructors
+#' docs_vocab <- prep_docs(teacher_rate, "doc")
+#' vocab_len <- length(docs_vocab$vocab)
+#' m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
+#'                   data = teacher_rate, docs = docs_vocab$documents,
+#'                   V = vocab_len, K = 2, model = "sldax")
+#'
 #' @export
 gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
                         docs, V, K = 2L,
@@ -455,6 +465,10 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #' @return An object of class [Mlr-class].
 #' @family Gibbs sampler
 #'
+#' @examples
+#' data(mtcars)
+#' m1 <- gibbs_mlr(mpg ~ hp, data = mtcars)
+#'
 #' @export
 gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
                       mu0 = NULL, sigma0 = NULL, a0 = NULL, b0 = NULL,
@@ -562,6 +576,10 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'
 #' @return An object of class [Logistic-class].
 #' @family Gibbs sampler
+#'
+#' @examples
+#' data(mtcars)
+#' m1 <- gibbs_logistic(vs ~ hp, data = mtcars)
 #'
 #' @export
 gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
@@ -672,6 +690,10 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   stop-word removal. It is assumed that the unit of analysis is each term, so
 #'   this function will not be appropriate for other units of analysis such as
 #'   n-grams or sentences.
+#' @examples
+#' data(teacher_rate)  # Synthetic student ratings of instructors
+#' docs_vocab <- prep_docs(teacher_rate, "doc")
+#' str(docs_vocab) # A list with two components `documents` and `vocab`
 #'
 #' @export
 prep_docs <- function(data, col, lower = TRUE) {
@@ -718,6 +740,21 @@ prep_docs <- function(data, col, lower = TRUE) {
 #'   for each of \eqn{K} topics.
 #'
 #' @return A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
+#'
+#' @examples
+#'
+#' #' library(lda) # Required if using `prep_docs()`
+#'
+#' data(teacher_rate)  # Synthetic student ratings of instructors
+#' docs_vocab <- prep_docs(teacher_rate, "doc")
+#' vocab_len <- length(docs_vocab$vocab)
+#' m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
+#'                   data = teacher_rate, docs = docs_vocab$documents,
+#'                   V = vocab_len, K = 2, model = "sldax")
+#' hbeta <- est_beta(m1)
+#' ts_beta <- term_score(hbeta)
+#' str(ts_beta) # One row per topic, one column per unique term in the vocabulary
+#'
 #' @export
 term_score <- function(beta_) {
 

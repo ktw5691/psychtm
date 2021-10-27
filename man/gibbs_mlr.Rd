@@ -66,6 +66,11 @@ regression coefficients.
 
 For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} identity matrix.
 }
+\examples{
+data(mtcars)
+m1 <- gibbs_mlr(mpg ~ hp, data = mtcars)
+
+}
 \seealso{
 Other Gibbs sampler: 
 \code{\link{gibbs_logistic}()},

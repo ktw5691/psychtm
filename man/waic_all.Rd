@@ -21,5 +21,5 @@ Compute WAIC for all outcomes.
 \examples{
 data(teacher_rate)
 fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 5)
-waic_all(iter = 5, t(fit_mlr@lpd))
+waic_all(iter = 5, t(lpd(fit_mlr)))
 }

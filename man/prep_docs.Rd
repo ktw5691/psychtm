@@ -30,3 +30,9 @@ stop-word removal. It is assumed that the unit of analysis is each term, so
 this function will not be appropriate for other units of analysis such as
 n-grams or sentences.
 }
+\examples{
+data(teacher_rate)  # Synthetic student ratings of instructors
+docs_vocab <- prep_docs(teacher_rate, "doc")
+str(docs_vocab) # A list with two components `documents` and `vocab`
+
+}

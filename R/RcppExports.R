@@ -245,11 +245,16 @@ NULL
 #' @title Compute WAIC for all outcomes.
 #'
 #' @name waic_all
-#' @param iter The current iteration of the chain.
-#' @param l_pred A m x D matrix of predictive likelihoods (NOT log-likelihoods).
+#' @param iter The length of the sampled chain.
+#' @param l_pred A `iter` x D matrix of predictive likelihoods (NOT log-likelihoods).
 #'
 #' @return Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
 #'   the effective number of parameters.
+#'
+#' @examples
+#' data(teacher_rate)
+#' fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 5)
+#' waic_all(iter = 5, t(lpd(fit_mlr)))
 #' @export
 waic_all <- function(iter, l_pred) {
     .Call(`_psychtm_waic_all`, iter, l_pred)
@@ -263,6 +268,14 @@ waic_all <- function(iter, l_pred) {
 #'
 #' @return A vector of (1) the difference in WAIC (on the deviance scale)
 #'   between models and (2) the standard error of the difference in WAIC.
+#'
+#' @examples
+#' data(teacher_rate)
+#' fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 100)
+#' fit_mlr2 <- gibbs_mlr(rating ~ grade + I(grade^2), data = teacher_rate, m = 100)
+#' # Returns (1) D = WAIC(fit_mlr2) - WAIC(fit_mlr) and (2) SE(D)
+#' #   Suggests that a linear relationship is preferable
+#' waic_diff(t(lpd(fit_mlr2)), t(lpd(fit_mlr)))
 #' @export
 waic_diff <- function(l_pred1, l_pred2) {
     .Call(`_psychtm_waic_diff`, l_pred1, l_pred2)

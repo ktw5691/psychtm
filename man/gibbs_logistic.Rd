@@ -66,6 +66,11 @@ regression coefficients.
 For \code{sigma0}, by default, we use a \eqn{p} x \eqn{p} diagonal matrix
 with diagonal elements (variances) of \code{6.25}.
 }
+\examples{
+data(mtcars)
+m1 <- gibbs_logistic(vs ~ hp, data = mtcars)
+
+}
 \seealso{
 Other Gibbs sampler: 
 \code{\link{gibbs_mlr}()},

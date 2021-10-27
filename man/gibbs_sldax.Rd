@@ -156,6 +156,17 @@ matrix for \code{model = "slda"} and \code{model = "sldax"} and a diagonal
 matrix with diagonal elements (variances) of \code{6.25} for
 \code{model = "slda_logit"} and \code{model = "sldax_logit"}.
 }
+\examples{
+library(lda) # Required if using `prep_docs()`
+
+data(teacher_rate)  # Synthetic student ratings of instructors
+docs_vocab <- prep_docs(teacher_rate, "doc")
+vocab_len <- length(docs_vocab$vocab)
+m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
+                  data = teacher_rate, docs = docs_vocab$documents,
+                  V = vocab_len, K = 2, model = "sldax")
+
+}
 \seealso{
 Other Gibbs sampler: 
 \code{\link{gibbs_logistic}()},

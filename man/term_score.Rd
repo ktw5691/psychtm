@@ -18,3 +18,18 @@ For more details, see Blei, D. M., & Lafferty, J. D. (2009). Topic models. In
 A. N. Srivastava & M. Sahami (Eds.), Text mining: Classification, clustering,
 and applications. Chapman and Hall/CRC.
 }
+\examples{
+
+#' library(lda) # Required if using `prep_docs()`
+
+data(teacher_rate)  # Synthetic student ratings of instructors
+docs_vocab <- prep_docs(teacher_rate, "doc")
+vocab_len <- length(docs_vocab$vocab)
+m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
+                  data = teacher_rate, docs = docs_vocab$documents,
+                  V = vocab_len, K = 2, model = "sldax")
+hbeta <- est_beta(m1)
+ts_beta <- term_score(hbeta)
+str(ts_beta) # One row per topic, one column per unique term in the vocabulary
+
+}
