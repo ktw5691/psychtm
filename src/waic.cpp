@@ -34,11 +34,16 @@ double waic_d(const arma::colvec& like_pred, double p_effd) {
 //' @title Compute WAIC for all outcomes.
 //'
 //' @name waic_all
-//' @param iter The current iteration of the chain.
-//' @param l_pred A m x D matrix of predictive likelihoods (NOT log-likelihoods).
+//' @param iter The length of the sampled chain.
+//' @param l_pred A `iter` x D matrix of predictive likelihoods (NOT log-likelihoods).
 //'
 //' @return Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
 //'   the effective number of parameters.
+//'
+//' @examples
+//' data(teacher_rate)
+//' fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 5)
+//' waic_all(iter = 5, t(fit_mlr@lpd))
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector waic_all(uint32_t iter, const arma::mat& l_pred) {
