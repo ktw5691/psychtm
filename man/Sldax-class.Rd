@@ -3,90 +3,48 @@
 \docType{class}
 \name{Sldax-class}
 \alias{Sldax-class}
-\alias{topics}
 \alias{topics,Sldax-method}
-\alias{topics<-}
 \alias{topics<-,Sldax-method}
-\alias{theta}
 \alias{theta,Sldax-method}
-\alias{theta<-}
 \alias{theta<-,Sldax-method}
-\alias{beta_}
 \alias{beta_,Sldax-method}
-\alias{beta_<-}
 \alias{beta_<-,Sldax-method}
-\alias{gamma_}
 \alias{gamma_,Sldax-method}
-\alias{gamma_<-}
 \alias{gamma_<-,Sldax-method}
-\alias{alpha}
 \alias{alpha,Sldax-method}
-\alias{alpha<-}
 \alias{alpha<-,Sldax-method}
-\alias{ntopics}
 \alias{ntopics,Sldax-method}
-\alias{ntopics<-}
 \alias{ntopics<-,Sldax-method}
-\alias{nvocab}
 \alias{nvocab,Sldax-method}
-\alias{nvocab<-}
 \alias{nvocab<-,Sldax-method}
 \alias{Sldax}
 \title{S4 class to represent a SLDAX general model that inherits from \linkS4class{Mlr} and \linkS4class{Logistic}.}
 \usage{
-topics(x)
-
 \S4method{topics}{Sldax}(x)
-
-topics(x) <- value
 
 \S4method{topics}{Sldax}(x) <- value
 
-theta(x)
-
 \S4method{theta}{Sldax}(x)
-
-theta(x) <- value
 
 \S4method{theta}{Sldax}(x) <- value
 
-beta_(x)
-
 \S4method{beta_}{Sldax}(x)
-
-beta_(x) <- value
 
 \S4method{beta_}{Sldax}(x) <- value
 
-gamma_(x)
-
 \S4method{gamma_}{Sldax}(x)
-
-gamma_(x) <- value
 
 \S4method{gamma_}{Sldax}(x) <- value
 
-alpha(x)
-
 \S4method{alpha}{Sldax}(x)
-
-alpha(x) <- value
 
 \S4method{alpha}{Sldax}(x) <- value
 
-ntopics(x)
-
 \S4method{ntopics}{Sldax}(x)
-
-ntopics(x) <- value
 
 \S4method{ntopics}{Sldax}(x) <- value
 
-nvocab(x)
-
 \S4method{nvocab}{Sldax}(x)
-
-nvocab(x) <- value
 
 \S4method{nvocab}{Sldax}(x) <- value
 
@@ -115,38 +73,13 @@ unused word index (i.e., the document did not have a word at that index).}
 \item{...}{additional arguments to be passed to the low level regression
 fitting functions (see below).}
 }
+\value{
+A \linkS4class{Sldax} object.
+}
 \description{
 S4 class to represent a SLDAX general model that inherits from \linkS4class{Mlr} and \linkS4class{Logistic}.
 
-Create generic \code{topics} function for class
-
-Create generic \verb{topics<-} function for class
-
-Create generic \code{theta} function for class
-
-Create generic \verb{theta<-} function for class
-
-Create generic \code{beta_} function for class
-
-Create generic \verb{beta_<-} function for class
-
-Create generic \code{gamma_} function for class
-
-Create generic \verb{gamma_<-} function for class
-
-Create generic \code{alpha} function for class
-
-Create generic \verb{alpha<-} function for class
-
-Create generic \code{ntopics} function for class
-
-Create generic \verb{ntopics<-} function for class
-
-Create generic \code{nvocab} function for class
-
-Create generic \verb{nvocab<-} function for class
-
-Logistic helper function (constructor) for \code{Sldax} class
+Helper function (constructor) for \code{Sldax} class
 }
 \section{Slots}{
 
@@ -167,4 +100,11 @@ unused word index (i.e., the document did not have a word at that index).}
 \item{\code{beta}}{A K x V x M numeric array of topic-vocabulary distributions.}
 }}
 
+\examples{
+m1 <- Sldax(ndocs = 1, nvocab = 2,
+            topics = array(c(1, 2, 2, 1), dim = c(1, 4, 1)),
+            theta = array(c(0.5, 0.5), dim = c(1, 2, 1)),
+            beta = array(c(0.5, 0.5, 0.5, 0.5), dim = c(2, 2, 1)))
+nvocab(m1) <- 2L
+}
 \keyword{classes}

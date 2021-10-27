@@ -3,162 +3,84 @@
 \docType{class}
 \name{Model-class}
 \alias{Model-class}
-\alias{ndocs}
 \alias{ndocs,Model-method}
-\alias{ndocs<-}
 \alias{ndocs<-,Model-method}
-\alias{nchain}
 \alias{nchain,Model-method}
-\alias{nchain<-}
 \alias{nchain<-,Model-method}
-\alias{mu0}
 \alias{mu0,Model-method}
-\alias{mu0<-}
 \alias{mu0<-,Model-method}
-\alias{sigma0}
 \alias{sigma0,Model-method}
-\alias{sigma0<-}
 \alias{sigma0<-,Model-method}
-\alias{eta_start}
 \alias{eta_start,Model-method}
-\alias{eta_start<-}
 \alias{eta_start<-,Model-method}
-\alias{eta}
 \alias{eta,Model-method}
-\alias{eta<-}
 \alias{eta<-,Model-method}
-\alias{loglike}
 \alias{loglike,Model-method}
-\alias{loglike<-}
 \alias{loglike<-,Model-method}
-\alias{logpost}
 \alias{logpost,Model-method}
-\alias{logpost<-}
 \alias{logpost<-,Model-method}
-\alias{waic}
 \alias{waic,Model-method}
-\alias{waic<-}
 \alias{waic<-,Model-method}
-\alias{se_waic}
 \alias{se_waic,Model-method}
-\alias{se_waic<-}
 \alias{se_waic<-,Model-method}
-\alias{p_eff}
 \alias{p_eff,Model-method}
-\alias{p_eff<-}
 \alias{p_eff<-,Model-method}
-\alias{lpd}
 \alias{lpd,Model-method}
-\alias{lpd<-}
 \alias{lpd<-,Model-method}
-\alias{extra}
 \alias{extra,Model-method}
-\alias{extra<-}
 \alias{extra<-,Model-method}
 \alias{Model}
 \title{An S4 super class to represent a regression-like model}
 \usage{
-ndocs(x)
-
 \S4method{ndocs}{Model}(x)
-
-ndocs(x) <- value
 
 \S4method{ndocs}{Model}(x) <- value
 
-nchain(x)
-
 \S4method{nchain}{Model}(x)
-
-nchain(x) <- value
 
 \S4method{nchain}{Model}(x) <- value
 
-mu0(x)
-
 \S4method{mu0}{Model}(x)
-
-mu0(x) <- value
 
 \S4method{mu0}{Model}(x) <- value
 
-sigma0(x)
-
 \S4method{sigma0}{Model}(x)
-
-sigma0(x) <- value
 
 \S4method{sigma0}{Model}(x) <- value
 
-eta_start(x)
-
 \S4method{eta_start}{Model}(x)
-
-eta_start(x) <- value
 
 \S4method{eta_start}{Model}(x) <- value
 
-eta(x)
-
 \S4method{eta}{Model}(x)
-
-eta(x) <- value
 
 \S4method{eta}{Model}(x) <- value
 
-loglike(x)
-
 \S4method{loglike}{Model}(x)
-
-loglike(x) <- value
 
 \S4method{loglike}{Model}(x) <- value
 
-logpost(x)
-
 \S4method{logpost}{Model}(x)
-
-logpost(x) <- value
 
 \S4method{logpost}{Model}(x) <- value
 
-waic(x)
-
 \S4method{waic}{Model}(x)
-
-waic(x) <- value
 
 \S4method{waic}{Model}(x) <- value
 
-se_waic(x)
-
 \S4method{se_waic}{Model}(x)
-
-se_waic(x) <- value
 
 \S4method{se_waic}{Model}(x) <- value
 
-p_eff(x)
-
 \S4method{p_eff}{Model}(x)
-
-p_eff(x) <- value
 
 \S4method{p_eff}{Model}(x) <- value
 
-lpd(x)
-
 \S4method{lpd}{Model}(x)
-
-lpd(x) <- value
 
 \S4method{lpd}{Model}(x) <- value
 
-extra(x)
-
 \S4method{extra}{Model}(x)
-
-extra(x) <- value
 
 \S4method{extra}{Model}(x) <- value
 
@@ -209,60 +131,11 @@ constant).}
 \item{lpd}{A nchain x ndocs matrix of predictive posterior likelihoods (NOT
 log-likelihoods).}
 }
+\value{
+A \linkS4class{Model} object.
+}
 \description{
 An S4 super class to represent a regression-like model
-
-Create generic \code{ndocs} function for class
-
-Create generic \verb{ndocs<-} function for class
-
-Create generic \code{chain} function for class
-
-Create generic \verb{nchain<-} function for class
-
-Create generic \code{mu0} function for class
-
-Create generic \verb{mu0<-} function for class
-
-Create generic \code{sigma0} function for class
-
-Create generic \verb{sigma0<-} function for class
-
-Create generic \code{eta_start} function for class
-
-Create generic \verb{eta_start<-} function for class
-
-Create generic \code{eta} function for class
-
-Create generic \verb{eta<-} function for class
-
-Create generic \code{loglike} function for class
-
-Create generic \verb{loglike<-} function for class
-
-Create generic \code{logpost} function for class
-
-Create generic \verb{logpost<-} function for class
-
-Create generic \code{waic} function for class
-
-Create generic \verb{waic<-} function for class
-
-Create generic \code{se_waic} function for class
-
-Create generic \verb{se_waic<-} function for class
-
-Create generic \code{p_eff} function for class
-
-Create generic \verb{p_eff<-} function for class
-
-Create generic \code{lpd} function for class
-
-Create generic \verb{lpd<-} function for class
-
-Create generic \code{extra} function for class
-
-Create generic \verb{extra<-} function for class
 
 Helper function (constructor) for \code{Model} class
 }
@@ -300,4 +173,9 @@ log-likelihoods).}
 time_elapsed, start_time, end_time, corrected_label_switching, and call.}
 }}
 
+\examples{
+m1 <- Model(ndocs = 1)
+print(m1)
+
+}
 \keyword{classes}

@@ -3,42 +3,24 @@
 \docType{class}
 \name{Mlr-class}
 \alias{Mlr-class}
-\alias{sigma2}
 \alias{sigma2,Mlr-method}
-\alias{sigma2<-}
 \alias{sigma2<-,Mlr-method}
-\alias{a0}
 \alias{a0,Mlr-method}
-\alias{a0<-}
 \alias{a0<-,Mlr-method}
-\alias{b0}
 \alias{b0,Mlr-method}
-\alias{b0<-}
 \alias{b0<-,Mlr-method}
 \alias{Mlr}
 \title{S4 class for a regression model that inherits from \linkS4class{Model}.}
 \usage{
-sigma2(x)
-
 \S4method{sigma2}{Mlr}(x)
-
-sigma2(x) <- value
 
 \S4method{sigma2}{Mlr}(x) <- value
 
-a0(x)
-
 \S4method{a0}{Mlr}(x)
-
-a0(x) <- value
 
 \S4method{a0}{Mlr}(x) <- value
 
-b0(x)
-
 \S4method{b0}{Mlr}(x)
-
-b0(x) <- value
 
 \S4method{b0}{Mlr}(x) <- value
 
@@ -58,20 +40,11 @@ Mlr(a0 = 0.001, b0 = 0.001, sigma2 = NaN, ...)
 \item{...}{additional arguments to be passed to the low level regression
 fitting functions (see below).}
 }
+\value{
+An \linkS4class{Mlr} object.
+}
 \description{
 S4 class for a regression model that inherits from \linkS4class{Model}.
-
-Create generic \code{sigma2} function for class
-
-Create generic \verb{sigma2<-} function for class
-
-Create generic \code{a0} function for class
-
-Create generic \verb{a0<-} function for class
-
-Create generic \code{b0} function for class
-
-Create generic \verb{b0<-} function for class
 
 Helper function (constructor) for \code{Mlr} class
 }
@@ -85,4 +58,9 @@ Helper function (constructor) for \code{Mlr} class
 \item{\code{sigma2}}{A nchain x 1 numeric vector of draws of the residual variance.}
 }}
 
+\examples{
+m1 <- Mlr(ndocs = 1)
+print(m1)
+
+}
 \keyword{classes}

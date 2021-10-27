@@ -3,18 +3,12 @@
 \docType{class}
 \name{Logistic-class}
 \alias{Logistic-class}
-\alias{proposal_sd}
 \alias{proposal_sd,Logistic-method}
-\alias{proposal_sd<-}
 \alias{proposal_sd<-,Logistic-method}
 \alias{Logistic}
 \title{S4 class for a logistic regression model that inherits from \linkS4class{Model}}
 \usage{
-proposal_sd(x)
-
 \S4method{proposal_sd}{Logistic}(x)
-
-proposal_sd(x) <- value
 
 \S4method{proposal_sd}{Logistic}(x) <- value
 
@@ -31,16 +25,13 @@ sampling of p + 1 regression coefficients by Metropolis-Hastings.}
 \item{...}{additional arguments to be passed to the low level regression
 fitting functions (see below).}
 }
+\value{
+A \linkS4class{Logistic} object.
+}
 \description{
 S4 class for a logistic regression model that inherits from \linkS4class{Model}
 
-Create generic \code{proposal_sd} function for class
-
-Slot \verb{@proposal_sd} generic accessor
-
-Create generic \verb{proposal_sd<-} function for class
-
-Logistic helper function (constructor) for \code{Logistic} class
+Helper function (constructor) for \code{Logistic} class
 }
 \section{Slots}{
 
@@ -49,4 +40,9 @@ Logistic helper function (constructor) for \code{Logistic} class
 sampling of p + 1 regression coefficients by Metropolis-Hastings.}
 }}
 
+\examples{
+m1 <- Logistic(ndocs = 1)
+print(m1)
+
+}
 \keyword{classes}

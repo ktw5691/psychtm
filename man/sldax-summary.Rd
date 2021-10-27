@@ -97,12 +97,26 @@ used to fit the \linkS4class{Sldax} model.}
 posterior standard error bars (default: \code{0.5}).}
 }
 \value{
+A matrix of topic-word probability estimates.
+
+A matrix of topic proportion estimates.
+
+A numeric vector of coherence scores for each topic (more positive is better).
+
+A numeric vector of exclusivity scores (more positive is better).
+
+A data frame of the \code{ntopics} most probable topics per document.
+
 A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
+
+A matrix of empirical topic proportions per document.
 
 An object of class \code{\link[coda:mcmc]{coda::mcmc}} summarizing the posterior
 distribution of the regression coefficients and residual variance (if
 applicable). Convenience functions such as \code{\link[coda:summary.mcmc]{summary()}} and
 \code{\link[coda:plot.mcmc]{plot()}} can be used for posterior summarization.
+
+A \code{ggplot} object.
 }
 \description{
 Obtain parameter estimates, model goodness-of-fit metrics, and posterior summaries.
@@ -128,4 +142,87 @@ Roberts, Stewart, & Airoldi, 2013).
 containing posterior information for the regression model parameters.
 \code{gg_coef()} plots regression coefficients (Warning: this function is
 deprecated. See \code{help("Deprecated")}.
+}
+\examples{
+m1 <- Sldax(ndocs = 1, nvocab = 2,
+            topics = array(c(1, 2, 2, 1), dim = c(1, 4, 1)),
+            theta = array(c(0.5, 0.5), dim = c(1, 2, 1)),
+            beta = array(c(0.5, 0.5, 0.5, 0.5), dim = c(2, 2, 1)))
+est_beta(m1, stat = "mean")
+est_beta(m1, stat = "median")
+m1 <- Sldax(ndocs = 2, nvocab = 2, nchain = 2,
+            topics = array(c(1, 2, 2, 1,
+                             1, 2, 2, 1), dim = c(2, 2, 2)),
+            theta = array(c(0.5, 0.5,
+                            0.5, 0.5,
+                            0.5, 0.5,
+                            0.5, 0.5), dim = c(2, 2, 2)),
+            loglike = rep(NaN, times = 2),
+            logpost = rep(NaN, times = 2),
+            lpd = matrix(NaN, nrow = 2, ncol = 2),
+            eta = matrix(0.0, nrow = 2, ncol = 2),
+            mu0 = c(0.0, 0.0),
+            sigma0 = diag(1, 2),
+            eta_start = c(0.0, 0.0),
+            beta = array(c(0.5, 0.5, 0.5, 0.5,
+                           0.5, 0.5, 0.5, 0.5), dim = c(2, 2, 2)))
+est_theta(m1, stat = "mean")
+est_theta(m1, stat = "median")
+mdoc <- matrix(c(1, 2, 2, 1), nrow = 1)
+m1 <- Sldax(ndocs = 1, nvocab = 2,
+            topics = array(c(1, 2, 2, 2), dim = c(1, 4, 1)),
+            theta = array(c(0.5, 0.5), dim = c(1, 2, 1)),
+            beta = array(c(0.5, 0.4, 0.5, 0.6), dim = c(2, 2, 1)))
+bhat <- est_beta(m1)
+get_coherence(bhat, docs = mdoc, nwords = nvocab(m1))
+m1 <- Sldax(ndocs = 1, nvocab = 2,
+            topics = array(c(1, 2, 2, 2), dim = c(1, 4, 1)),
+            theta = array(c(0.5, 0.5), dim = c(1, 2, 1)),
+            beta = array(c(0.5, 0.4, 0.5, 0.6), dim = c(2, 2, 1)))
+bhat <- est_beta(m1)
+get_exclusivity(bhat, nwords = nvocab(m1))
+m1 <- Sldax(ndocs = 2, nvocab = 2, nchain = 2,
+            topics = array(c(1, 2, 2, 1,
+                             1, 2, 2, 1), dim = c(2, 2, 2)),
+            theta = array(c(0.4, 0.3,
+                            0.6, 0.7,
+                            0.45, 0.5,
+                            0.55, 0.5), dim = c(2, 2, 2)),
+            loglike = rep(NaN, times = 2),
+            logpost = rep(NaN, times = 2),
+            lpd = matrix(NaN, nrow = 2, ncol = 2),
+            eta = matrix(0.0, nrow = 2, ncol = 2),
+            mu0 = c(0.0, 0.0),
+            sigma0 = diag(1, 2),
+            eta_start = c(0.0, 0.0),
+            beta = array(c(0.5, 0.5, 0.5, 0.5,
+                           0.5, 0.5, 0.5, 0.5), dim = c(2, 2, 2)))
+t_hat <- est_theta(m1, stat = "mean")
+get_toptopics(t_hat, ntopics = ntopics(m1))
+m1 <- Sldax(ndocs = 1, nvocab = 2,
+            topics = array(c(1, 2, 2, 2), dim = c(1, 4, 1)),
+            theta = array(c(0.5, 0.5), dim = c(1, 2, 1)),
+            beta = array(c(0.5, 0.4, 0.5, 0.6), dim = c(2, 2, 1)))
+bhat <- est_beta(m1)
+get_topwords(bhat, nwords = nvocab(m1), method = "termscore")
+get_topwords(bhat, nwords = nvocab(m1), method = "prob")
+m1 <- Sldax(ndocs = 1, nvocab = 2,
+            topics = array(c(1, 2, 2, 2), dim = c(1, 4, 1)),
+            theta = array(c(0.5, 0.5), dim = c(1, 2, 1)),
+            beta = array(c(0.5, 0.4, 0.5, 0.6), dim = c(2, 2, 1)))
+get_zbar(m1)
+data(mtcars)
+m1 <- gibbs_mlr(mpg ~ hp, data = mtcars, m = 2)
+post_regression(m1)
+library(lda) # Required if using `prep_docs()`
+data(teacher_rate)  # Synthetic student ratings of instructors
+docs_vocab <- prep_docs(teacher_rate, "doc")
+vocab_len <- length(docs_vocab$vocab)
+m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
+                  data = teacher_rate,
+                  docs = docs_vocab$documents,
+                  V = vocab_len,
+                  K = 2,
+                  model = "sldax")
+gg_coef(m1)
 }
