@@ -6,6 +6,7 @@
 #' @return A `ggplot` object.
 #'
 #' @examples
+#' \dontrun{
 #' library(lda) # Required if using `prep_docs()`
 #' data(teacher_rate)  # Synthetic student ratings of instructors
 #' docs_vocab <- prep_docs(teacher_rate, "doc")
@@ -17,6 +18,7 @@
 #'                   K = 2,
 #'                   model = "sldax")
 #' gg_coef(m1)
+#' }
 #' @rdname sldax-summary
 #' @export
 setGeneric("gg_coef",

@@ -214,6 +214,7 @@ get_zbar(m1)
 data(mtcars)
 m1 <- gibbs_mlr(mpg ~ hp, data = mtcars, m = 2)
 post_regression(m1)
+\dontrun{
 library(lda) # Required if using `prep_docs()`
 data(teacher_rate)  # Synthetic student ratings of instructors
 docs_vocab <- prep_docs(teacher_rate, "doc")
@@ -225,4 +226,5 @@ m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
                   K = 2,
                   model = "sldax")
 gg_coef(m1)
+}
 }
