@@ -10,7 +10,11 @@ This if the first package release on CRAN.
 
 * There were 2 NOTEs:
 
-  * This is a new release.
+  * checking CRAN incoming feasibility ... NOTE
+    Maintainer: 'Kenneth Wilcox <kwilcox3@nd.edu>'
+    New submission
+
+This is a new release.
 
   * checking installed package size ... NOTE
     installed size is 16.2Mb
