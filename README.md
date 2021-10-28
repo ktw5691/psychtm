@@ -10,7 +10,7 @@ state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
 [![`covr`
-codecov](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token=hpAkicQFxg)](https://codecov.io/gh/ktw5691/psychtm)
+codecov](https://app.codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg?token=hpAkicQFxg)](https://app.codecov.io/gh/ktw5691/psychtm)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm)
 <!-- badges: end -->
