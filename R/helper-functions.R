@@ -401,7 +401,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
         # Permute topic assignments for all words
         if (return_assignments) {
           perm_z <- topics(res)
-          for (iter in seq_len(nchain(res))){
+          for (iter in seq_len(nchain(res))) {
             perm_i <- relabel_out$permutations[iter, ]
             if (isTRUE(all.equal(seq_len(K), perm_i))) next # No change needed, go to next sample
             old_z <- perm_z[, , iter] # Original draws to check
@@ -444,10 +444,8 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #' description of the model to be fitted.
 #' @param data An optional data frame containing the variables in the model.
 #' @param m The number of iterations to run the Gibbs sampler (default: `100`).
-#' @param burn The number of iterations to discard as the burn-in period
-#'   (default: `0`).
-#' @param thin The period of iterations to keep after the burn-in period
-#'   (default: `1`).
+#' @param burn The number of iterations to discard as the burn-in period (default: `0`).
+#' @param thin The period of iterations to keep after the burn-in period (default: `1`).
 #' @param mu0 An optional p x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A p x p variance-covariance matrix for the prior on the

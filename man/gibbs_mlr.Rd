@@ -27,11 +27,9 @@ description of the model to be fitted.}
 
 \item{m}{The number of iterations to run the Gibbs sampler (default: \code{100}).}
 
-\item{burn}{The number of iterations to discard as the burn-in period
-(default: \code{0}).}
+\item{burn}{The number of iterations to discard as the burn-in period (default: \code{0}).}
 
-\item{thin}{The period of iterations to keep after the burn-in period
-(default: \code{1}).}
+\item{thin}{The period of iterations to keep after the burn-in period (default: \code{1}).}
 
 \item{mu0}{An optional p x 1 mean vector for the prior on the regression
 coefficients. See 'Details'.}
