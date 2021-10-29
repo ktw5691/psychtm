@@ -106,9 +106,8 @@ posterior? (default = \code{TRUE}).}
 \item{verbose}{Should parameter draws be output during sampling? (default:
 \code{FALSE}).}
 
-\item{display_progress}{Should percent progress of sampler be displayed
-(default: \code{FALSE}). Recommended that only one of \code{verbose} and
-\code{display_progress} be set to \code{TRUE} at any given time.}
+\item{display_progress}{Show progress bar? (default: \code{FALSE}). Do not use
+with \code{verbose = TRUE}.}
 }
 \value{
 An object of class \linkS4class{Sldax}.
@@ -131,13 +130,16 @@ the length of \code{mu0} (\eqn{q}) and/or the number of rows and columns of
 values for \code{eta_start}, be sure that the length of \code{eta_start} is
 correct.
 
-For \code{model}, one of \code{c("lda", "slda", "sldax", "slda_logit", "sldax_logit")} are possible. \code{"lda"}: unsupervised topic model;
-\code{"slda"}: supervised topic model with a continuous outcome;
-\code{"sldax"}: supervised topic model with a continuous outcome and
-additional predictors of the outcome; \code{"slda_logit"}: supervised topic
-model with a dichotomous outcome (0/1); \code{"sldax_logit"}: supervised
-topic model with a dichotomous outcome (0/1) and additional predictors of the
-outcome.
+For \code{model}, one of \code{c("lda", "slda", "sldax", "slda_logit", "sldax_logit")}.
+\itemize{
+\item \code{"lda"}: unsupervised topic model;
+\item \code{"slda"}: supervised topic model with a continuous outcome;
+\item \code{"sldax"}: supervised topic model with a continuous outcome and
+additional predictors of the outcome;
+\item \code{"slda_logit"}: supervised topic model with a dichotomous outcome (0/1);
+\item \code{"sldax_logit"}: supervised topic model with a dichotomous outcome (0/1)
+and additional predictors of the outcome.
+}
 
 For \code{mu0}, the first \eqn{p} elements correspond to coefficients for the
 \eqn{p} additional predictors (if none, \eqn{p = 0}), while elements

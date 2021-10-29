@@ -1014,22 +1014,33 @@ Sldax <- function(nvocab, topics, theta, beta, ntopics = 2.0, alpha = 1.0,
 #'
 #' Obtain parameter estimates, model goodness-of-fit metrics, and posterior summaries.
 #'
-#' `get_zbar()` computes empirical topic proportions from slot `@topics`.
-#' `est_theta()` estimates the mean or median theta matrix.
-#' `est_beta()` estimates the mean or median beta matrix.
-#' `get_toptopics()` creates a [`tibble`][tibble::tibble()] of the topic
+#' + `get_zbar()` computes empirical topic proportions from slot `@topics`.
+#'
+#' + `est_theta()` estimates the mean or median theta matrix.
+#'
+#' + `est_beta()` estimates the mean or median beta matrix.
+#'
+#' + `get_toptopics()` creates a [`tibble`][tibble::tibble()] of the topic
 #'    proportion estimates for the top `ntopics` topics per document sorted by
 #'    probability.
-#' `get_topwords()` creates a [`tibble`][tibble::tibble()] of topics and the
+#'
+#' + `get_topwords()` creates a [`tibble`][tibble::tibble()] of topics and the
 #'    top `nwords` words per topic sorted by probability or term score.
-#' `get_coherence()` computes the coherence metric for each topic (see Mimno,
+#'
+#' + `get_coherence()` computes the coherence metric for each topic (see Mimno,
 #'    Wallach, Talley, Leenders, & McCallum, 2011).
-#' `get_exclusivity()` computes the exclusivity metric for each topic (see
+#'
+#' + `get_exclusivity()` computes the exclusivity metric for each topic (see
 #'    Roberts, Stewart, & Airoldi, 2013).
-#' `post_regression()` creates a [`coda::mcmc`][coda::mcmc] object
+#'
+#' + `post_regression()` creates a [`coda::mcmc`][coda::mcmc] object
 #' containing posterior information for the regression model parameters.
-#' `gg_coef()` plots regression coefficients (Warning: this function is
-#'    deprecated. See `help("Deprecated")`.
+#'
+#' + `gg_coef()` plots regression coefficients
+#'
+#'   + Warning: this function is deprecated.
+#'
+#'   + See `help("Deprecated")`.
 #'
 #' @name sldax-summary
 NULL
@@ -1142,8 +1153,8 @@ setGeneric("est_theta",
 
 #' Create generic `get_coherence` function for class
 #'
-#' @param beta_ A \eqn{K} x \eqn{V} matrix of word-topic probabilities. Can be
-#'   computed using [`est_beta()`][est_beta()]. Each row sums to 1.
+#' @param beta_ A \eqn{K} x \eqn{V} matrix of word-topic probabilities.
+#'   Each row sums to 1.
 #' @param docs The \eqn{D} x max(\eqn{N_d}) matrix of documents (word indices)
 #'   used to fit the [Sldax-class] model.
 #' @param nwords The number of highest-probability words per topic to consider where

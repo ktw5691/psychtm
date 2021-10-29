@@ -128,8 +128,7 @@ constant).}
 
 \item{p_eff}{The effective number of parameters.}
 
-\item{lpd}{A nchain x ndocs matrix of predictive posterior likelihoods (NOT
-log-likelihoods).}
+\item{lpd}{A nchain x ndocs matrix of predictive posterior likelihoods.}
 }
 \value{
 A \linkS4class{Model} object.
@@ -166,8 +165,7 @@ constant).}
 
 \item{\code{p_eff}}{The effective number of parameters.}
 
-\item{\code{lpd}}{A nchain x ndocs matrix of predictive posterior likelihoods (NOT
-log-likelihoods).}
+\item{\code{lpd}}{A nchain x ndocs matrix of predictive posterior likelihoods.}
 
 \item{\code{extra}}{A list of additional model fitting information. Contains
 time_elapsed, start_time, end_time, corrected_label_switching, and call.}

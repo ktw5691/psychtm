@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{prep_docs}
 \alias{prep_docs}
-\title{Prepare documents in a data frame for modeling using \code{\link[=gibbs_sldax]{gibbs_sldax()}}}
+\title{Prepare documents in a data frame for modeling}
 \usage{
 prep_docs(data, col, lower = TRUE)
 }

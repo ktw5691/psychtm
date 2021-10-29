@@ -28,9 +28,8 @@
 //' @param b0 The scale parameter for the prior on sigma2 (default: `0.001`)
 //' @param verbose Should parameter draws be output during sampling? (default:
 //'   `false`).
-//' @param display_progress Should percent progress of sampler be displayed
-//'   (default: `false`). Recommended that only one of `verbose` and
-//'   `display_progress` be set to `true` at any given time.
+//' @param display_progress Show progress bar? (default: `false`). Do not use
+//'   with `verbose = true`.
 //'
 //' @return An object of class `Mlr`.
 //'

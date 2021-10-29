@@ -74,8 +74,8 @@ gg_coef(mcmc_fit, burn = 0L, thin = 1L, stat = "mean", errorbw = 0.5)
 
 \item{stat}{The summary statistic to use on the posterior draws (default: \code{"mean"}).}
 
-\item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities. Can be
-computed using \code{\link[=est_beta]{est_beta()}}. Each row sums to 1.}
+\item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities.
+Each row sums to 1.}
 
 \item{docs}{The \eqn{D} x max(\eqn{N_d}) matrix of documents (word indices)
 used to fit the \linkS4class{Sldax} model.}
@@ -126,22 +126,27 @@ For SLDA or SLDAX models, label switching is handled during estimation in the
 is not addressed by this function.
 }
 \details{
-\code{get_zbar()} computes empirical topic proportions from slot \verb{@topics}.
-\code{est_theta()} estimates the mean or median theta matrix.
-\code{est_beta()} estimates the mean or median beta matrix.
-\code{get_toptopics()} creates a \code{\link[tibble:tibble]{tibble}} of the topic
+\itemize{
+\item \code{get_zbar()} computes empirical topic proportions from slot \verb{@topics}.
+\item \code{est_theta()} estimates the mean or median theta matrix.
+\item \code{est_beta()} estimates the mean or median beta matrix.
+\item \code{get_toptopics()} creates a \code{\link[tibble:tibble]{tibble}} of the topic
 proportion estimates for the top \code{ntopics} topics per document sorted by
 probability.
-\code{get_topwords()} creates a \code{\link[tibble:tibble]{tibble}} of topics and the
+\item \code{get_topwords()} creates a \code{\link[tibble:tibble]{tibble}} of topics and the
 top \code{nwords} words per topic sorted by probability or term score.
-\code{get_coherence()} computes the coherence metric for each topic (see Mimno,
+\item \code{get_coherence()} computes the coherence metric for each topic (see Mimno,
 Wallach, Talley, Leenders, & McCallum, 2011).
-\code{get_exclusivity()} computes the exclusivity metric for each topic (see
+\item \code{get_exclusivity()} computes the exclusivity metric for each topic (see
 Roberts, Stewart, & Airoldi, 2013).
-\code{post_regression()} creates a \code{\link[coda:mcmc]{coda::mcmc}} object
+\item \code{post_regression()} creates a \code{\link[coda:mcmc]{coda::mcmc}} object
 containing posterior information for the regression model parameters.
-\code{gg_coef()} plots regression coefficients (Warning: this function is
-deprecated. See \code{help("Deprecated")}.
+\item \code{gg_coef()} plots regression coefficients
+\itemize{
+\item Warning: this function is deprecated.
+\item See \code{help("Deprecated")}.
+}
+}
 }
 \examples{
 m1 <- Sldax(ndocs = 1, nvocab = 2,

@@ -48,9 +48,8 @@ regression coefficients, N(0, \code{proposal_sd}(j)), \eqn{j = 1, \ldots, p}
 \item{verbose}{Should parameter draws be output during sampling? (default:
 \code{FALSE}).}
 
-\item{display_progress}{Should percent progress of sampler be displayed
-(default: \code{FALSE}). Recommended that only one of \code{verbose} and
-\code{display_progress} be set to \code{TRUE} at any given time.}
+\item{display_progress}{Show progress bar? (default: \code{FALSE}). Do not use
+with \code{verbose = TRUE}.}
 }
 \value{
 An object of class \linkS4class{Logistic}.

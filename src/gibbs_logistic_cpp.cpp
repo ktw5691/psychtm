@@ -28,9 +28,8 @@
 //'   regression coefficients, N(0, `proposal_sd`) (default: `2.38, ..., 2.38`).
 //' @param verbose Should parameter draws be output during sampling? (default:
 //'   `false`).
-//' @param display_progress Should percent progress of sampler be displayed
-//'   (default: `false`). Recommended that only one of `verbose` and
-//'   `display_progress` be set to `true` at any given time.
+//' @param display_progress Show progress bar? (default: `false`). Do not use
+//'   with `verbose = true`.
 //'
 //' @return An object of class Logistic.
 //'

@@ -125,9 +125,8 @@
 #'   regression coefficients, N(0, `proposal_sd`) (default: `2.38, ..., 2.38`).
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   `false`).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: `false`). Recommended that only one of `verbose` and
-#'   `display_progress` be set to `true` at any given time.
+#' @param display_progress Show progress bar? (default: `false`). Do not use
+#'   with `verbose = true`.
 #'
 #' @return An object of class Logistic.
 #'
@@ -155,9 +154,8 @@
 #' @param b0 The scale parameter for the prior on sigma2 (default: `0.001`)
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   `false`).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: `false`). Recommended that only one of `verbose` and
-#'   `display_progress` be set to `true` at any given time.
+#' @param display_progress Show progress bar? (default: `false`). Do not use
+#'   with `verbose = true`.
 #'
 #' @return An object of class `Mlr`.
 #'
@@ -214,9 +212,8 @@
 #'   in slot `@topics`. CAUTION: this can be memory-intensive.
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   `false`).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: `false`). Recommended that only one of `verbose` and
-#'   `display_progress` be set to `true` at any given time.
+#' @param display_progress Show progress bar? (default: `false`). Do not use
+#'   with `verbose = true`.
 #'
 #' @noRd
 .gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 1.0, gamma_ = 1.0, constrain_eta = FALSE, sample_beta = TRUE, sample_theta = TRUE, return_assignments = FALSE, verbose = FALSE, display_progress = FALSE) {

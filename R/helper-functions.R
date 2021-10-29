@@ -16,14 +16,19 @@
 #' values for `eta_start`, be sure that the length of `eta_start` is
 #' correct.
 #'
-#' For `model`, one of `c("lda", "slda", "sldax", "slda_logit",
-#' "sldax_logit")` are possible. `"lda"`: unsupervised topic model;
-#' `"slda"`: supervised topic model with a continuous outcome;
-#' `"sldax"`: supervised topic model with a continuous outcome and
-#' additional predictors of the outcome; `"slda_logit"`: supervised topic
-#' model with a dichotomous outcome (0/1); `"sldax_logit"`: supervised
-#' topic model with a dichotomous outcome (0/1) and additional predictors of the
-#' outcome.
+#' For `model`, one of `c("lda", "slda", "sldax", "slda_logit", "sldax_logit")`.
+#'
+#' + `"lda"`: unsupervised topic model;
+#'
+#' + `"slda"`: supervised topic model with a continuous outcome;
+#'
+#' + `"sldax"`: supervised topic model with a continuous outcome and
+#'   additional predictors of the outcome;
+#'
+#' + `"slda_logit"`: supervised topic model with a dichotomous outcome (0/1);
+#'
+#' + `"sldax_logit"`: supervised topic model with a dichotomous outcome (0/1)
+#'   and additional predictors of the outcome.
 #'
 #' For `mu0`, the first \eqn{p} elements correspond to coefficients for the
 #' \eqn{p} additional predictors (if none, \eqn{p = 0}), while elements
@@ -91,9 +96,8 @@
 #'   posterior? (default = `TRUE`).
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   `FALSE`).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: `FALSE`). Recommended that only one of `verbose` and
-#'   `display_progress` be set to `TRUE` at any given time.
+#' @param display_progress Show progress bar? (default: `FALSE`). Do not use
+#'   with `verbose = TRUE`.
 #'
 #' @return An object of class [Sldax-class].
 #' @family Gibbs sampler
@@ -456,9 +460,8 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   coefficients.
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   `FALSE`).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: `FALSE`). Recommended that only one of `verbose` and
-#'   `display_progress` be set to `TRUE` at any given time.
+#' @param display_progress Show progress bar? (default: `FALSE`). Do not use
+#'   with `verbose = TRUE`.
 #'
 #' @return An object of class [Mlr-class].
 #' @family Gibbs sampler
@@ -568,9 +571,8 @@ gibbs_mlr <- function(formula, data, m = 100, burn = 0, thin = 1,
 #'   (default: `2.38` for all coefficients).
 #' @param verbose Should parameter draws be output during sampling? (default:
 #'   `FALSE`).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: `FALSE`). Recommended that only one of `verbose` and
-#'   `display_progress` be set to `TRUE` at any given time.
+#' @param display_progress Show progress bar? (default: `FALSE`). Do not use
+#'   with `verbose = TRUE`.
 #'
 #' @return An object of class [Logistic-class].
 #' @family Gibbs sampler
@@ -669,7 +671,7 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
   return(res_out)
 }
 
-#' Prepare documents in a data frame for modeling using [`gibbs_sldax()`][gibbs_sldax()]
+#' Prepare documents in a data frame for modeling
 #'
 #' `prep_docs()` takes documents stored as a column of a data frame and
 #'   converts them into a list containing a matrix representation of documents

@@ -13,8 +13,7 @@
 #' @slot waic WAIC (up to an additive constant) on the deviance scale.
 #' @slot se_waic Standard error of the WAIC.
 #' @slot p_eff The effective number of parameters.
-#' @slot lpd A nchain x ndocs matrix of predictive posterior likelihoods (NOT
-#'   log-likelihoods).
+#' @slot lpd A nchain x ndocs matrix of predictive posterior likelihoods.
 #' @slot extra A list of additional model fitting information. Contains
 #'   time_elapsed, start_time, end_time, corrected_label_switching, and call.
 #'
@@ -31,8 +30,7 @@
 #' @param waic WAIC (up to an additive constant) on the deviance scale.
 #' @param se_waic Standard error of the WAIC.
 #' @param p_eff The effective number of parameters.
-#' @param lpd A nchain x ndocs matrix of predictive posterior likelihoods (NOT
-#'   log-likelihoods).
+#' @param lpd A nchain x ndocs matrix of predictive posterior likelihoods.
 #' @param x An `Model` object.
 #' @param value A value to assign to a slot for `x`
 #'
