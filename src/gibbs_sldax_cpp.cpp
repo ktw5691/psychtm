@@ -399,14 +399,14 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           if (interaction_xcol > 0) {
             for (uint16_t k = p - K + 2; k < p + 1; k++) {
               // Force eta components to be in descending order (first is largest) to resolve label switching of topics
-              eta_order = (etac(k - 1) > etac(k)) || (abs(etac(k - 1) - etac(k)) < .000001);
+              eta_order = (etac(k - 1) > etac(k)) || (fabs(etac(k - 1) - etac(k)) < .000001);
               if (!eta_order) break;
             }
           } else {
             for (uint16_t k = p + 1; k < q; k++) {
               // Force eta components to be in descending order (first is largest)
               //   to resolve label switching of topics
-              eta_order = (etac(k - 1) > etac(k)) || (abs(etac(k - 1) - etac(k)) < .000001);
+              eta_order = (etac(k - 1) > etac(k)) || (fabs(etac(k - 1) - etac(k)) < .000001);
               if (!eta_order) break;
             }
           }
