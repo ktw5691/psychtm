@@ -2,7 +2,6 @@ Package: psychtm
 Type: Package
 Title: Text Mining Methods for Psychological Research
 Version: 2021.1.9000
-Date: 2021-10-29
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre", "cph"))
 Description: Provides text mining methods for social science research. The
@@ -12,6 +11,8 @@ Description: Provides text mining methods for social science research. The
     Monte Carlo. A description of the key models and estimation methods is available
     in Wilcox, Jacobucci, Zhang, & Ammerman (2021). <doi:10.31234/osf.io/62tc3>.
 License: LGPL (>= 3)
+URL: https://github.com/ktw5691/psychtm/
+BugReports: https://github.com/ktw5691/psychtm/issues
 Depends: R (>= 3.3.0)
 Imports:
     coda (>= 0.4),
@@ -33,12 +34,13 @@ Suggests:
 LinkingTo: Rcpp (>= 0.11.0),
            RcppArmadillo,
            RcppProgress (>= 0.4.2)
-BugReports: https://github.com/ktw5691/psychtm/issues
-RoxygenNote: 7.1.2
-Roxygen: list(markdown = TRUE)
-Language: en-US
-Encoding: UTF-8
 SystemRequirements: C++11
+VignetteBuilder: knitr
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
 Collate:
     'RcppExports.R'
     'aaa-classes.R'
@@ -51,5 +53,3 @@ Collate:
     'psychtm.R'
     'sldax-methods.R'
     'utils.R'
-VignetteBuilder: knitr
-LazyData: true
