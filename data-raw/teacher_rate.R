@@ -1,6 +1,6 @@
 ## code to prepare `teacher_rate` dataset
 
-dat <- readr::read_csv("../zhzh-text-data/prof1000.stem.gender.csv")
+dat <- readr::read_csv(here::here("~/Library/Mobile Documents/com~apple~CloudDocs/Home/2Current/zhzh-text-data/prof1000.stem.gender.csv"))
 rate_prof <- na.omit(dat)
 rate_prof <- rate_prof %>%
   select(rating, grade, comments)
