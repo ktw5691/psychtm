@@ -9,7 +9,8 @@ sigma0(x) <- value
 \arguments{
 \item{x}{An \code{Model} object.}
 
-\item{value}{Numeric covariance matrix of prior for regression coefficients to assign to slot.}
+\item{value}{Numeric covariance matrix of prior for regression coefficients
+to assign to slot.}
 }
 \value{
 None.

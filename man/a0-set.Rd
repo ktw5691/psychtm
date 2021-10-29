@@ -9,7 +9,8 @@ a0(x) <- value
 \arguments{
 \item{x}{An \code{Mlr} object.}
 
-\item{value}{Numeric shape parameter for residual variance prior to assign to slot.}
+\item{value}{Numeric shape parameter for residual variance prior to assign to
+slot.}
 }
 \value{
 None.

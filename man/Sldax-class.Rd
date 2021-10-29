@@ -18,7 +18,8 @@
 \alias{nvocab,Sldax-method}
 \alias{nvocab<-,Sldax-method}
 \alias{Sldax}
-\title{S4 class to represent a SLDAX general model that inherits from \linkS4class{Mlr} and \linkS4class{Logistic}.}
+\title{S4 class to represent a SLDAX general model that inherits from \linkS4class{Mlr}
+and \linkS4class{Logistic}.}
 \usage{
 \S4method{topics}{Sldax}(x)
 
@@ -77,7 +78,8 @@ fitting functions (see below).}
 A \linkS4class{Sldax} object.
 }
 \description{
-S4 class to represent a SLDAX general model that inherits from \linkS4class{Mlr} and \linkS4class{Logistic}.
+S4 class to represent a SLDAX general model that inherits from \linkS4class{Mlr}
+and \linkS4class{Logistic}.
 
 Helper function (constructor) for \code{Sldax} class
 }

@@ -10,7 +10,8 @@ sigma0(x)
 \item{x}{An \code{Model} object.}
 }
 \value{
-Double matrix of prior variances and covariances for regression coefficients.
+Double matrix of prior variances and covariances for regression
+coefficients.
 }
 \description{
 Create generic \code{sigma0} function for class

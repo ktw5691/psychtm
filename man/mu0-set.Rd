@@ -9,7 +9,8 @@ mu0(x) <- value
 \arguments{
 \item{x}{An \code{Model} object.}
 
-\item{value}{Numeric vector of prior means for regression coefficients to assign to slot.}
+\item{value}{Numeric vector of prior means for regression coefficients to
+assign to slot.}
 }
 \value{
 None.

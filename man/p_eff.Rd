@@ -10,7 +10,8 @@ p_eff(x)
 \item{x}{An \code{Model} object.}
 }
 \value{
-Numeric estimate of the number of effective parameters when computing WAIC.
+Numeric estimate of the number of effective parameters when computing
+WAIC.
 }
 \description{
 Create generic \code{p_eff} function for class

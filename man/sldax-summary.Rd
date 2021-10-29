@@ -68,11 +68,14 @@ gg_coef(mcmc_fit, burn = 0L, thin = 1L, stat = "mean", errorbw = 0.5)
 \arguments{
 \item{mcmc_fit}{An object of class \linkS4class{Sldax}.}
 
-\item{burn}{The number of draws to discard as a burn-in period (default: \code{0}).}
+\item{burn}{The number of draws to discard as a burn-in
+period (default: \code{0}).}
 
-\item{thin}{The number of draws to skip as a thinning period (default: \code{1}; i.e., no thinning).}
+\item{thin}{The number of draws to skip as a thinning
+period (default: \code{1}; i.e., no thinning).}
 
-\item{stat}{The summary statistic to use on the posterior draws (default: \code{"mean"}).}
+\item{stat}{The summary statistic to use on the posterior
+draws (default: \code{"mean"}).}
 
 \item{beta_}{A \eqn{K} x \eqn{V} matrix of word-topic probabilities.
 Each row sums to 1.}
@@ -82,7 +85,8 @@ used to fit the \linkS4class{Sldax} model.}
 
 \item{nwords}{The number of words to retrieve (default: all).}
 
-\item{weight}{The weight (between 0 and 1) to give to exclusivity (near 1) vs. frequency (near 0). (default: \code{0.7})}
+\item{weight}{The weight (between 0 and 1) to give to
+exclusivity (near 1) vs. frequency (near 0). (default: \code{0.7}).}
 
 \item{theta}{A D x K matrix of K topic proportions for all D documents.}
 
@@ -101,7 +105,8 @@ A matrix of topic-word probability estimates.
 
 A matrix of topic proportion estimates.
 
-A numeric vector of coherence scores for each topic (more positive is better).
+A numeric vector of coherence scores for each
+topic (more positive is better).
 
 A numeric vector of exclusivity scores (more positive is better).
 
@@ -111,15 +116,17 @@ A \eqn{K} x \eqn{V} matrix of term-scores (comparable to tf-idf).
 
 A matrix of empirical topic proportions per document.
 
-An object of class \code{\link[coda:mcmc]{coda::mcmc}} summarizing the posterior
-distribution of the regression coefficients and residual variance (if
-applicable). Convenience functions such as \code{\link[coda:summary.mcmc]{summary()}} and
-\code{\link[coda:plot.mcmc]{plot()}} can be used for posterior summarization.
+An object of class \code{\link[coda:mcmc]{coda::mcmc}} summarizing the
+posterior distribution of the regression coefficients and residual
+variance (if applicable). Convenience functions such
+as \code{\link[coda:summary.mcmc]{summary()}} and \code{\link[coda:plot.mcmc]{plot()}}
+can be used for posterior summarization.
 
 A \code{ggplot} object.
 }
 \description{
-Obtain parameter estimates, model goodness-of-fit metrics, and posterior summaries.
+Obtain parameter estimates, model goodness-of-fit metrics, and posterior
+summaries.
 
 For SLDA or SLDAX models, label switching is handled during estimation in the
 \code{\link[=gibbs_sldax]{gibbs_sldax()}} function with argument \code{correct_ls}, so it

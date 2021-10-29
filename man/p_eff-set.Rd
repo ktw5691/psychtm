@@ -9,7 +9,8 @@ p_eff(x) <- value
 \arguments{
 \item{x}{An \code{Model} object.}
 
-\item{value}{Numeric value of effective number of parameters estimate from WAIC to assign to slot.}
+\item{value}{Numeric value of effective number of parameters estimate from
+WAIC to assign to slot.}
 }
 \value{
 None.

@@ -9,7 +9,8 @@ alpha(x) <- value
 \arguments{
 \item{x}{An \code{Sldax} object.}
 
-\item{value}{Numeric parameter for symmetric Dirichlet prior on topic proportions to assign to slot.}
+\item{value}{Numeric parameter for symmetric Dirichlet prior on topic
+proportions to assign to slot.}
 }
 \value{
 None.

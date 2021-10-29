@@ -9,7 +9,8 @@ gamma_(x) <- value
 \arguments{
 \item{x}{An \code{Sldax} object.}
 
-\item{value}{Numeric parameter for symmetric Dirichlet prior on topic-word probabilities to assign to slot.}
+\item{value}{Numeric parameter for symmetric Dirichlet prior on topic-word
+probabilities to assign to slot.}
 }
 \value{
 None.

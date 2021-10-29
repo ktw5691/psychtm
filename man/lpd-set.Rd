@@ -9,7 +9,8 @@ lpd(x) <- value
 \arguments{
 \item{x}{An \code{Model} object.}
 
-\item{value}{Numeric matrix of log predictive densities in each document to assign to slot.}
+\item{value}{Numeric matrix of log predictive densities in each document to
+assign to slot.}
 }
 \value{
 None.

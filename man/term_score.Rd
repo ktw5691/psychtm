@@ -30,6 +30,7 @@ m1 <- gibbs_sldax(rating ~ I(grade - 1), m = 2,
                   V = vocab_len, K = 2, model = "sldax")
 hbeta <- est_beta(m1)
 ts_beta <- term_score(hbeta)
-str(ts_beta) # One row per topic, one column per unique term in the vocabulary
+# One row per topic, one column per unique term in the vocabulary
+str(ts_beta)
 
 }

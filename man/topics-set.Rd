@@ -9,7 +9,8 @@ topics(x) <- value
 \arguments{
 \item{x}{An \code{Sldax} object.}
 
-\item{value}{Integer array of topic assignment draws for each word to assign to slot.}
+\item{value}{Integer array of topic assignment draws for each word to assign
+to slot.}
 }
 \value{
 None.

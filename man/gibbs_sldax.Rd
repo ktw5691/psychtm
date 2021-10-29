@@ -62,11 +62,11 @@ distribution.}
 \item{sample_theta}{A logical (default = \code{TRUE}): If \code{TRUE}, the
 topic proportions will be sampled. CAUTION: This can be memory-intensive.}
 
-\item{interaction_xcol}{EXPERIMENTAL: The column number of the design matrix for
-the additional predictors for which an interaction with the \eqn{K} topics is
-desired (default: \code{-1L}, no interaction). Currently only supports a single
-continuous predictor or a two-category categorical predictor represented as a
-single dummy-coded column.}
+\item{interaction_xcol}{EXPERIMENTAL: The column number of the design matrix
+for the additional predictors for which an interaction with the \eqn{K}
+topics is desired (default: \code{-1L}, no interaction). Currently only supports
+a single continuous predictor or a two-category categorical predictor
+represented as a single dummy-coded column.}
 
 \item{alpha_}{The hyper-parameter for the prior on the topic proportions
 (default: \code{1.0}).}

@@ -9,7 +9,8 @@ eta_start(x) <- value
 \arguments{
 \item{x}{An \code{Model} object.}
 
-\item{value}{Numeric vector of starting values for regression coefficients to assign to slot.}
+\item{value}{Numeric vector of starting values for regression coefficients to
+assign to slot.}
 }
 \value{
 None.
