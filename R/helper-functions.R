@@ -65,11 +65,11 @@
 #'   distribution.
 #' @param sample_theta A logical (default = `TRUE`): If `TRUE`, the
 #'   topic proportions will be sampled. CAUTION: This can be memory-intensive.
-#' @param interaction_xcol EXPERIMENTAL: The column number of the design matrix for
-#'   the additional predictors for which an interaction with the \eqn{K} topics is
-#'   desired (default: `-1L`, no interaction). Currently only supports a single
-#'   continuous predictor or a two-category categorical predictor represented as a
-#'   single dummy-coded column.
+#' @param interaction_xcol EXPERIMENTAL: The column number of the design matrix
+#'   for the additional predictors for which an interaction with the \eqn{K}
+#'   topics is desired (default: `-1L`, no interaction). Currently only supports
+#'   a single continuous predictor or a two-category categorical predictor
+#'   represented as a single dummy-coded column.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
 #'   (default: `1.0`).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
@@ -136,12 +136,15 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 
   # Check for non-negative integers only in docs
   if (any(!is.non_negative_integer(docs)))
-    stop("Invalid elements in 'docs'. 'docs' can only contain non-negative integers")
+    stop("Invalid elements in 'docs'. 'docs' can only contain
+          non-negative integers")
   # Check for documents of at least two words in length in docs
   if (any(apply(docs, 1, function(x) length(x[x > 0])) < 2))
-    stop("Each document (row) in 'docs' must contain at least 2 positive integers")
+    stop("Each document (row) in 'docs' must contain
+          at least 2 positive integers")
   # Check for missing values in documents
-  if (any(is.na(docs))) stop("NA found in 'docs'. Please use 0 instead to indicate unused word positions")
+  if (any(is.na(docs))) stop("NA found in 'docs'. Please use 0 instead to
+                              indicate unused word positions")
 
   # Check that data and docs have same number of observations
   if (model != "lda") {
@@ -342,11 +345,14 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 
   # Check for requirements to correct label switching
   if (isTRUE(correct_ls) & !(isTRUE(sample_beta) & isTRUE(sample_theta)))
-    stop("'sample_beta' and 'sample_theta' must both be TRUE to correct label switching")
+    stop("'sample_beta' and 'sample_theta' must both be TRUE to correct
+          label switching")
 
-  # TODO: Currently does not handle label switching correction when topic-covariate interaction specified
+  # TODO: Currently does not handle label switching correction when
+  #       topic-covariate interaction specified
   if (isTRUE(correct_ls) & isFALSE(interaction_xcol < 1))
-    stop("Label switching correction is not currently supported for models with topic-covariate interactions")
+    stop("Label switching correction is not currently supported for models with
+          topic-covariate interactions")
 
   res_out <- tryCatch({
     res <- .gibbs_sldax_cpp(docs = docs, V = V, m = m, burn = burn, thin = thin,
@@ -367,36 +373,51 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
       }
       else {
         colnames(eta(res)) <- c(colnames(x), paste0("topic", seq_len(K)),
-                                paste0(colnames(x)[interaction_xcol], ":topic",  seq_len(K - 1)))
+                                paste0(colnames(x)[interaction_xcol], ":topic",
+                                       seq_len(K - 1)))
       }
     } else if (model %in% c(2, 4)) {
       colnames(eta(res)) <- paste0("topic", seq_len(K))
     }
 
     # Correct label switching; requires sampling theta and beta
-    #   TODO: Label switching not implemented for models with topic-covariate interactions
+    #   TODO: Label switching not implemented for models with topic-covariate
+    #         interactions
     correct_label_switch <- FALSE
     if (correct_ls) {
       # relabel_out$permutations is Nchain x K array of permutation indices
-      relabel_out = label.switching::stephens(aperm(theta(res), c(3, 1, 2)), maxiter = 100) # First arg needs to be Nchain x D x K array
+      # First arg to label.switching::stephens needs to be Nchain x D x K array
+      relabel_out <- label.switching::stephens(
+        aperm(theta(res), c(3, 1, 2)), maxiter = 100)
       if (relabel_out$iterations >= 100) {
-        warning("Relabeling failed to converge, no label switching correction applied.")
+        warning("Relabeling failed to converge, no label switching
+                 correction applied.")
       } else {
         # Permute theta
-        perm_theta <- label.switching::permute.mcmc(aperm(theta(res), c(3, 2, 1)), relabel_out$permutations) # First arg needs to be Nchain x K x npar array; npar won't be swapped, but rows (K) will be permuted
-        perm_theta <- aperm(perm_theta$output, c(3, 2, 1)) # Return to D x K x Nchain format
+        # First arg to label.switching::permute.mcmc needs to be
+        #   Nchain x K x npar array
+        # npar won't be swapped, but rows (K) will be permuted
+        perm_theta <- label.switching::permute.mcmc(
+          aperm(theta(res), c(3, 2, 1)), relabel_out$permutations)
+        # Return to D x K x Nchain format
+        perm_theta <- aperm(perm_theta$output, c(3, 2, 1))
         theta(res) <- perm_theta
         rm(perm_theta)
 
         # Permute beta
-        perm_beta <- label.switching::permute.mcmc(aperm(beta_(res), c(3, 1, 2)), relabel_out$permutations)
-        perm_beta <- aperm(perm_beta$output, c(2, 3, 1)) # Return to K x V x Nchain format
+        perm_beta <- label.switching::permute.mcmc(
+          aperm(beta_(res), c(3, 1, 2)), relabel_out$permutations)
+        # Return to K x V x Nchain format
+        perm_beta <- aperm(perm_beta$output, c(2, 3, 1))
         beta_(res) <- perm_beta
         rm(perm_beta)
 
         if (model != 1) { # Skip for LDA model
           # Permute eta for topics
-          perm_eta <- label.switching::permute.mcmc(array(eta(res)[, seq(p + 1, q_)], dim = c(nchain(res), K, 1)), relabel_out$permutations)
+          perm_eta <- label.switching::permute.mcmc(
+            array(eta(res)[, seq(p + 1, q_)],
+                  dim = c(nchain(res), K, 1)),
+            relabel_out$permutations)
           perm_eta <- array(perm_eta$output, c(nchain(res), K))
           eta(res)[, seq(p + 1, q_)] <- perm_eta
           rm(perm_eta)
@@ -407,11 +428,16 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
           perm_z <- topics(res)
           for (iter in seq_len(nchain(res))) {
             perm_i <- relabel_out$permutations[iter, ]
-            if (isTRUE(all.equal(seq_len(K), perm_i))) next # No change needed, go to next sample
-            old_z <- perm_z[, , iter] # Original draws to check
+            if (isTRUE(all.equal(seq_len(K), perm_i)))
+              # No change needed, go to next sample
+              next
+            # Original draws to check
+            old_z <- perm_z[, , iter]
             for (k in seq_len(K)) {
-              new_index = perm_i[k]
-              if (new_index == k) next # Index does not need to change for this topic, go to next topic
+              new_index <- perm_i[k]
+              if (new_index == k)
+                # Index does not need to change for this topic, go to next topic
+                next
               perm_z[, , iter][old_z == k] <- new_index
             }
           }
@@ -448,8 +474,10 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 #' description of the model to be fitted.
 #' @param data An optional data frame containing the variables in the model.
 #' @param m The number of iterations to run the Gibbs sampler (default: `100`).
-#' @param burn The number of iterations to discard as the burn-in period (default: `0`).
-#' @param thin The period of iterations to keep after the burn-in period (default: `1`).
+#' @param burn The number of iterations to discard as the burn-in
+#'   period (default: `0`).
+#' @param thin The period of iterations to keep after the burn-in
+#'   period (default: `1`).
 #' @param mu0 An optional p x 1 mean vector for the prior on the regression
 #'   coefficients. See 'Details'.
 #' @param sigma0 A p x p variance-covariance matrix for the prior on the
@@ -716,7 +744,7 @@ prep_docs <- function(data, col, lower = TRUE) {
   text_prep <- lda::lexicalize(unlist(data[, col]), lower = lower)
 
   # Get length of longest document
-  doc_lens <- sapply(text_prep$documents, NCOL)
+  doc_lens <- vapply(text_prep$documents, NCOL, FUN.VALUE = 0L)
   # Integer matrix
   docs <- matrix(0L, nrow = ndoc, ncol = max(doc_lens))
   for (d in seq_len(ndoc)) {
@@ -753,7 +781,8 @@ prep_docs <- function(data, col, lower = TRUE) {
 #'                   V = vocab_len, K = 2, model = "sldax")
 #' hbeta <- est_beta(m1)
 #' ts_beta <- term_score(hbeta)
-#' str(ts_beta) # One row per topic, one column per unique term in the vocabulary
+#' # One row per topic, one column per unique term in the vocabulary
+#' str(ts_beta)
 #'
 #' @export
 term_score <- function(beta_) {

@@ -49,9 +49,11 @@ setMethod("get_coherence",
               # M most probable words for topic k
               wordsMk_vec <- unlist(topM[topM$topic == k, "word"])
 
-              # Initialize document frequency of word presence to 0 (max is log(D))
+              # Initialize document frequency of word presence
+              #   to 0 (max is log(D))
               log_corpusM <- numeric(nwords)
-              # Compute log of frequency of topic k's M most frequent words in corpus
+              # Compute log of frequency of topic k's M most frequent words
+              #   in corpus
               for (m in seq_len(nwords)) {
                 log_corpusM[m] <- log(
                   sum(
@@ -63,9 +65,13 @@ setMethod("get_coherence",
               # Compute coherence for topic k
               for (l in 2:nwords) {
                 for (j in seq_len(l - 1)) {
-                  # Count presence of co-occurences of two words (1 or 0 for each document) in corpus; range is 0 to D
+                  # Count presence of co-occurences of two words (1 or 0 for
+                  #   each document) in corpus; range is 0 to D
                   d_lj <- sum(
-                    apply(docs, 1, function(x) as.integer( (wordsMk_vec[l] %in% x) & (wordsMk_vec[j] %in% x)))
+                    apply(
+                      docs, 1, function(x) as.integer(
+                        (wordsMk_vec[l] %in% x) & (wordsMk_vec[j] %in% x))
+                    )
                   )
                   temp_score <- temp_score + log(d_lj + 1) - log_corpusM[j]
                 }
@@ -86,24 +92,30 @@ setMethod("get_exclusivity",
 
             # Unnormalized marginal word probabilities across topics
             sum_over_topics <- colSums(beta_)
-            # Divide each word-topic probability by the marginal word probabilities (unnormalized)
+            # Divide each word-topic probability by the marginal word
+            #   probabilities (unnormalized)
             ex_temp <- beta_ %*% diag(1 / sum_over_topics) # K x V
             # Exclusivity
-            #   V x K matrix of empirical CDF of weighted word probabilities for each topic
+            #   V x K matrix of empirical CDF of weighted word probabilities for
+            #   each topic
             exc <- apply(ex_temp, 1, rank) / V
             exc <- 1 / exc
             # Frequency
-            #   V x K matrix of empirical CDF of word probabilities for each topic
+            #   V x K matrix of empirical CDF of word probabilities for each
+            #   topic
             fre <- apply(beta_, 1, rank) / V
             fre <- 1 / fre
-            # Compute FREX as weighted harmonic mean of frequency and exclusivity
+            # Compute FREX as weighted harmonic mean of frequency and
+            #   exclusivity
             #   V x K matrix of FREX values
             frex <- weight * exc + (1 - weight) * fre
             frex <- 1 / frex
 
             # Get top M word indices per topic
-            ind <- apply(beta_, 1, order, decreasing = TRUE)[seq_len(nwords), ] # M x K matrix
-            # For M most probable words per topic, compute sum of M corresponding FREX scores
+            # M x K matrix
+            ind <- apply(beta_, 1, order, decreasing = TRUE)[seq_len(nwords), ]
+            # For M most probable words per topic, compute sum of M
+            #   corresponding FREX scores
             frex_scores <- numeric(K)
             for (k in seq_len(K)) frex_scores[k] <- sum(frex[ind[, k], k])
             return(frex_scores)
@@ -195,15 +207,19 @@ setMethod("get_zbar",
             topics[topics == 0] <- NA
 
             # Median topic draw for each word and doc
-            if (!is.null(dim(topics)) && length(dim(topics)) == 3L && dim(topics)[3] > 1L) {
-              z_med <- apply(topics, c(1, 2),
-                             function(x) round(median(x, na.rm = TRUE), 0))
+            if (!is.null(dim(topics)) &&
+                length(dim(topics)) == 3L &&
+                dim(topics)[3] > 1L) {
+              z_med <- apply(
+                topics, c(1, 2), function(x) round(median(x, na.rm = TRUE), 0))
             } else {
               z_med <- topics
             }
 
             ntopic <- ntopics(mcmc_fit)
-            if (!is.null(dim(topics)) && length(dim(topics)) == 3 && dim(topics)[3] > 1L) {
+            if (!is.null(dim(topics)) &&
+                length(dim(topics)) == 3 &&
+                dim(topics)[3] > 1L) {
               doc_lengths <- apply(topics[, , 1], 1, function(x) sum(!is.na(x)))
               zbar <- t(apply(z_med, 1, tabulate, nbins = ntopic)) / doc_lengths
             } else {
@@ -261,20 +277,24 @@ setMethod("post_regression",
 
             # Obtain topic coefficient contrasts
             k <- ntopics(mcmc_fit)
-            cm <- (diag(k, nrow = k) - matrix(rep(1, k ^ 2), nrow = k)) / (k - 1)
+            cm <- ( diag(k, nrow = k) - matrix(rep(1, k ^ 2), nrow = k) ) /
+              (k - 1)
             # Number of predictors NOT INCLUDING topics
             n_covs <- ncol(eta(mcmc_fit)) - k
             # Topic "effects" or contrasts
-            effectm <- crossprod(t(eta(mcmc_fit))[seq(n_covs + 1, n_covs + k), ], cm)
+            effectm <- crossprod(
+              t(eta(mcmc_fit))[seq(n_covs + 1, n_covs + k), ], cm)
             colnames(effectm) <- paste0("effect_t", seq_len(k))
 
             if (extra(mcmc_fit)$call$model %in% c("slda", "sldax")) {
-              mcmc_out <- coda::mcmc(cbind(eta(mcmc_fit), effectm, sigma2(mcmc_fit)),
-                                     start = burn + 1, thin = thin)
+              mcmc_out <- coda::mcmc(
+                cbind(eta(mcmc_fit), effectm, sigma2(mcmc_fit)),
+                start = burn + 1, thin = thin)
               colnames(mcmc_out)[ncol(mcmc_out)] <- "sigma2"
             } else {
-              mcmc_out <- coda::mcmc(cbind(eta(mcmc_fit), effectm),
-                                     start = burn + 1, thin = thin)
+              mcmc_out <- coda::mcmc(
+                cbind(eta(mcmc_fit), effectm),
+                start = burn + 1, thin = thin)
             }
 
             return(mcmc_out)

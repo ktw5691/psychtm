@@ -34,9 +34,11 @@ setGeneric("gg_coef",
              if (!is(mcmc_fit, "Sldax"))
                stop("'mcmc_fit' must be an Sldax object.")
 
-             if ( !is.non_negative_integer(burn) ) stop("'burn' must be a non-negative integer.")
+             if ( !is.non_negative_integer(burn) )
+               stop("'burn' must be a non-negative integer.")
 
-             if ( !is.positive_integer(thin) ) stop("'thin' must be a positive integer.")
+             if ( !is.positive_integer(thin) )
+               stop("'thin' must be a positive integer.")
 
              m <- nchain(mcmc_fit)
              if (burn >= m)
@@ -46,7 +48,8 @@ setGeneric("gg_coef",
 
              if (length(stat) > 1) {
                stat <- stat[1]
-               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
+               message("Multiple arguments were supplied to 'stat'. Only using
+                        the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
@@ -105,7 +108,8 @@ setMethod("gg_coef",
               dplyr::ungroup(
                 dplyr::mutate(
                   dplyr::rowwise(coefs),
-                  sig = dplyr::if_else(.data$lbcl > 0 | .data$ubcl < 0, "Yes", "No"))),
+                  sig = dplyr::if_else(
+                    .data$lbcl > 0 | .data$ubcl < 0, "Yes", "No"))),
               sig = factor(.data$sig))
 
             ggp <- ggplot2::ggplot(

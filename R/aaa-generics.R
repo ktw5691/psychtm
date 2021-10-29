@@ -91,7 +91,8 @@ setMethod("mu0", "Model", function(x) x@mu0)
 #' Create generic `mu0<-` function for class
 #'
 #' @param x An `Model` object.
-#' @param value Numeric vector of prior means for regression coefficients to assign to slot.
+#' @param value Numeric vector of prior means for regression coefficients to
+#'   assign to slot.
 #'
 #' @return None.
 #'
@@ -111,7 +112,8 @@ setMethod("mu0<-", "Model", function(x, value) {
 #'
 #' @param x An `Model` object.
 #'
-#' @return Double matrix of prior variances and covariances for regression coefficients.
+#' @return Double matrix of prior variances and covariances for regression
+#'   coefficients.
 #'
 #' @examples
 #' m1 <- Model(ndocs = 1)
@@ -125,7 +127,8 @@ setMethod("sigma0", "Model", function(x) x@sigma0)
 #' Create generic `sigma0<-` function for class
 #'
 #' @param x An `Model` object.
-#' @param value Numeric covariance matrix of prior for regression coefficients to assign to slot.
+#' @param value Numeric covariance matrix of prior for regression coefficients
+#'   to assign to slot.
 #'
 #' @return None.
 #' @examples
@@ -159,7 +162,8 @@ setMethod("eta_start", "Model", function(x) x@eta_start)
 #' Create generic `eta_start<-` function for class
 #'
 #' @param x An `Model` object.
-#' @param value Numeric vector of starting values for regression coefficients to assign to slot.
+#' @param value Numeric vector of starting values for regression coefficients to
+#'   assign to slot.
 #'
 #' @return None.
 #' @examples
@@ -349,7 +353,8 @@ setMethod("se_waic<-", "Model", function(x, value) {
 #'
 #' @param x An `Model` object.
 #'
-#' @return Numeric estimate of the number of effective parameters when computing WAIC.
+#' @return Numeric estimate of the number of effective parameters when computing
+#'   WAIC.
 #'
 #' @examples
 #' m1 <- Model(ndocs = 1)
@@ -363,7 +368,8 @@ setMethod("p_eff", "Model", function(x) x@p_eff)
 #' Create generic `p_eff<-` function for class
 #'
 #' @param x An `Model` object.
-#' @param value Numeric value of effective number of parameters estimate from WAIC to assign to slot.
+#' @param value Numeric value of effective number of parameters estimate from
+#'   WAIC to assign to slot.
 #'
 #' @return None.
 #'
@@ -397,7 +403,8 @@ setMethod("lpd", "Model", function(x) x@lpd)
 #' Create generic `lpd<-` function for class
 #'
 #' @param x An `Model` object.
-#' @param value Numeric matrix of log predictive densities in each document to assign to slot.
+#' @param value Numeric matrix of log predictive densities in each document to
+#'   assign to slot.
 #'
 #' @return None.
 #'
@@ -494,7 +501,8 @@ setValidity("Model", function(object) {
               (length(object@mu0) != ncol(object@eta)) |
               (length(object@mu0) != nrow(object@sigma0)) |
               (length(object@mu0) != ncol(object@sigma0))) {
-    "@mu0, @eta_start, and @eta should all have the same length which should be equal to the number of rows and columns in @sigma0"
+    "@mu0, @eta_start, and @eta should all have the same length which should be
+      equal to the number of rows and columns in @sigma0"
   } else {
     TRUE
   }
@@ -556,7 +564,8 @@ setMethod("a0", "Mlr", function(x) x@a0)
 #' Create generic `a0<-` function for class
 #'
 #' @param x An `Mlr` object.
-#' @param value Numeric shape parameter for residual variance prior to assign to slot.
+#' @param value Numeric shape parameter for residual variance prior to assign to
+#'   slot.
 #'
 #' @return None.
 #'
@@ -590,7 +599,8 @@ setMethod("b0", "Mlr", function(x) x@b0)
 #' Create generic `b0<-` function for class
 #'
 #' @param x An `Mlr` object.
-#' @param value Numeric value of rate parameter for residual variance prior to assign to slot.
+#' @param value Numeric value of rate parameter for residual variance prior to
+#'   assign to slot.
 #'
 #' @return None.
 #'
@@ -652,7 +662,8 @@ setMethod("proposal_sd", "Logistic", function(x) x@proposal_sd)
 #' Create generic `proposal_sd<-` function for class
 #'
 #' @param x An `Logistic` object.
-#' @param value Numeric vector of scale parameters for Metropolis sampling of regression coefficients to assign to slot.
+#' @param value Numeric vector of scale parameters for Metropolis sampling of
+#'   regression coefficients to assign to slot.
 #'
 #' @return None.
 #'
@@ -716,7 +727,8 @@ setMethod("topics", "Sldax", function(x) x@topics)
 #' Create generic `topics<-` function for class
 #'
 #' @param x An `Sldax` object.
-#' @param value Integer array of topic assignment draws for each word to assign to slot.
+#' @param value Integer array of topic assignment draws for each word to assign
+#'   to slot.
 #'
 #' @return None.
 #'
@@ -839,7 +851,8 @@ setMethod("gamma_", "Sldax", function(x) x@gamma)
 #' Create generic `gamma_<-` function for class
 #'
 #' @param x An `Sldax` object.
-#' @param value Numeric parameter for symmetric Dirichlet prior on topic-word probabilities to assign to slot.
+#' @param value Numeric parameter for symmetric Dirichlet prior on topic-word
+#'   probabilities to assign to slot.
 #'
 #' @return None.
 #'
@@ -880,7 +893,8 @@ setMethod("alpha", "Sldax", function(x) x@alpha)
 #' Create generic `alpha<-` function for class
 #'
 #' @param x An `Sldax` object.
-#' @param value Numeric parameter for symmetric Dirichlet prior on topic proportions to assign to slot.
+#' @param value Numeric parameter for symmetric Dirichlet prior on topic
+#'   proportions to assign to slot.
 #'
 #' @return None.
 #'
@@ -1012,7 +1026,8 @@ Sldax <- function(nvocab, topics, theta, beta, ntopics = 2.0, alpha = 1.0,
 
 #' Summary functions for objects of class [Sldax-class]
 #'
-#' Obtain parameter estimates, model goodness-of-fit metrics, and posterior summaries.
+#' Obtain parameter estimates, model goodness-of-fit metrics, and posterior
+#'   summaries.
 #'
 #' + `get_zbar()` computes empirical topic proportions from slot `@topics`.
 #'
@@ -1048,9 +1063,12 @@ NULL
 #' Create generic `est_beta` function for class
 #'
 #' @param mcmc_fit An object of class [Sldax-class].
-#' @param burn The number of draws to discard as a burn-in period (default: `0`).
-#' @param thin The number of draws to skip as a thinning period (default: `1`; i.e., no thinning).
-#' @param stat The summary statistic to use on the posterior draws (default: `"mean"`).
+#' @param burn The number of draws to discard as a burn-in
+#'   period (default: `0`).
+#' @param thin The number of draws to skip as a thinning
+#'   period (default: `1`; i.e., no thinning).
+#' @param stat The summary statistic to use on the posterior
+#'   draws (default: `"mean"`).
 #'
 #' @return A matrix of topic-word probability estimates.
 #'
@@ -1072,10 +1090,13 @@ setGeneric("est_beta",
                stop("'mcmc_fit' must be an Sldax object.")
 
              if (length(dim(beta_(mcmc_fit))) != 3)
-               stop("Only one draw of 'beta' available, so this function is not useful.")
+               stop("Only one draw of 'beta' available, so this function is
+                     not useful.")
 
-             if ( !is.non_negative_integer(burn) ) stop("'burn' must be a non-negative integer.")
-             if ( !is.positive_integer(thin) ) stop("'thin' must be a positive integer.")
+             if ( !is.non_negative_integer(burn) )
+               stop("'burn' must be a non-negative integer.")
+             if ( !is.positive_integer(thin) )
+               stop("'thin' must be a positive integer.")
 
              m <- nchain(mcmc_fit)
              if (burn >= m)
@@ -1085,7 +1106,8 @@ setGeneric("est_beta",
 
              if (length(stat) > 1) {
                stat <- stat[1]
-               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
+               message("Multiple arguments were supplied to 'stat'.
+                       Only using the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
@@ -1130,10 +1152,13 @@ setGeneric("est_theta",
                stop("'mcmc_fit' must be an Sldax object.")
 
              if (length(dim(theta(mcmc_fit))) != 3)
-               stop("Only one draw of 'theta' available, so this function is not useful.")
+               stop("Only one draw of 'theta' available, so this function is
+                     not useful.")
 
-             if ( !is.non_negative_integer(burn) ) stop("'burn' must be a non-negative integer.")
-             if ( !is.positive_integer(thin) ) stop("'thin' must be a positive integer.")
+             if ( !is.non_negative_integer(burn) )
+               stop("'burn' must be a non-negative integer.")
+             if ( !is.positive_integer(thin) )
+               stop("'thin' must be a positive integer.")
 
              m <- nchain(mcmc_fit)
              if (burn >= m)
@@ -1143,7 +1168,8 @@ setGeneric("est_theta",
 
              if (length(stat) > 1) {
                stat <- stat[1]
-               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
+               message("Multiple arguments were supplied to 'stat'. Only using
+                        the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
@@ -1157,10 +1183,12 @@ setGeneric("est_theta",
 #'   Each row sums to 1.
 #' @param docs The \eqn{D} x max(\eqn{N_d}) matrix of documents (word indices)
 #'   used to fit the [Sldax-class] model.
-#' @param nwords The number of highest-probability words per topic to consider where
-#'   \eqn{M \le V} and \eqn{V} is the size of the corpus vocabulary. (default: `10`)
+#' @param nwords The number of highest-probability words per topic to consider
+#'   where \eqn{M \le V} and \eqn{V} is the size of the corpus
+#'   vocabulary. (default: `10`)
 #'
-#' @return A numeric vector of coherence scores for each topic (more positive is better).
+#' @return A numeric vector of coherence scores for each
+#'   topic (more positive is better).
 #'
 #' @examples
 #' mdoc <- matrix(c(1, 2, 2, 1), nrow = 1)
@@ -1184,14 +1212,16 @@ setGeneric("get_coherence",
              if ( length(dim(beta_)) != 2 )
                stop("'beta_' does not appear to be a K x V matrix.")
 
-             if (any(beta_ < 0.0 | beta_ > 1.0)) stop("Entries of 'beta_' must be between 0.0 and 1.0.")
+             if (any(beta_ < 0.0 | beta_ > 1.0))
+               top("Entries of 'beta_' must be between 0.0 and 1.0.")
              sum_rowsum_beta <- sum(rowSums(beta_))
              K <- nrow(beta_)
              tol <- 0.001
              if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
                stop("Rows of 'beta_' must each sum to 1.0.")
 
-             if ( !is.positive_integer(nwords) ) stop("'nwords' must be a positive integer.")
+             if ( !is.positive_integer(nwords) )
+               stop("'nwords' must be a positive integer.")
 
              standardGeneric("get_coherence")
            }
@@ -1199,7 +1229,8 @@ setGeneric("get_coherence",
 
 #' Create generic `get_exclusivity` function for class
 #'
-#' @param weight The weight (between 0 and 1) to give to exclusivity (near 1) vs. frequency (near 0). (default: `0.7`)
+#' @param weight The weight (between 0 and 1) to give to
+#'   exclusivity (near 1) vs. frequency (near 0). (default: `0.7`).
 #'
 #' @return A numeric vector of exclusivity scores (more positive is better).
 #'
@@ -1223,16 +1254,19 @@ setGeneric("get_exclusivity",
              if (length(dim(beta_)) != 2)
                stop("'beta_' does not appear to be a K x V matrix.")
 
-             if (any(beta_ < 0.0 | beta_ > 1.0)) stop("Entries of 'beta_' must be between 0.0 and 1.0.")
+             if (any(beta_ < 0.0 | beta_ > 1.0))
+               stop("Entries of 'beta_' must be between 0.0 and 1.0.")
              sum_rowsum_beta <- sum(rowSums(beta_))
              K <- nrow(beta_)
              tol <- 0.001
              if (sum_rowsum_beta > K + tol | sum_rowsum_beta < K - tol)
                stop("Rows of 'beta_' must each sum to 1.0.")
 
-             if ( !is.positive_integer(nwords) ) stop("'nwords' must be a positive integer.")
+             if ( !is.positive_integer(nwords) )
+               stop("'nwords' must be a positive integer.")
 
-             if ( ((weight >= 1.0) | (weight <= 0.0))) stop("'weight' must be between 0.0 and 1.0.")
+             if ( ((weight >= 1.0) | (weight <= 0.0)))
+               stop("'weight' must be between 0.0 and 1.0.")
 
              standardGeneric("get_exclusivity")
            }
@@ -1270,7 +1304,8 @@ setGeneric("get_toptopics",
 
              if (missing(theta)) stop("Please supply a matrix to 'theta'.")
              if (!is.matrix(theta)) stop("Please supply a matrix to 'theta'.")
-             if (any(theta < 0.0 | theta > 1.0)) stop("Entries of 'theta' must be between 0.0 and 1.0.")
+             if (any(theta < 0.0 | theta > 1.0))
+               stop("Entries of 'theta' must be between 0.0 and 1.0.")
              sum_rowsum_theta <- sum(rowSums(theta))
              d <- nrow(theta)
              K <- ncol(theta)
@@ -1279,7 +1314,8 @@ setGeneric("get_toptopics",
                stop("Rows of 'theta' must each sum to 1.0.")
 
              if (missing(ntopics)) ntopics <- K # Default
-             if ( !is.positive_integer(ntopics) ) stop("'ntopics' must be a positive integer.")
+             if ( !is.positive_integer(ntopics) )
+               stop("'ntopics' must be a positive integer.")
 
              standardGeneric("get_toptopics")
            }
@@ -1324,20 +1360,24 @@ setGeneric("get_topwords",
 
              if (missing(vocab)) {
                vocab <- as.character(seq_len(V))
-               message("'vocab' not supplied. Defaulting to indices 1, 2, ..., V.")
+               message("'vocab' not supplied. Defaulting to
+                        indices 1, 2, ..., V.")
              }
              if (length(vocab) < 2L)
                stop("'vocab' must contain at least two elements.")
              if (length(vocab) != V)
-               stop("The number of elements in 'vocab' should equal the number of columns in 'beta_'.")
+               stop("The number of elements in 'vocab' should equal the number
+                     of columns in 'beta_'.")
              if (!is.character(vocab))
                stop("'vocab' must be a character vector.")
              if (nwords > length(unique(vocab)))
-               stop("'nwords' cannot exceed the number of unique terms in 'vocab'.")
+               stop("'nwords' cannot exceed the number of unique terms
+                     in 'vocab'.")
 
              if (length(method) > 1) {
                method <- method[1]
-               message("Multiple arguments were supplied to 'method'. Only using the first argument.")
+               message("Multiple arguments were supplied to 'method'. Only using
+                        the first argument.")
              }
              if (!(method %in% c("termscore", "prob")))
                stop("'method' must be either 'termscore' or 'prob'.")
@@ -1368,7 +1408,8 @@ setGeneric("get_zbar",
 
              if ( !is.non_negative_integer(burn) )
                stop("'burn' must be a non-negative integer.")
-             if ( !is.positive_integer(thin) ) stop("'thin' must be a positive integer.")
+             if ( !is.positive_integer(thin) )
+               stop("'thin' must be a positiveinteger.")
 
              m <- nchain(mcmc_fit)
              if (burn >= m)
@@ -1380,16 +1421,18 @@ setGeneric("get_zbar",
            }
 )
 
-#' Generic function to summarize regression relationships for `Mlr`, `Logistic`, or `Sldax` objects
+#' Generic function to summarize regression relationships for `Mlr`,
+#'   `Logistic`, or `Sldax` objects
 #'
 #' For SLDA or SLDAX models, label switching is handled during estimation in the
 #' [`gibbs_sldax()`][gibbs_sldax()] function with argument `correct_ls`, so it
 #' is not addressed by this function.
 #'
-#' @return An object of class [`coda::mcmc`][coda::mcmc] summarizing the posterior
-#'   distribution of the regression coefficients and residual variance (if
-#'   applicable). Convenience functions such as [`summary()`][coda::summary.mcmc()] and
-#'   [`plot()`][coda::plot.mcmc()] can be used for posterior summarization.
+#' @return An object of class [`coda::mcmc`][coda::mcmc] summarizing the
+#'   posterior distribution of the regression coefficients and residual
+#'   variance (if applicable). Convenience functions such
+#'   as [`summary()`][coda::summary.mcmc()] and [`plot()`][coda::plot.mcmc()]
+#'   can be used for posterior summarization.
 #'
 #' @examples
 #' data(mtcars)
@@ -1402,16 +1445,21 @@ setGeneric("post_regression",
 
              if (missing(mcmc_fit))
                stop("Please supply an object to 'mcmc_fit'.")
-             if ( !( is(mcmc_fit, "Sldax") | is(mcmc_fit, "Mlr") | is(mcmc_fit, "Logistic")) )
-               stop("'mcmc_fit' must be an `Sldax` or `Mlr` or `Logistic` object.")
+             if ( !( is(mcmc_fit, "Sldax") |
+                     is(mcmc_fit, "Mlr") |
+                     is(mcmc_fit, "Logistic")) )
+               stop("'mcmc_fit' must be an `Sldax` or `Mlr`
+                     or `Logistic` object.")
 
              if ( !is.null(extra(mcmc_fit)$call$model) ) {
                if (extra(mcmc_fit)$call$model == "lda")
-                stop("The `lda` model does not contain regression parameters, so this function is not useful.")
+                stop("The `lda` model does not contain regression parameters,
+                      so this function is not useful.")
              }
 
              if ( nrow(eta(mcmc_fit)) < 2L )
-               stop("Only one draw of 'eta' available, so this function is not useful.")
+               stop("Only one draw of 'eta' available, so this function is
+                     not useful.")
 
              standardGeneric("post_regression")
            }

@@ -124,15 +124,16 @@ test_that("est_beta() handles multiple values for 'stat'", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 1)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
   expect_message(
     est_beta(mcmc_fit = fit, stat = c("mean", "median")),
-    "Multiple arguments were supplied to 'stat'. Only using the first argument.",
+    "Multiple arguments were supplied to 'stat'. Only using the
+     first argument.",
     fixed = TRUE
   )
 })
@@ -149,12 +150,12 @@ test_that("est_beta() handles invalid 'stat'", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 1)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
   expect_error(
     est_beta(mcmc_fit = fit, stat = 1),
     "'stat' must be either 'mean' or 'median'.",
@@ -181,17 +182,19 @@ test_that("est_beta() handles missing 'stat' by defaulting to mean", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 1)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
   for (iter in seq_len(nchain(fit))) {
     for (topic in seq_len(ntopics(fit))) {
       for (word in seq_len(nvocab(fit))) {
-        if (iter == 1) t1[topic, word] <- sum(topics(fit)[, , iter] == topic & docs == word)
-        if (iter == 2) t2[topic, word] <- sum(topics(fit)[, , iter] == topic & docs == word)
+        if (iter == 1) t1[topic, word] <- sum(
+          topics(fit)[, , iter] == topic & docs == word)
+        if (iter == 2) t2[topic, word] <- sum(
+          topics(fit)[, , iter] == topic & docs == word)
       }
     }
   }
@@ -216,17 +219,19 @@ test_that("est_beta() computes median estimate correctly", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 1)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
   for (iter in seq_len(nchain(fit))) {
     for (topic in seq_len(ntopics(fit))) {
       for (word in seq_len(nvocab(fit))) {
-        if (iter == 1) t1[topic, word] <- sum(topics(fit)[, , iter] == topic & docs == word)
-        if (iter == 2) t2[topic, word] <- sum(topics(fit)[, , iter] == topic & docs == word)
+        if (iter == 1) t1[topic, word] <- sum(
+          topics(fit)[, , iter] == topic & docs == word)
+        if (iter == 2) t2[topic, word] <- sum(
+          topics(fit)[, , iter] == topic & docs == word)
       }
     }
   }

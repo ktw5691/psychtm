@@ -120,15 +120,16 @@ test_that("est_theta() handles multiple values for 'stat'", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 2)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
   expect_message(
     est_theta(mcmc_fit = fit, stat = c("mean", "median")),
-    "Multiple arguments were supplied to 'stat'. Only using the first argument.",
+    "Multiple arguments were supplied to 'stat'. Only using the
+     first argument.",
     fixed = TRUE
   )
 })
@@ -147,12 +148,12 @@ test_that("est_theta() handles invalid 'stat'", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 2)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
   expect_error(
     est_theta(mcmc_fit = fit, stat = 1),
     "'stat' must be either 'mean' or 'median'.",
@@ -180,12 +181,12 @@ test_that("est_theta() handles missing 'stat' by defaulting to mean", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 2)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
 
   for (iter in seq_len(nchain(fit))) {
     for (topic in seq_len(ntopics(fit))) {
@@ -219,12 +220,12 @@ test_that("est_theta() correctly computes median", {
   eta <- matrix(c(1, -1, 1, -1), byrow = TRUE, nrow = 2)
   lpd <- matrix(NaN, nrow = 2, ncol = 2)
   loglike <- logpost <- rep(NaN, 2)
-  mu0 = c(0, 0)
-  sigma0 = diag(1, 2)
-  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))), nchain = 2,
-               topics = topics, theta = theta, beta = beta_, eta = eta,
-               lpd = lpd, loglike = loglike, logpost = logpost, mu0 = mu0,
-               sigma0 = sigma0, eta_start = eta_start)
+  mu0 <- c(0, 0)
+  sigma0 <- diag(1, 2)
+  fit <- Sldax(ndocs = nrow(docs), nvocab = length(unique(as.numeric(docs))),
+               nchain = 2, topics = topics, theta = theta, beta = beta_,
+               eta = eta, lpd = lpd, loglike = loglike, logpost = logpost,
+               mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
 
   for (iter in seq_len(nchain(fit))) {
     for (topic in seq_len(ntopics(fit))) {

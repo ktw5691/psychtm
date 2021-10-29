@@ -130,7 +130,8 @@ setClass("Logistic",
          )
 )
 
-#' S4 class to represent a SLDAX general model that inherits from [Mlr-class] and [Logistic-class].
+#' S4 class to represent a SLDAX general model that inherits from [Mlr-class]
+#'   and [Logistic-class].
 #'
 #' @slot nvocab The number of terms in the corpus vocabulary.
 #' @param nvocab The number of terms in the corpus vocabulary.
