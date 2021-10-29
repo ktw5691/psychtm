@@ -10,7 +10,7 @@ Description: Provides text mining methods for social science research. The
     methods for topic models including Latent Dirichlet Allocation (LDA),
     supervised LDA, and supervised LDA with covariates using Bayesian Markov Chain
     Monte Carlo. A description of the key models and estimation methods is available
-    in Wilcox, Jacobucci, Zhang, & Ammerman, (2021). <doi:10.31234/osf.io/62tc3>.
+    in Wilcox, Jacobucci, Zhang, & Ammerman (2021). <doi:10.31234/osf.io/62tc3>.
 License: LGPL (>= 3)
 Depends: R (>= 3.3.0)
 Imports:
