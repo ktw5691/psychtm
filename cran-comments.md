@@ -2,25 +2,41 @@
 
 * This is the first package release on CRAN.
 
-## R CMD check results
+## R CMD check
 
-* The package was tested with R CMD CHECK on:
+### Tests
 
-  * Ubuntu Linux 20.04.1 LTS, R-release, GCC
+* The package was tested with R CMD CHECK and passed with no ERRORs or WARNINGs
+  on:
 
-  * Windows Server 2008 R2 SP1, R-devel, 32/64 bit
+  * R-devel (2021-10-23 r81086; to become version 4.2.0)
+    
+    * Debian Linux, R-devel, GCC ASAN/UBSAN
+    
+    * Fedora Linux, R-devel, clang, gfortran
+    
+    * Windows Server 2008 R2 SP1, 32/64 bit
+    
+    * Ubuntu Linux 20.04.1 LTS, R-devel with rchk
 
-  * Fedora Linux, R-devel, clang, gfortran
-
-  * Debian Linux, R-devel, GCC ASAN/UBSAN
-
-* In the tests from Windows, Fedora Linux, and Debian Linux above, there were no ERRORs or WARNINGs.
+  * R-release (2021-08-10; version 4.1.1)
   
-  * R CMD CHECK returned: 0 errors | 0 warnings | 1 note
+    * Ubuntu Linux 20.04.1 LTS, GCC
+    
+    * Windows Server 2008 R2 SP1, 32/64 bit
 
-* In the tests from Ubuntu Linux, there were no ERRORs or WARNINGS.
+  * R-oldrel (2021-03-31; version 4.0.5)
+  
+    * Windows Server 2008 R2 SP1, 32/64 bit
 
-  * R CMD CHECK returned: 0 errors | 0 warnings | 2 notes
+### Results
+
+* In the tests from Windows, Fedora Linux, and Debian Linux above, there were no
+  ERRORs or WARNINGs and R CMD CHECK returned:
+  0 errors | 0 warnings | 1 note
+
+* In the tests from Ubuntu Linux and Fedora (R-devel) Linux, there were no ERRORs or
+  WARNINGS and R CMD CHECK returned: 0 errors | 0 warnings | 2 notes
 
   * There were 2 NOTEs:
     
@@ -35,11 +51,13 @@
       sub-directories of 1Mb or more:
         libs  15.3Mb
 
-      * In response, it seems that on Ubuntu Linux architectures, the CHECK
-        returns one NOTE because the `libs` subdirectory is above the 1Mb
-        threshold. However, it seems that this NOTE only appears under Linux
-        builds, but not under Windows or MacOS builds. My understanding is that
-        this inflation of the `libs` subdirectory is due to the use of `Rcpp`.
+      * In response, it seems that on Ubuntu Linux (R 4.1.1) and Fedora
+        Linux (R-devel) architectures, the
+        CHECK returns one NOTE because the `libs` subdirectory is above the 1Mb
+        threshold (installed size is 16.2Mb on Ubuntu and 8.0Mb on Fedora).
+        However, it seems that this NOTE only appears under Linux builds, but
+        not under Windows or MacOS builds. My understanding is that this
+        inflation of the `libs` subdirectory is due to the use of `Rcpp`.
         Indeed, some functions of the `psychtm` package have been written in C++
         using `Rcpp`. They are needed to perform model estimation for text
         mining. Without the speed improvements gained from those C++ functions,
