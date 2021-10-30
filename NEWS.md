@@ -8,7 +8,7 @@
   * Requires `coda` v0.4 or higher.
   * Requires `Rcpp` v0.11.0 or higher.
   * Requires `tibble` v2.1.3 or higher.
-* Added a vignette to illustrate package use.
+* Added a vignette to illustrate package use: closes (#47).
 * Added example data set `teacher_rate` for demonstration in vignette.
 * New function `prep_docs()` to prepare documents in a data frame for modeling with `gibbs_sldax()`.
 * New function `post_regression()` to summarize regression relationships for objects of class `Mlr`, `Logistic`, or `Sldax`: closes (#7).
