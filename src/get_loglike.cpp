@@ -7,6 +7,8 @@
 //' @param muhatd A double predicted outcome on logit scale.
 //'
 //' @return The current log-likelihood for observation d.
+//'
+//' @noRd
 double get_ll_logit_yd(bool yd, double muhatd) {
 
   // Compute log-likelihood of y
@@ -22,6 +24,8 @@ double get_ll_logit_yd(bool yd, double muhatd) {
 //' @param eta A q x 1 vector of regression coefficients.
 //'
 //' @return The current log-likelihood.
+//'
+//' @noRd
 double get_ll_logit(const arma::colvec& y, const arma::mat& w,
                     const arma::colvec& eta) {
 
@@ -46,6 +50,8 @@ double get_ll_logit(const arma::colvec& y, const arma::mat& w,
 //' @param sigma2 The current draw of the residual variance of y.
 //'
 //' @return The current log-likelihood.
+//'
+//' @noRd
 double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
                   const arma::colvec& eta, double sigma2) {
 
@@ -69,6 +75,8 @@ double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
 //' @param N A vector of length D containing the number of words in each document.
 //'
 //' @return The current log-likelihood.
+//'
+//' @noRd
 double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
                   const arma::mat& theta, const arma::mat& beta,
                   const Rcpp::IntegerVector& docs_index,
@@ -87,7 +95,7 @@ double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
   return ll_temp;
 }
 
-//' @title Log-likelihood for sLDA/sLDAX model
+//' @title Log-likelihood for SLDA/SLDAX model
 //'
 //' @name get_ll_slda_norm
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -103,6 +111,8 @@ double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
 //' @param N A vector of length D containing the number of words in each document.
 //'
 //' @return The current log-likelihood.
+//'
+//' @noRd
 double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
                         const arma::colvec& eta, double sigma2,
                         const arma::umat& zdocs, const arma::umat& docs,
@@ -115,7 +125,7 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' @title Log-likelihood for logistic sLDA/sLDAX model
+//' @title Log-likelihood for logistic SLDA/SLDAX model
 //'
 //' @name get_ll_slda_logit
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -130,6 +140,8 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
 //' @param N A vector of length D containing the number of words in each document.
 //'
 //' @return The current log-likelihood.
+//'
+//' @noRd
 double get_ll_slda_logit(const arma::colvec& y, const arma::mat& w,
                          const arma::colvec& eta,
                          const arma::umat& zdocs, const arma::umat& docs,

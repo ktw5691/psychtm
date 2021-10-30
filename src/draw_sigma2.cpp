@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Draw sigma2 from full conditional posterior for sLDA/sLDAX/MLR
+//' @title Draw sigma2 from full conditional posterior for SLDA/SLDAX/MLR
 //'
 //' @name draw_sigma2
 //' @param a0 The prior shape parameter for \eqn{\sigma^2}.
@@ -11,6 +11,8 @@
 //' @param eta A q x 1 vector of regression coefficients.
 //'
 //' @return A draw for \eqn{\sigma^2}.
+//'
+//' @noRd
 long double draw_sigma2(float a0, float b0,
                         const arma::mat& w, const arma::colvec& y,
                         const arma::colvec& eta) {

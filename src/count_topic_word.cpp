@@ -8,7 +8,7 @@
 //' with the maximum length of a document in the corpus equal to max(\eqn{N_d})
 //' and a vocabulary of \eqn{V} unique terms in the corpus.
 //'
-//' Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
+//' Indices in `doc_topic` and `doc_word` where no word exists in the
 //' document must be set to 0.
 //'
 //' @name count_topic_word
@@ -19,7 +19,8 @@
 //' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
 //'
 //' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
-//' @export
+//'
+//' @noRd
 // [[Rcpp::export(.count_topic_word)]]
 arma::mat count_topic_word(uint16_t K, uint32_t V,
                            const arma::umat& doc_topic,

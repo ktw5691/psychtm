@@ -16,6 +16,8 @@
 //' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 //'
 //' @return A K x 1 vector of the log-numerator from the LDA model to sample zdn.
+//'
+//' @noRd
 arma::vec get_log_numer_samplez(uint32_t V, const arma::vec& ndk_n,
                                 const arma::vec& nkm_n, const arma::vec& nk_n,
                                 float alpha_, float gamma_) {

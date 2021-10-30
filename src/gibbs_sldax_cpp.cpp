@@ -16,13 +16,13 @@
 #include <progress.hpp>
 #include <progress_bar.hpp>
 
-//' @title Collapsed Gibbs sampler for the sLDA-X model
+//' @title Collapsed Gibbs sampler for the SLDAX model
 //'
 //' @name gibbs_sldax_cpp
 //' @param m The number of iterations to run the Gibbs sampler.
 //' @param burn The number of iterations to discard as the burn-in period.
 //' @param thin The period of iterations to keep after the burn-in period
-//'   (default: 1).
+//'   (default: `1`).
 //' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 //' @param x A D x p matrix of additional predictors (no column of 1s for
 //'   intercept).
@@ -40,34 +40,34 @@
 //' @param eta_start A (K + p) x 1 vector of starting values for the
 //'   regression coefficients. The first p elements correspond to predictors
 //'   in X, while the last K elements correspond to the K topic means.
-//' @param constrain_eta A logical (default = \code{false}): If \code{true}, the
+//' @param constrain_eta A logical (default = `false`): If `true`, the
 //'   regression coefficients will be constrained so that they are in descending
-//'   order; if \code{FALSE}, no constraints will be applied.
-//' @param sample_beta A logical (default = \code{true}): If \code{true}, the
+//'   order; if `false`, no constraints will be applied.
+//' @param sample_beta A logical (default = `true`): If `true`, the
 //'   topic-vocabulary distributions are sampled from their full conditional
 //'   distribution.
-//' @param sample_theta A logical (default = \code{true}): If \code{true}, the
+//' @param sample_theta A logical (default = `true`): If `true`, the
 //'   topic proportions are sampled from their full conditional distribution.
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions
-//'   (default: 1.0).
+//'   (default: `1.0`).
 //' @param gamma_ The hyper-parameter for the prior on the topic-specific
-//'   vocabulary probabilities (default: 1.0).
+//'   vocabulary probabilities (default: `1.0`).
 //' @param proposal_sd The proposal standard deviation for drawing the
-//'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+//'   regression coefficients, N(0, `proposal_sd`) (default: `0.2`).
 //' @param interaction_xcol The column number of the design matrix for the
 //' additional predictors for which an interaction with the \eqn{K} topics is
-//' desired (default: \eqn{-1L}, no interaction). Currently only supports a
+//' desired (default: `-1L`, no interaction). Currently only supports a
 //' single continuous predictor or a two-category categorical predictor
 //' represented as a single dummy-coded column.
-//' @param return_assignments A logical (default = \code{false}): If
-//'   \code{true}, returns an N x \eqn{max N_d} x M array of topic assignments
-//'   in slot @topics. CAUTION: this can be memory-intensive.
+//' @param return_assignments A logical (default = `false`): If
+//'   `true`, returns an N x \eqn{max N_d} x M array of topic assignments
+//'   in slot `@topics`. CAUTION: this can be memory-intensive.
 //' @param verbose Should parameter draws be output during sampling? (default:
-//'   \code{False}).
-//' @param display_progress Should percent progress of sampler be displayed
-//'   (default: \code{false}). Recommended that only one of \code{verbose} and
-//'   \code{display_progress} be set to \code{true} at any given time.
-//' @export
+//'   `false`).
+//' @param display_progress Show progress bar? (default: `false`). Do not use
+//'   with `verbose = true`.
+//'
+//' @noRd
 // [[Rcpp::export(.gibbs_sldax_cpp)]]
 Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
                    uint32_t m, uint32_t burn, uint32_t thin,
@@ -231,7 +231,7 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
   arma::colvec eta(q);
   arma::colvec etac(q);
 
-  // For supervised models sLDA/sLDAX, set up regression coefficients
+  // For supervised models SLDA/SLDAX, set up regression coefficients
   if (constrain_eta) {
     if (model == sldax || model == sldax_logit) {
       // Constrain starting values of eta to be in descending order
@@ -399,14 +399,14 @@ Rcpp::S4 gibbs_sldax_cpp(const arma::umat& docs, uint32_t V,
           if (interaction_xcol > 0) {
             for (uint16_t k = p - K + 2; k < p + 1; k++) {
               // Force eta components to be in descending order (first is largest) to resolve label switching of topics
-              eta_order = (etac(k - 1) > etac(k)) || (abs(etac(k - 1) - etac(k)) < .000001);
+              eta_order = (etac(k - 1) > etac(k)) || (fabs(etac(k - 1) - etac(k)) < .000001);
               if (!eta_order) break;
             }
           } else {
             for (uint16_t k = p + 1; k < q; k++) {
               // Force eta components to be in descending order (first is largest)
               //   to resolve label switching of topics
-              eta_order = (etac(k - 1) > etac(k)) || (abs(etac(k - 1) - etac(k)) < .000001);
+              eta_order = (etac(k - 1) > etac(k)) || (fabs(etac(k - 1) - etac(k)) < .000001);
               if (!eta_order) break;
             }
           }

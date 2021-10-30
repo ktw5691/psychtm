@@ -6,6 +6,8 @@
 //' @param v A row vector of values to be tabulated.
 //'
 //' @return A map of (values, frequencies)
+//'
+//' @noRd
 std::map<uint32_t, uint32_t> table_cpp(const arma::urowvec& v) {
 
   // Create a map to store frequencies

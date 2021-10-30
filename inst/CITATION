@@ -1,0 +1,23 @@
+bibentry(
+  bibtype      = "Article",
+  title        = "Supervised latent {Dirichlet} allocation with covariates: {A} {Bayesian} structural and measurement model of text and covariates",
+  author       = c(person(given = "Kenneth",
+                          family = "Wilcox",
+                          comment = c(ORCID = "0000-0003-3969-0427")),
+                   person(given = "Ross",
+                          family = "Jacobucci"),
+                   person(given = "Zhiyong",
+                          family = "Zhang"),
+                   person(given = "Brooke",
+                          family = "Ammerman")),
+  journal      = "PsyArXiv",
+  year         = "2021",
+  doi          = "10.31234/osf.io/62tc3",
+
+  header       = "To cite psychtm in publications use:",
+  textVersion  =
+  paste("Wilcox, K. T., Jacobucci, R., Zhang, Z., & Ammerman, B. A. (2021).",
+        "Supervised latent Dirichlet allocation with covariates: A Bayesian structural and measurement model of text and covariates.",
+        "PsyArXiv.",
+        "https://doi.org/10.31234/osf.io/62tc3")
+)

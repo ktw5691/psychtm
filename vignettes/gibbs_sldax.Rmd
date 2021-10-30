@@ -1,0 +1,164 @@
+---
+title: "Estimating SLDAX Models"
+author: "Kenneth Tyler Wilcox"
+date: "20 October 2021"
+description: >
+  In this vignette, you will learn how to specify, estimate, and interpret SLDAX models.
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimating SLDAX Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Setup Packages and Load Data
+
+```{r setup}
+library(dplyr)   # For easier data manipulation with pipes `%>%`
+library(lda)     # Needed if using prep_docs() function
+library(psychtm)
+
+data(teacher_rate)  # Synthetic student ratings of instructors
+```
+
+## Data Preparation
+
+In this data set, the documents we want to model are stored as character vectors in a column of the data frame called `doc`. We can get a preview of the data structure to verify this. The documents are synthetic for this example but are generated to have similar word distributions to a real-world data set. Obviously, the synthetic documents are not as easily readable.
+
+```{r}
+glimpse(teacher_rate)
+```
+
+To use the topic modeling functions in `psychtm`, we need to prepare the text data to create a vector containing the vocabulary of all unique terms used in the documents of interest as well as a matrix of word indices that represent which term in the vocabulary was used in each document (a row) at each word position (a column). This matrix has D rows (assuming we have D documents in our data) and $\max \{N_d}$ columns where $N_d$ is the number of words in document $d, d = 1, 2, \ldots, D$ --- that is, the number of columns in this matrix is equal to the number of words in the longest document in our data. The `psychtm` package provides a function `prep_docs()` to convert a column of documents represented as character vectors in a data frame into a `documents` matrix and a `vocab` vector which will be needed to use this package's topic modeling functionality.
+
+```{r}
+docs_vocab <- prep_docs(teacher_rate, "doc")
+```
+
+We can see that we have `r length(docs_vocab$vocab)` unique terms in the vocabulary. We will save this for use later when modeling.
+
+```{r}
+str(docs_vocab$vocab)
+vocab_len <- length(docs_vocab$vocab)
+```
+
+We can also inspect the structure of the `documents` matrix created by `prep_docs()`. Notice that we have `r nrow(docs_vocab$documents)` rows --- the same as the number of rows in our original data frame `teacher_rate` --- and `r ncol(docs_vocab$documents)` columns --- corresponding to the number of terms or words in the longest document in our data.
+
+```{r}
+str(docs_vocab$documents)
+```
+
+Shorter documents represent unused word positions with a 0. For example, the first document only contains 19 words, so the remaining elements in the `documents` matrix are all set to 0. The first 25 are shown below.
+
+```{r}
+print(docs_vocab$documents[1, 1:25])
+```
+
+Nonzero elements are indices for the terms stored in the `vocab` vector. To demonstrate, we can recover the original document as follows word by word. In practice, one may want to further preprocess or clean the documents before modeling (e.g., remove stop-words or perform stemming). We do not demonstrate that here for simplicity, but see, for example, the ebook [*Welcome to Text Mining with R*](https://www.tidytextmining.com) for some examples using the [`tidytext`](https://github.com/juliasilge/tidytext) R package (Silge & Robinson, 2016).
+
+```{r}
+docs_vocab$vocab[docs_vocab$documents[1, 1:17]]
+```
+
+## Model Fitting
+
+The Supervised Latent Dirichlet Allocation with Covariates (SLDAX) model or its special cases Supervised Latent Dirichlet Allocation (SLDA) or Latent Dirichlet Allocation (LDA) can be fit using the `gibbs_sldax()` function. The function uses Gibbs sampling, a Markov Chain Monte Carlo algorithm, so the number of iterations to run the sampling algorithm `m` needs to be specified. It is usually a good idea to specify a "burn-in" period of iterations `burn` to discard while the algorithm iterates toward a converged solution so that pre-converged values are not treated as draws from the posterior distribution we want to sample from. Finally, a thinning period `thin` can be specified so that only draws separated by the thinning period are kept, resulting in lower autocorrelation among the final posterior samples.
+
+`m` can be calculated as the desired number of posterior draws `T` (e.g., 150 for speed in this tutorial; this is generally too low in practice) multiplied by `thin` plus `burn`: `m` = `T` x `thin` + `burn`. Below, we have `m` = 150 x 1 + 300 = 450. In practice, a longer burn-in period, total number of iterations, and a larger thinning period may be advisable. For any of SLDAX, SLDAX, and LDA, the `documents` matrix prepared above is supplied to the `docs` argument and the size of the vocabulary calculated earlier is supplied to the `V` argument. Finally, we specify that we are fitting an LDA model by supplying `model = "lda"`. Be patient as the algorithm may take a few minutes to complete. Progress can be displayed (optional) using the `display_progress` argument. Other options for `gibbs_sldax` such as prior specifications can be found in the documentation by running `?gibbs_sldax`.
+
+### Estimating a Latent Dirichlet Allocation Model
+
+Here, we fit an LDA model with three topics `K`, so no covariate or outcome variables need to be provided. We set a seed for reproducibility.
+
+```{r}
+set.seed(92850827)
+fit_lda <- gibbs_sldax(m = 450, burn = 300, thin = 1,
+                       docs = docs_vocab$documents,
+                       V = vocab_len,
+                       K = 3, model = "lda", display_progress = TRUE)
+```
+
+The estimated (posterior mean or median) topic proportions for each document $\theta_d$ can be obtained using `est_theta()`. Here I show the estimated topic proportions for Topic 1, 2, and 3 for the first six documents. Note that each row sums to 1 across topics for each document.
+
+```{r}
+theta_hat <- est_theta(fit_lda)
+head(theta_hat)
+```
+
+Similarly, we can obtain the estimated (posterior mean or median) topic--word probabilities $\beta_k$ for each topic using `est_beta()`. Here I show the estimated topic--word probabilities for Topic 1, 2, and 3 for the first ten terms in the vocabulary. Note that each row sums to 1 across terms for each topic.
+
+```{r}
+beta_hat <- est_beta(fit_lda)
+colnames(beta_hat) <- docs_vocab$vocab
+beta_hat[, 1:10]
+```
+
+To help interpret the topics, two quantities can be useful and are provided by the `get_topwords()` function. First, the most probable terms associated with each topic directly estimated in $\beta_k$ for each topic can be evaluated. Because common words such as stop words (e.g., "the", "and", "to") were not removed ahead of analysis in this demo, the topics can be difficult to interpret using the original probabilities.
+
+```{r}
+get_topwords(beta_ = beta_hat, nwords = 10, docs_vocab$vocab, method = "prob") %>% 
+  print(n = 30)
+```
+
+However, another metric which down-weights words that are highly probable in many topics (e.g., stopwords like "and" or "to") is the term score. That is, term scores can be interpreted as a measure of uniquely representative a term is for a topic where larger term scores denote terms that have a high probability for a topic and lower probabilities for other topics (i.e., more "unique" to a given topic) and smaller term scores denote terms that are probable in multiple topics (i.e., more "common" to all topics). This is the default metric computed by `get_topwords()`. Inspecting the top 10 terms for each topic below using term scores, it is now clearer that Topic 1 corresponds with descriptions of course professors, whereas Topic 2 corresponds to course assessment methods such as readings and exams.
+
+```{r}
+get_topwords(beta_hat, 15, docs_vocab$vocab, method = "termscore") %>%
+  print(n = 30)
+```
+
+For models with a larger number of topics than illustrated here, it can be useful to extract the most probable subset of topics for each document using the `get_toptopics()` function. For example, the most probable two topics for each document can be retrieved. Results for the first three documents are shown.
+
+```{r}
+head(get_toptopics(theta = theta_hat, ntopics = 2))
+```
+
+### Model Goodness of Fit Metrics
+
+Model fit metrics of topic [coherence](https://mimno.infosci.cornell.edu/papers/mimno-semantic-emnlp.pdf) and topic [exclusivity](https://www.jstatsoft.org/v091/i02) can be computed using `get_coherence()` and `get_exclusivity()`. This can be useful, for example, when using cross-validation to determine the optimal number of topics. By default, coherence and exclusivity are computed for each topic, but a global measure can be defined, for example, by averaging over topics if desired (not shown).
+
+```{r}
+get_coherence(beta_ = beta_hat, docs = docs_vocab$documents)
+```
+
+```{r}
+get_exclusivity(beta_ = beta_hat)
+```
+
+### Estimating a SLDAX Model
+
+To fit an SLDAX model where the latent topics along with covariates are used to model an outcome, we need to further specify the regression model for the covariates of interest (the topics are automatically entered into the model additively). We also need to specify a data frame `data` containing the covariates and outcome of interest. Be careful to ensure that this is the same set of observations for which documents were provided previously. Missing data imputation methods for missing  documents, covariates, or outcomes are currently not implemented. Only complete data can be analyzed. We also change the model to be estimated to `model = "sldax"`.
+
+```{r}
+set.seed(44680835)
+fit_sldax <- gibbs_sldax(rating ~ I(grade - 1), data = teacher_rate,
+                         m = 450, burn = 300, thin = 1,
+                         docs = docs_vocab$documents,
+                         V = vocab_len,
+                         K = 3, model = "sldax", display_progress = TRUE)
+```
+
+Topic proportion and topic--word probabilities can be summarized with the same functions as demonstrated above in the section on LDA. As we saw above for an LDA model, we can interpret the three topics from the SLDAX model using term scores.
+
+```{r}
+get_topwords(est_beta(fit_sldax), 15, docs_vocab$vocab, method = "termscore") %>%
+  print(n = 30)
+```
+
+Here we illustrate summarization of the regression relationships in the SLDAX model. The `post_regression()` function constructs a `coda::mcmc` object that can be further manipulated by the methods in the [`coda`](https://CRAN.R-project.org/package=coda) R package (Plummer et al., 2006) such as `summary.mcmc()` as shown below. The burn-in length and thinning period are automatically reflected in these posterior summaries.
+
+The results of `summary()` provide the posterior mean estimates, corresponding posterior standard deviations, Bayesian credible intervals, and the standard error and autocorrelation-adjusted standard error of the posterior mean estimates. See `?coda:::summary.mcmc` for further information .
+
+Here, we see that a 1-unit improvement in a student's grade is associated with a roughly -0.3 decrease in their rating of the instructor while holding the topical content of their comments constant. The posterior mean estimates of the regression coefficients for the topics (e.g., `topic1`) correspond to conditional mean ratings when a student received the lowest possible grade and *only* that topic was present in their written comment. To obtain meaningful topic "effects" associated with changing the prevalence of a given topic while holding all others constant, we need to estimate the posterior distribution of a contrast of the topic regression coefficients. The `post_regression()` function calculates these contrasts as $c_k = \eta_k^{(t)} - K^{-1} \sum_{j \ne k} \eta_j^{(t)}$ where $\eta_k$ and $\eta_j$ are regression coefficients for the topics (not for any of the covariates). These topic effects are labeled as `effect_t1` and so on. Here, we see using the posterior means and credible intervals that Topic 1 is positively associated with instructor ratings while holding a student's grade constant, Topic 2 is negatively associated with instructor ratings while holding a student's grade constant, and Topic 3 does not appear to be associated with instructor ratings while holding student's grade constant. In practice, the topic interpretations should be inspected and longer chains should be used along with convergence checks.
+
+```{r}
+eta_post <- post_regression(fit_sldax)
+summary(eta_post)
+```

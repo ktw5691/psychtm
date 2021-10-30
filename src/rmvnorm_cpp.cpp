@@ -8,6 +8,8 @@
 //' @param sigma The q x q variance-covariance matrix of the distribution.
 //'
 //' @return A n x q matrix of random draws.
+//'
+//' @noRd
 arma::mat rmvnorm_cpp(uint32_t n, const arma::colvec& mu,
                       const arma::mat& sigma) {
 

@@ -1,2 +1,15 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^.*\.Rproj$
+^\.Rproj\.user$
+.Rprofile
+^codecov\.yml$
+^LICENSE\.md$
+^README.Rmd
+^data-raw$
+^\.github$
+^README\.Rmd$
+^revdep$
+^cran-comments\.md$
+^doc$
+^Meta$

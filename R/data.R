@@ -1,0 +1,17 @@
+#' Synthetic (fake) student ratings of instructor quality.
+#'
+#' A data set containing almost 3,800 student ratings and written comments
+#' regarding instructor quality along with the students' grades associated with
+#' the course.
+#'
+#' @format A data frame with 3,733 rows and 4 variables:
+#' \describe{
+#'   \item{id}{Row number to identify rater}
+#'   \item{rating}{A numerical rating of instructor quality
+#'                 from 1 (worst) to 5 (best)}
+#'   \item{grade}{A numerical grade received by the rater for the instructor's
+#'                course ranging from 1 (worst) to 13 (best)}
+#'   \item{doc}{A character vector containing pseudo-written comments about the
+#'              instructors}
+#' }
+"teacher_rate"

@@ -12,6 +12,8 @@
 //'   regression coefficients.
 //'
 //' @return The current log-posterior.
+//'
+//' @noRd
 double get_lpost_eta(double ll, const arma::colvec& eta,
                      const arma::colvec& mu0, const arma::mat& sigma0) {
 
@@ -39,6 +41,8 @@ double get_lpost_eta(double ll, const arma::colvec& eta,
 //' @param b0 The scale parameter for the prior on sigma2.
 //'
 //' @return The current log-posterior contribution.
+//'
+//' @noRd
 double get_lpost_mlr(double ll,
                      const arma::colvec& eta, double sigma2,
                      const arma::colvec& mu0, const arma::mat& sigma0,
@@ -65,6 +69,8 @@ double get_lpost_mlr(double ll,
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions.
 //'
 //' @return The current log-posterior contribution.
+//'
+//' @noRd
 double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
                      double gamma_, double alpha_) {
 
@@ -87,7 +93,7 @@ double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
   return ll + beta_contrib + theta_contrib;
 }
 
-//' @title Log-posterior for sLDA/sLDAX model
+//' @title Log-posterior for SLDA/SLDAX model
 //'
 //' @name get_lpost_slda_norm
 //' @param ll A double of the current log-likelihood.
@@ -105,6 +111,8 @@ double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
 //' @param b0 The scale parameter for the prior on sigma2.
 //'
 //' @return The current log-posterior.
+//'
+//' @noRd
 double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
                            const arma::mat& theta, const arma::mat& beta,
                            const arma::colvec& mu0, const arma::mat& sigma0,
@@ -118,7 +126,7 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
   return lp_temp;
 }
 
-//' @title Log-posterior for logistic sLDA/sLDAX model
+//' @title Log-posterior for logistic SLDA/SLDAX model
 //'
 //' @name get_lpost_slda_logit
 //' @param ll A double of the current log-likelihood.
@@ -133,6 +141,8 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
 //' @param alpha_ The hyper-parameter for the prior on the topic proportions.
 //'
 //' @return The current log-posterior.
+//'
+//' @noRd
 double get_lpost_slda_logit(double ll, const arma::colvec& eta,
                             const arma::mat& theta, const arma::mat& beta,
                             const arma::colvec& mu0, const arma::mat& sigma0,
@@ -145,7 +155,7 @@ double get_lpost_slda_logit(double ll, const arma::colvec& eta,
   return lp_temp;
 }
 
-//' @title Compute full conditional log-posterior of eta for logistic sLDA/sLDAX/regression
+//' @title Compute full conditional log-posterior of eta for logistic SLDA/SLDAX/regression
 //'
 //' @name eta_logpost_logit
 //' @param w A D x q matrix containing a predictor model matrix of assumed form
@@ -157,6 +167,8 @@ double get_lpost_slda_logit(double ll, const arma::colvec& eta,
 //'   coefficients.
 //'
 //' @return The full conditional log-posterior density of eta.
+//'
+//' @noRd
 double eta_logpost_logit(const arma::mat& w, const arma::colvec& y,
                          const arma::vec& eta,
                          const arma::vec& mu0, const arma::mat& sigma0) {

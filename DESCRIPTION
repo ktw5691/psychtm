@@ -1,40 +1,54 @@
 Package: psychtm
 Type: Package
-Title: Text Mining for Psychological Research
-Version: 2020.9
-Date: 2020-10-16
+Title: Text Mining Methods for Psychological Research
+Version: 2021.1.9000
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
-                  role = c("aut", "cre"))
-Description: Supports Bayesian topic modeling using the SLDAX framework.
-License: GPL-3
+                  role = c("aut", "cre", "cph"))
+Description: Provides text mining methods for social science research. The
+    package implements estimation, inference, summarization, and goodness-of-fit
+    methods for topic models including Latent Dirichlet Allocation (LDA),
+    supervised LDA, and supervised LDA with covariates using Bayesian Markov Chain
+    Monte Carlo. A description of the key models and estimation methods is available
+    in Wilcox, Jacobucci, Zhang, & Ammerman (2021). <doi:10.31234/osf.io/62tc3>.
+License: LGPL (>= 3)
+URL: https://github.com/ktw5691/psychtm/
+BugReports: https://github.com/ktw5691/psychtm/issues
 Depends: R (>= 3.3.0)
 Imports:
+    coda (>= 0.4),
     label.switching,
     methods,
-    Rcpp,
-    RcppArmadillo,
-    RcppProgress,
-    tibble
+    Rcpp (>= 0.11.0),
+    rlang (>= 0.4.10),
+    tibble (>= 2.1.3)
 Suggests:
+    spelling,
+    knitr (>= 1.22),
     covr,
     dplyr,
     ggplot2,
-    testthat
-LinkingTo: Rcpp,
+    lda,
+    testthat (>= 3.0.2),
+    rmarkdown
+LinkingTo: Rcpp (>= 0.11.0),
            RcppArmadillo,
            RcppProgress (>= 0.4.2)
-BugReports: https://github.com/ktw5691/psychtm/issues
-RoxygenNote: 7.1.1
-Encoding: UTF-8
 SystemRequirements: C++11
+VignetteBuilder: knitr
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
 Collate:
     'RcppExports.R'
-    'helper.R'
-    'model-class.R'
-    'logistic-class.R'
-    'mlr-class.R'
+    'aaa-classes.R'
+    'aaa-generics.R'
+    'data.R'
+    'deprec-functions.R'
+    'helper-functions.R'
     'onUnload.R'
-    'sldax-class.R'
-    'sldax-generic-functions.R'
-    'sldax-results.R'
+    'psychtm-package.R'
+    'psychtm.R'
+    'sldax-methods.R'
     'utils.R'

@@ -7,7 +7,7 @@
 #' with the maximum length of a document in the corpus equal to max(\eqn{N_d})
 #' and a vocabulary of \eqn{V} unique terms in the corpus.
 #'
-#' Indices in \code{doc_topic} and \code{doc_word} where no word exists in the
+#' Indices in `doc_topic` and `doc_word` where no word exists in the
 #' document must be set to 0.
 #'
 #' @name count_topic_word
@@ -18,7 +18,8 @@
 #' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
 #'
 #' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
-#' @export
+#'
+#' @noRd
 .count_topic_word <- function(K, V, doc_topic, doc_word) {
     .Call(`_psychtm_count_topic_word`, K, V, doc_topic, doc_word)
 }
@@ -26,13 +27,13 @@
 #' @title Sample \eqn{B} from full conditional distribution
 #'
 #' @name draw_beta
-#' @param m Number of samples
 #' @param wz_co A K x V matrix of counts of word-topic co-occurrences
 #'   (topics: columns; words: rows).
 #' @param gamma_ The hyperparameter on the Dirichlet prior for \eqn{\beta_k}.
 #'
 #' @return A K x V matrix \eqn{B}.
-#' @export
+#'
+#' @noRd
 .draw_beta <- function(wz_co, gamma_) {
     .Call(`_psychtm_draw_beta`, wz_co, gamma_)
 }
@@ -45,7 +46,8 @@
 #' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 #'
 #' @return A V x 1 vector of estimates for \eqn{\beta_k}.
-#' @export
+#'
+#' @noRd
 .draw_betak <- function(wz_co, gamma_) {
     .Call(`_psychtm_draw_betak`, wz_co, gamma_)
 }
@@ -53,13 +55,13 @@
 #' @title Sample \eqn{\Theta} from full conditional distribution
 #'
 #' @name draw_theta
-#' @param m Number of samples
 #' @param z_count A D x K matrix of counts of topic draws (columns) in
 #'   documents (rows).
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 #'
 #' @return A D x K matrix \eqn{\Theta}.
-#' @export
+#'
+#' @noRd
 .draw_theta <- function(z_count, alpha_) {
     .Call(`_psychtm_draw_theta`, z_count, alpha_)
 }
@@ -71,7 +73,8 @@
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 #'
 #' @return A K x 1 vector draw of \eqn{\theta_d}.
-#' @export
+#'
+#' @noRd
 .draw_thetad <- function(z_count, alpha_) {
     .Call(`_psychtm_draw_thetad`, z_count, alpha_)
 }
@@ -84,7 +87,8 @@
 #' @param gamma_ The hyperparameter for the Dirichlet priors on \eqn{\beta_k}.
 #'
 #' @return A V x 1 vector of estimates for \eqn{\beta_k}.
-#' @export
+#'
+#' @noRd
 .est_betak <- function(wz_co, gamma_) {
     .Call(`_psychtm_est_betak`, wz_co, gamma_)
 }
@@ -96,7 +100,8 @@
 #' @param alpha_ The hyperparameter on the Dirichlet prior for \eqn{\theta_d}.
 #'
 #' @return A K x 1 vector of estimate for \eqn{\theta_d}.
-#' @export
+#'
+#' @noRd
 .est_thetad <- function(z_count, alpha_) {
     .Call(`_psychtm_est_thetad`, z_count, alpha_)
 }
@@ -107,7 +112,7 @@
 #' @param m The number of iterations to run the Gibbs sampler.
 #' @param burn The number of iterations to discard as the burn-in period.
 #' @param thin The period of iterations to keep after the burn-in period
-#'   (default: 1).
+#'   (default: `1`).
 #' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 #' @param x A D x p matrix of additional predictors (no column of 1s for
 #'   intercept).
@@ -117,15 +122,15 @@
 #' @param eta_start A (p + 1) x 1 vector of starting values for the
 #'   regression coefficients.
 #' @param proposal_sd The proposal standard deviation for drawing the
-#'   regression coefficients, N(0, proposal_sd) (default: 2.38, ..., 2.38).
+#'   regression coefficients, N(0, `proposal_sd`) (default: `2.38, ..., 2.38`).
 #' @param verbose Should parameter draws be output during sampling? (default:
-#'   \code{FALSE}).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#'   `false`).
+#' @param display_progress Show progress bar? (default: `false`). Do not use
+#'   with `verbose = true`.
 #'
-#' @return An object of class \code{Logistic}.
-#' @export
+#' @return An object of class Logistic.
+#'
+#' @noRd
 .gibbs_logistic_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, proposal_sd, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_logistic_cpp`, m, burn, thin, y, x, mu0, sigma0, eta_start, proposal_sd, verbose, display_progress)
 }
@@ -136,7 +141,7 @@
 #' @param m The number of iterations to run the Gibbs sampler.
 #' @param burn The number of iterations to discard as the burn-in period.
 #' @param thin The period of iterations to keep after the burn-in period
-#'   (default: 1).
+#'   (default: `1`).
 #' @param y A D x 1 vector of outcomes to be predicted.
 #' @param x A D x (p + 1) matrix of additional predictors.
 #' @param mu0 A (p + 1) x 1 mean vector for the prior on the regression
@@ -145,27 +150,27 @@
 #'   prior on the regression coefficients.
 #' @param eta_start A (p + 1) x 1 vector of starting values for the
 #'   regression coefficients.
-#' @param a0 The shape parameter for the prior on sigma2 (default: 0.001)
-#' @param b0 The scale parameter for the prior on sigma2 (default: 0.001)
+#' @param a0 The shape parameter for the prior on sigma2 (default: `0.001`)
+#' @param b0 The scale parameter for the prior on sigma2 (default: `0.001`)
 #' @param verbose Should parameter draws be output during sampling? (default:
-#'   \code{FALSE}).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: \code{FALSE}). Recommended that only one of \code{verbose} and
-#'   \code{display_progress} be set to \code{TRUE} at any given time.
+#'   `false`).
+#' @param display_progress Show progress bar? (default: `false`). Do not use
+#'   with `verbose = true`.
 #'
-#' @return An object of class \code{Mlr}.
-#' @export
+#' @return An object of class `Mlr`.
+#'
+#' @noRd
 .gibbs_mlr_cpp <- function(m, burn, thin, y, x, mu0, sigma0, eta_start, a0 = 0.001, b0 = 0.001, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_mlr_cpp`, m, burn, thin, y, x, mu0, sigma0, eta_start, a0, b0, verbose, display_progress)
 }
 
-#' @title Collapsed Gibbs sampler for the sLDA-X model
+#' @title Collapsed Gibbs sampler for the SLDAX model
 #'
 #' @name gibbs_sldax_cpp
 #' @param m The number of iterations to run the Gibbs sampler.
 #' @param burn The number of iterations to discard as the burn-in period.
 #' @param thin The period of iterations to keep after the burn-in period
-#'   (default: 1).
+#'   (default: `1`).
 #' @param y A D x 1 vector of binary outcomes (0/1) to be predicted.
 #' @param x A D x p matrix of additional predictors (no column of 1s for
 #'   intercept).
@@ -183,34 +188,34 @@
 #' @param eta_start A (K + p) x 1 vector of starting values for the
 #'   regression coefficients. The first p elements correspond to predictors
 #'   in X, while the last K elements correspond to the K topic means.
-#' @param constrain_eta A logical (default = \code{false}): If \code{true}, the
+#' @param constrain_eta A logical (default = `false`): If `true`, the
 #'   regression coefficients will be constrained so that they are in descending
-#'   order; if \code{FALSE}, no constraints will be applied.
-#' @param sample_beta A logical (default = \code{true}): If \code{true}, the
+#'   order; if `false`, no constraints will be applied.
+#' @param sample_beta A logical (default = `true`): If `true`, the
 #'   topic-vocabulary distributions are sampled from their full conditional
 #'   distribution.
-#' @param sample_theta A logical (default = \code{true}): If \code{true}, the
+#' @param sample_theta A logical (default = `true`): If `true`, the
 #'   topic proportions are sampled from their full conditional distribution.
 #' @param alpha_ The hyper-parameter for the prior on the topic proportions
-#'   (default: 1.0).
+#'   (default: `1.0`).
 #' @param gamma_ The hyper-parameter for the prior on the topic-specific
-#'   vocabulary probabilities (default: 1.0).
+#'   vocabulary probabilities (default: `1.0`).
 #' @param proposal_sd The proposal standard deviation for drawing the
-#'   regression coefficients, N(0, proposal_sd) (default: 0.2).
+#'   regression coefficients, N(0, `proposal_sd`) (default: `0.2`).
 #' @param interaction_xcol The column number of the design matrix for the
 #' additional predictors for which an interaction with the \eqn{K} topics is
-#' desired (default: \eqn{-1L}, no interaction). Currently only supports a
+#' desired (default: `-1L`, no interaction). Currently only supports a
 #' single continuous predictor or a two-category categorical predictor
 #' represented as a single dummy-coded column.
-#' @param return_assignments A logical (default = \code{false}): If
-#'   \code{true}, returns an N x \eqn{max N_d} x M array of topic assignments
-#'   in slot @topics. CAUTION: this can be memory-intensive.
+#' @param return_assignments A logical (default = `false`): If
+#'   `true`, returns an N x \eqn{max N_d} x M array of topic assignments
+#'   in slot `@topics`. CAUTION: this can be memory-intensive.
 #' @param verbose Should parameter draws be output during sampling? (default:
-#'   \code{False}).
-#' @param display_progress Should percent progress of sampler be displayed
-#'   (default: \code{false}). Recommended that only one of \code{verbose} and
-#'   \code{display_progress} be set to \code{true} at any given time.
-#' @export
+#'   `false`).
+#' @param display_progress Show progress bar? (default: `false`). Do not use
+#'   with `verbose = true`.
+#'
+#' @noRd
 .gibbs_sldax_cpp <- function(docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol = -1L, alpha_ = 1.0, gamma_ = 1.0, constrain_eta = FALSE, sample_beta = TRUE, sample_theta = TRUE, return_assignments = FALSE, verbose = FALSE, display_progress = FALSE) {
     .Call(`_psychtm_gibbs_sldax_cpp`, docs, V, m, burn, thin, K, model, y, x, mu0, sigma0, a0, b0, eta_start, proposal_sd, interaction_xcol, alpha_, gamma_, constrain_eta, sample_beta, sample_theta, return_assignments, verbose, display_progress)
 }
@@ -219,9 +224,10 @@
 #'
 #' @name pwaic_d
 #' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods).
-#' @export
 #' @return The contribution of y_d (its predictive posterior likelihood variance)
 #'   to the effective number of parameters.
+#'
+#' @noRd
 NULL
 
 #' @title WAIC for observation y_d
@@ -236,11 +242,16 @@ NULL
 #' @title Compute WAIC for all outcomes.
 #'
 #' @name waic_all
-#' @param iter The current iteration of the chain.
-#' @param l_pred A m x D matrix of predictive likelihoods (NOT log-likelihoods).
+#' @param iter The length of the sampled chain.
+#' @param l_pred A `iter` x D matrix of predictive likelihoods (NOT log-likelihoods).
 #'
 #' @return Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
 #'   the effective number of parameters.
+#'
+#' @examples
+#' data(teacher_rate)
+#' fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 5)
+#' waic_all(iter = 5, t(lpd(fit_mlr)))
 #' @export
 waic_all <- function(iter, l_pred) {
     .Call(`_psychtm_waic_all`, iter, l_pred)
@@ -254,6 +265,14 @@ waic_all <- function(iter, l_pred) {
 #'
 #' @return A vector of (1) the difference in WAIC (on the deviance scale)
 #'   between models and (2) the standard error of the difference in WAIC.
+#'
+#' @examples
+#' data(teacher_rate)
+#' fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 100)
+#' fit_mlr2 <- gibbs_mlr(rating ~ grade + I(grade^2), data = teacher_rate, m = 100)
+#' # Returns (1) D = WAIC(fit_mlr2) - WAIC(fit_mlr) and (2) SE(D)
+#' #   Suggests that a linear relationship is preferable
+#' waic_diff(t(lpd(fit_mlr2)), t(lpd(fit_mlr)))
 #' @export
 waic_diff <- function(l_pred1, l_pred2) {
     .Call(`_psychtm_waic_diff`, l_pred1, l_pred2)

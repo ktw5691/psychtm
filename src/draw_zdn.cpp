@@ -3,13 +3,15 @@
 #include "get_loglike.h"
 #include "get_log_numer_samplez.h"
 
-//' @title Draw zdn from full conditional distribution for LDA/sLDA/sLDAX
+//' @title Draw zdn from full conditional distribution for LDA/SLDA/SLDAX
 //'
 //' @name draw_zdn
 //' @param log_num A K x 1 vector of the log-numerator for sampling from topics
 //'   1, ..., K.
 //'
 //' @return Indicator for the topic draw from {1, 2, ..., K}.
+//'
+//' @noRd
 uint16_t draw_zdn(arma::vec& log_num) {
 
   const uint16_t K = log_num.size(); // Number of topics
@@ -41,6 +43,8 @@ uint16_t draw_zdn(arma::vec& log_num) {
 //'   from the counts.
 //'
 //' @return Indicator for the topic draw from {1, 2, ..., K}.
+//'
+//' @noRd
 uint16_t draw_zdn_lda(uint32_t V,
                       const arma::vec& ndk_n, const arma::vec& nkm_n,
                       const arma::vec& nk_n, float alpha_, float gamma_) {
@@ -53,7 +57,7 @@ uint16_t draw_zdn_lda(uint32_t V,
   return zdn;
 }
 
-//' @title Draw zdn from full conditional distribution for sLDA/sLDAX
+//' @title Draw zdn from full conditional distribution for SLDA/SLDAX
 //'
 //' @name draw_zdn_slda_norm
 //' @param yd The outcome variable for document \eqn{d}.
@@ -72,6 +76,8 @@ uint16_t draw_zdn_lda(uint32_t V,
 //'   from the counts.
 //'
 //' @return Indicator for the topic draw from {1, 2, ..., K}.
+//'
+//' @noRd
 uint16_t draw_zdn_slda_norm(double yd, const arma::rowvec& w_d,
                             const arma::vec& eta, double sigma2,
                             uint32_t V, const arma::vec& ndk_n,
@@ -89,7 +95,7 @@ uint16_t draw_zdn_slda_norm(double yd, const arma::rowvec& w_d,
   return zdn;
 }
 
-//' @title Draw zdn from full conditional distribution for sLDA/sLDAX with binary outcome
+//' @title Draw zdn from full conditional distribution for SLDA/SLDAX with binary outcome
 //'
 //' @name draw_zdn_slda_logit
 //' @param yd A the outcome variable for document d.
@@ -107,6 +113,8 @@ uint16_t draw_zdn_slda_norm(double yd, const arma::rowvec& w_d,
 //'   from the counts.
 //'
 //' @return Indicator for the topic draw from {1, 2, ..., K}.
+//'
+//' @noRd
 uint16_t draw_zdn_slda_logit(double yd, const arma::rowvec& w_d,
                              const arma::vec& eta,
                              uint32_t V, const arma::vec& ndk_n,

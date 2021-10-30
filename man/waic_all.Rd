@@ -7,14 +7,19 @@
 waic_all(iter, l_pred)
 }
 \arguments{
-\item{iter}{The current iteration of the chain.}
+\item{iter}{The length of the sampled chain.}
 
-\item{l_pred}{A m x D matrix of predictive likelihoods (NOT log-likelihoods).}
+\item{l_pred}{A \code{iter} x D matrix of predictive likelihoods (NOT log-likelihoods).}
 }
 \value{
 Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
-  the effective number of parameters.
+the effective number of parameters.
 }
 \description{
 Compute WAIC for all outcomes.
+}
+\examples{
+data(teacher_rate)
+fit_mlr <- gibbs_mlr(rating ~ grade, data = teacher_rate, m = 5)
+waic_all(iter = 5, t(lpd(fit_mlr)))
 }

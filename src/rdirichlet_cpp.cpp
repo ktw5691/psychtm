@@ -7,6 +7,8 @@
 //' @param alpha The K x 1 vector of concentration parameters (column vector).
 //'
 //' @return A n x K matrix of random draws.
+//'
+//' @noRd
 arma::mat rdirichlet_cpp(uint32_t n, const arma::rowvec& alpha_) {
 
   // Draw Dirichlet rv using Gamma distribution
