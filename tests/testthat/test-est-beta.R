@@ -132,8 +132,7 @@ test_that("est_beta() handles multiple values for 'stat'", {
                mu0 = mu0, sigma0 = sigma0, eta_start = eta_start)
   expect_message(
     est_beta(mcmc_fit = fit, stat = c("mean", "median")),
-    "Multiple arguments were supplied to 'stat'. Only using the
-     first argument.",
+    "Multiple arguments were supplied to 'stat'. Only using the first argument.",
     fixed = TRUE
   )
 })

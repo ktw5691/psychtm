@@ -48,8 +48,7 @@ setGeneric("gg_coef",
 
              if (length(stat) > 1) {
                stat <- stat[1]
-               message("Multiple arguments were supplied to 'stat'. Only using
-                        the first argument.")
+               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
@@ -70,13 +69,11 @@ setMethod("gg_coef",
             .Deprecated()
 
             if (!requireNamespace("dplyr", quietly = TRUE)) {
-              stop("Package \"dplyr\" needed for this function to work.
-                    Please install it.",
+              stop("Package \"dplyr\" needed for this function to work. Please install it.",
                    call. = FALSE)
             }
             if (!requireNamespace("ggplot2", quietly = TRUE)) {
-              stop("Package \"ggplot2\" needed for this function to work.
-                    Please install it.",
+              stop("Package \"ggplot2\" needed for this function to work. Please install it.",
                    call. = FALSE)
             }
 

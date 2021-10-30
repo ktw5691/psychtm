@@ -143,8 +143,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
     stop("Each document (row) in 'docs' must contain
           at least 2 positive integers")
   # Check for missing values in documents
-  if (any(is.na(docs))) stop("NA found in 'docs'. Please use 0 instead to
-                              indicate unused word positions")
+  if (any(is.na(docs))) stop("NA found in 'docs'. Please use 0 instead to indicate unused word positions")
 
   # Check that data and docs have same number of observations
   if (model != "lda") {
@@ -194,9 +193,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
       }
       x <- as.matrix(x, ncol) # If y ~ 1 supplied, x has dims D x 0
       if (dim(x)[2] == 0 & model %in% c(3, 5))
-        stop("Design matrix 'x' has 0 columns.
-              Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as
-              'formula'.")
+        stop("Design matrix 'x' has 0 columns. Possible reason: don't supply y ~ 1 or y ~ 0 or y ~ -1 as 'formula'.")
 
       if (model == 4 | model == 5) { # y should be dichotomous
         # Check if y is factor and convert to 0/1 numeric if it is
@@ -345,14 +342,12 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
 
   # Check for requirements to correct label switching
   if (isTRUE(correct_ls) & !(isTRUE(sample_beta) & isTRUE(sample_theta)))
-    stop("'sample_beta' and 'sample_theta' must both be TRUE to correct
-          label switching")
+    stop("'sample_beta' and 'sample_theta' must both be TRUE to correct label switching")
 
   # TODO: Currently does not handle label switching correction when
   #       topic-covariate interaction specified
   if (isTRUE(correct_ls) & isFALSE(interaction_xcol < 1))
-    stop("Label switching correction is not currently supported for models with
-          topic-covariate interactions")
+    stop("Label switching correction is not currently supported for models with topic-covariate interactions")
 
   res_out <- tryCatch({
     res <- .gibbs_sldax_cpp(docs = docs, V = V, m = m, burn = burn, thin = thin,
@@ -390,8 +385,7 @@ gibbs_sldax <- function(formula, data, m = 100, burn = 0, thin = 1,
       relabel_out <- label.switching::stephens(
         aperm(theta(res), c(3, 1, 2)), maxiter = 100)
       if (relabel_out$iterations >= 100) {
-        warning("Relabeling failed to converge, no label switching
-                 correction applied.")
+        warning("Relabeling failed to converge, no label switching correction applied.")
       } else {
         # Permute theta
         # First arg to label.switching::permute.mcmc needs to be
@@ -727,8 +721,7 @@ gibbs_logistic <- function(formula, data, m = 100, burn = 0, thin = 1,
 prep_docs <- function(data, col, lower = TRUE) {
 
   if (!requireNamespace("lda", quietly = TRUE)) {
-    stop("Package \"lda\" needed for this function to work.
-                    Please install it.",
+    stop("Package \"lda\" needed for this function to work. Please install it.",
          call. = FALSE)
   }
 
