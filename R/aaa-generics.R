@@ -501,8 +501,7 @@ setValidity("Model", function(object) {
               (length(object@mu0) != ncol(object@eta)) |
               (length(object@mu0) != nrow(object@sigma0)) |
               (length(object@mu0) != ncol(object@sigma0))) {
-    "@mu0, @eta_start, and @eta should all have the same length which should be
-      equal to the number of rows and columns in @sigma0"
+    "@mu0, @eta_start, and @eta should all have the same length which should be equal to the number of rows and columns in @sigma0"
   } else {
     TRUE
   }
@@ -1090,8 +1089,7 @@ setGeneric("est_beta",
                stop("'mcmc_fit' must be an Sldax object.")
 
              if (length(dim(beta_(mcmc_fit))) != 3)
-               stop("Only one draw of 'beta' available, so this function is
-                     not useful.")
+               stop("Only one draw of 'beta' available, so this function is not useful.")
 
              if ( !is.non_negative_integer(burn) )
                stop("'burn' must be a non-negative integer.")
@@ -1106,8 +1104,7 @@ setGeneric("est_beta",
 
              if (length(stat) > 1) {
                stat <- stat[1]
-               message("Multiple arguments were supplied to 'stat'.
-                       Only using the first argument.")
+               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
@@ -1152,8 +1149,7 @@ setGeneric("est_theta",
                stop("'mcmc_fit' must be an Sldax object.")
 
              if (length(dim(theta(mcmc_fit))) != 3)
-               stop("Only one draw of 'theta' available, so this function is
-                     not useful.")
+               stop("Only one draw of 'theta' available, so this function is not useful.")
 
              if ( !is.non_negative_integer(burn) )
                stop("'burn' must be a non-negative integer.")
@@ -1168,8 +1164,7 @@ setGeneric("est_theta",
 
              if (length(stat) > 1) {
                stat <- stat[1]
-               message("Multiple arguments were supplied to 'stat'. Only using
-                        the first argument.")
+               message("Multiple arguments were supplied to 'stat'. Only using the first argument.")
              }
              if (!(stat %in% c("mean", "median")))
                stop("'stat' must be either 'mean' or 'median'.")
@@ -1213,7 +1208,7 @@ setGeneric("get_coherence",
                stop("'beta_' does not appear to be a K x V matrix.")
 
              if (any(beta_ < 0.0 | beta_ > 1.0))
-               top("Entries of 'beta_' must be between 0.0 and 1.0.")
+               stop("Entries of 'beta_' must be between 0.0 and 1.0.")
              sum_rowsum_beta <- sum(rowSums(beta_))
              K <- nrow(beta_)
              tol <- 0.001
@@ -1366,18 +1361,15 @@ setGeneric("get_topwords",
              if (length(vocab) < 2L)
                stop("'vocab' must contain at least two elements.")
              if (length(vocab) != V)
-               stop("The number of elements in 'vocab' should equal the number
-                     of columns in 'beta_'.")
+               stop("The number of elements in 'vocab' should equal the number of columns in 'beta_'.")
              if (!is.character(vocab))
                stop("'vocab' must be a character vector.")
              if (nwords > length(unique(vocab)))
-               stop("'nwords' cannot exceed the number of unique terms
-                     in 'vocab'.")
+               stop("'nwords' cannot exceed the number of unique terms in 'vocab'.")
 
              if (length(method) > 1) {
                method <- method[1]
-               message("Multiple arguments were supplied to 'method'. Only using
-                        the first argument.")
+               message("Multiple arguments were supplied to 'method'. Only using the first argument.")
              }
              if (!(method %in% c("termscore", "prob")))
                stop("'method' must be either 'termscore' or 'prob'.")
@@ -1409,7 +1401,7 @@ setGeneric("get_zbar",
              if ( !is.non_negative_integer(burn) )
                stop("'burn' must be a non-negative integer.")
              if ( !is.positive_integer(thin) )
-               stop("'thin' must be a positiveinteger.")
+               stop("'thin' must be a positive integer.")
 
              m <- nchain(mcmc_fit)
              if (burn >= m)
@@ -1448,18 +1440,15 @@ setGeneric("post_regression",
              if ( !( is(mcmc_fit, "Sldax") |
                      is(mcmc_fit, "Mlr") |
                      is(mcmc_fit, "Logistic")) )
-               stop("'mcmc_fit' must be an `Sldax` or `Mlr`
-                     or `Logistic` object.")
+               stop("'mcmc_fit' must be an `Sldax` or `Mlr` or `Logistic` object.")
 
              if ( !is.null(extra(mcmc_fit)$call$model) ) {
                if (extra(mcmc_fit)$call$model == "lda")
-                stop("The `lda` model does not contain regression parameters,
-                      so this function is not useful.")
+                stop("The `lda` model does not contain regression parameters, so this function is not useful.")
              }
 
              if ( nrow(eta(mcmc_fit)) < 2L )
-               stop("Only one draw of 'eta' available, so this function is
-                     not useful.")
+               stop("Only one draw of 'eta' available, so this function is not useful.")
 
              standardGeneric("post_regression")
            }
