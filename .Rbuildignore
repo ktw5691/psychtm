@@ -11,3 +11,5 @@
 ^README\.Rmd$
 ^revdep$
 ^cran-comments\.md$
+^doc$
+^Meta$
