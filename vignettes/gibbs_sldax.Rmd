@@ -145,7 +145,7 @@ fit_sldax <- gibbs_sldax(rating ~ I(grade - 1), data = teacher_rate,
                          K = 3, model = "sldax", display_progress = TRUE)
 ```
 
-Topic proportion and topic--word probabilities can be summarized with the same functions as demonstrated above in the section on LDA. As we saw above for an LDA model, we can interpret the three topics from the SLDAX model using termscores.
+Topic proportion and topic--word probabilities can be summarized with the same functions as demonstrated above in the section on LDA. As we saw above for an LDA model, we can interpret the three topics from the SLDAX model using term scores.
 
 ```{r}
 get_topwords(est_beta(fit_sldax), 15, docs_vocab$vocab, method = "termscore") %>%
