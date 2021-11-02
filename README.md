@@ -29,7 +29,7 @@ psychology. This package allows users to
 
 ## Installation
 
-Once on CRAN, install the package as usual:
+You can install the package from CRAN as usual:
 
 ``` r
 install.packages("psychtm")
