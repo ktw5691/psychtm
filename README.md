@@ -9,12 +9,11 @@
 state and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
-![CRAN status](https://www.r-pkg.org/badges/version/psychtm) [![Codecov
-test
+[![CRAN
+status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm)
+[![Codecov test
 coverage](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm?branch=main)
 <!-- badges: end -->
-
-<!-- [![CRAN status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm) -->
 
 The goal of `psychtm` is to make text mining models and methods
 accessible for social science researchers, particularly within

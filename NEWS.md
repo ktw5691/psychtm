@@ -1,4 +1,4 @@
-# psychtm 2021.1.9000
+# psychtm 2021.1.0
 
 * Initial release for [CRAN](https://CRAN.R-project.org/).
 
