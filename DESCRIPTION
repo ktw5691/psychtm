@@ -1,7 +1,7 @@
 Package: psychtm
 Type: Package
 Title: Text Mining Methods for Psychological Research
-Version: 2021.1.0
+Version: 2021.2.9000
 Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
                   role = c("aut", "cre", "cph"))
 Description: Provides text mining methods for social science research. The
