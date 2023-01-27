@@ -4,14 +4,13 @@
 # psychtm: A package for text mining in psychological research
 
 <!-- badges: start -->
-
-[![Project Status: Active – The project has reached a stable, usable
-state and is being actively
-developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
-![CRAN status](https://www.r-pkg.org/badges/version/psychtm) [![Codecov
-test
-coverage](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm?branch=main)
+[![CRAN status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm)
+[![Codecov test coverage](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm?branch=main)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
+[![](https://cranlogs.r-pkg.org/badges/last-month/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
+[![](https://cranlogs.r-pkg.org/badges/last-week/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
 <!-- badges: end -->
 
 <!-- [![CRAN status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm) -->
