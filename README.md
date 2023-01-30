@@ -22,8 +22,10 @@ The goal of `psychtm` is to make text mining models and methods
 accessible for social science researchers, particularly within
 psychology. This package allows users to
 
-- Estimate the SLDAX topic model and popular models subsumed by SLDAX,
-  including SLDA, LDA, and regression models;
+- Estimate the supervised latent Dirichlet allocation with covariates
+  (SLDAX) topic model and popular models subsumed by SLDAX, including
+  latent Dirichlet allocation (LDA), supervised LDA (SLDA) and
+  regression models;
 
 - Obtain posterior inferences;
 
