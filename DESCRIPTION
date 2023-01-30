@@ -1,15 +1,16 @@
 Package: psychtm
 Type: Package
 Title: Text Mining Methods for Psychological Research
-Version: 2021.2.9000
-Authors@R: person("Kenneth", "Wilcox", email = "kwilcox3@nd.edu",
+Version: 2023.1.0
+Authors@R: person("Kenneth", "Wilcox", email = "ktwilcox@cornell.edu",
                   role = c("aut", "cre", "cph"))
 Description: Provides text mining methods for social science research. The
     package implements estimation, inference, summarization, and goodness-of-fit
     methods for topic models including Latent Dirichlet Allocation (LDA),
-    supervised LDA, and supervised LDA with covariates using Bayesian Markov Chain
-    Monte Carlo. A description of the key models and estimation methods is available
-    in Wilcox, Jacobucci, Zhang, & Ammerman (2021). <doi:10.31234/osf.io/62tc3>.
+    supervised LDA (SLDA), and supervised LDA with covariates (SLDAX) using
+    Bayesian Markov Chain Monte Carlo. A description of the key models and
+    estimation methods is available in Wilcox, Jacobucci, 
+    Zhang, & Ammerman (2023). <doi:10.1037/met0000541>.
 License: LGPL (>= 3)
 URL: https://github.com/ktw5691/psychtm/
 BugReports: https://github.com/ktw5691/psychtm/issues
