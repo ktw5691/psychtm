@@ -16,7 +16,7 @@
 #include <progress.hpp>
 #include <progress_bar.hpp>
 
-//' @title Collapsed Gibbs sampler for the SLDAX model
+//' Collapsed Gibbs sampler for the SLDAX model
 //'
 //' @name gibbs_sldax_cpp
 //' @param m The number of iterations to run the Gibbs sampler.

@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Estimate \eqn{\beta_k}
+//' Estimate \eqn{\beta_k}
 //'
 //' @name est_betak
 //' @param wz_co A V x 1 vector of counts of the draws of each word for topic

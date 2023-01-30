@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Sample from K-dimensional Dirichlet distribution Dir(\eqn{\alpha})
+//' Sample from K-dimensional Dirichlet distribution Dir(\eqn{\alpha})
 //'
 //' @name rdirichlet_cpp
 //' @param n The number of samples to draw.

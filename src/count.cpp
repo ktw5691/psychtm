@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Update number of times topic was drawn in document excluding current word
+//' Update number of times topic was drawn in document excluding current word
 //'
 //' @name count_topicd
 //' @param topic The current topic index.
@@ -16,7 +16,7 @@ void count_topicd(uint16_t topic, uint16_t doc, arma::mat& ndk) {
   if (ndk(doc, topic - 1) < 0) ndk(doc, topic - 1) = 0;
 }
 
-//' @title Update number of times topic was drawn in corpus excluding current word
+//' Update number of times topic was drawn in corpus excluding current word
 //'
 //' @name count_topic_corpus
 //' @param topic The current topic index.
@@ -32,7 +32,7 @@ void count_topic_corpus(uint16_t topic, arma::vec& nk) {
   if (nk(topic - 1) < 0) nk(topic - 1) = 0;
 }
 
-//' @title Update number of times word and topic co-occur in corpus
+//' Update number of times word and topic co-occur in corpus
 //'
 //' @param word The current word index.
 //' @param topic The current topic index.
@@ -50,7 +50,7 @@ void count_word_topic(uint32_t word, uint16_t topic, arma::mat& nkm) {
   if (nkm(topic - 1, word - 1) < 0) nkm(topic - 1, word - 1) = 0;
 }
 
-//' @title Update all topic and topic-word counts in document and corpus
+//' Update all topic and topic-word counts in document and corpus
 //'
 //' @name update_zcounts
 //' @param d The current document index.

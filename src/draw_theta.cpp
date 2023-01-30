@@ -2,7 +2,7 @@
 
 #include "draw_thetad.h"
 
-//' @title Sample \eqn{\Theta} from full conditional distribution
+//' Sample \eqn{\Theta} from full conditional distribution
 //'
 //' @name draw_theta
 //' @param z_count A D x K matrix of counts of topic draws (columns) in

@@ -2,9 +2,9 @@
 
 #include "table_cpp.h"
 
-//' @title Count topic-word co-occurences in corpus.
+//' Count topic-word co-occurrences in corpus
 //'
-//' Computes topic-word co-occurence matrix for a corpus of \eqn{D} documents
+//' Computes topic-word co-occurrence matrix for a corpus of \eqn{D} documents
 //' with the maximum length of a document in the corpus equal to max(\eqn{N_d})
 //' and a vocabulary of \eqn{V} unique terms in the corpus.
 //'
@@ -18,7 +18,7 @@
 //'   the corpus.
 //' @param doc_word A \eqn{D} x max(\eqn{N_d}) matrix of words for corpus.
 //'
-//' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurence counts.
+//' @return A \eqn{K} x \eqn{V} matrix of topic-word co-occurrence counts.
 //'
 //' @noRd
 // [[Rcpp::export(.count_topic_word)]]

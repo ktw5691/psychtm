@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{waic_all}
 \alias{waic_all}
-\title{Compute WAIC for all outcomes.}
+\title{Compute WAIC for all outcomes}
 \usage{
 waic_all(iter, l_pred)
 }
@@ -16,7 +16,7 @@ Vector of (1) WAIC for model, (2) standard error for WAIC, and (3)
 the effective number of parameters.
 }
 \description{
-Compute WAIC for all outcomes.
+Compute WAIC for all outcomes
 }
 \examples{
 data(teacher_rate)

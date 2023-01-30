@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Contribution to effective number of parameters for WAIC from observation y_d
+//' Contribution to effective number of parameters for WAIC from observation y_d
 //'
 //' @name pwaic_d
 //' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods).
@@ -15,7 +15,7 @@ double pwaic_d(const arma::colvec& like_pred) {
   return mcmc_vary;
 }
 
-//' @title WAIC for observation y_d
+//' WAIC for observation y_d
 //'
 //' @name waic_d
 //' @param like_pred A m x 1 vector of predictive likelihoods (NOT log-likelihoods) for y_d.
@@ -31,7 +31,7 @@ double waic_d(const arma::colvec& like_pred, double p_effd) {
   return (-2.0 * (lppd - p_effd)); // See Gelman, Hwang, Vehtari (2014, p. 1003)
 }
 
-//' @title Compute WAIC for all outcomes.
+//' Compute WAIC for all outcomes
 //'
 //' @name waic_all
 //' @param iter The length of the sampled chain.
@@ -73,7 +73,7 @@ Rcpp::NumericVector waic_all(uint32_t iter, const arma::mat& l_pred) {
   return full_waic_se;
 }
 
-//' @title Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.
+//' Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models
 //'
 //' @name waic_diff
 //' @param l_pred1 A m1 x D matrix of predictive likelihoods (NOT log-likelihoods) from model 1.

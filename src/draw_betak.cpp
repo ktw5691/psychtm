@@ -2,7 +2,7 @@
 
 #include "rdirichlet_cpp.h"
 
-//' @title Sample \eqn{\beta_k} from full conditional distribution
+//' Sample \eqn{\beta_k} from full conditional distribution
 //'
 //' @name draw_betak
 //' @param wz_co A V x 1 vector of counts of the draws of each word for topic

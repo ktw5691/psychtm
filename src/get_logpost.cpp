@@ -2,7 +2,7 @@
 
 #include "get_loglike.h"
 
-//' @title Log-posterior for regression coefficients with normal prior
+//' Log-posterior for regression coefficients with normal prior
 //'
 //' @name get_lpost_eta
 //' @param ll A double of the current log-likelihood.
@@ -28,7 +28,7 @@ double get_lpost_eta(double ll, const arma::colvec& eta,
   return lp_temp;
 }
 
-//' @title Log-posterior contribution for normal outcome priors on coefs and sigma2 + log-likelihood
+//' Log-posterior contribution for normal outcome priors on coefs and sigma2 + log-likelihood
 //'
 //' @name get_lpost_mlr
 //' @param ll A double of the current log-likelihood.
@@ -58,7 +58,7 @@ double get_lpost_mlr(double ll,
   return lp_temp;
 }
 
-//' @title Log-posterior contribution from LDA model priors + log-likelihood
+//' Log-posterior contribution from LDA model priors + log-likelihood
 //'
 //' @name get_lpost_lda
 //' @param ll A double of the current log-likelihood.
@@ -93,7 +93,7 @@ double get_lpost_lda(double ll, const arma::mat& theta, const arma::mat& beta,
   return ll + beta_contrib + theta_contrib;
 }
 
-//' @title Log-posterior for SLDA/SLDAX model
+//' Log-posterior for SLDA/SLDAX model
 //'
 //' @name get_lpost_slda_norm
 //' @param ll A double of the current log-likelihood.
@@ -126,7 +126,7 @@ double get_lpost_slda_norm(double ll, const arma::colvec& eta, double sigma2,
   return lp_temp;
 }
 
-//' @title Log-posterior for logistic SLDA/SLDAX model
+//' Log-posterior for logistic SLDA/SLDAX model
 //'
 //' @name get_lpost_slda_logit
 //' @param ll A double of the current log-likelihood.
@@ -155,7 +155,7 @@ double get_lpost_slda_logit(double ll, const arma::colvec& eta,
   return lp_temp;
 }
 
-//' @title Compute full conditional log-posterior of eta for logistic SLDA/SLDAX/regression
+//' Compute full conditional log-posterior of eta for logistic SLDA/SLDAX/regression
 //'
 //' @name eta_logpost_logit
 //' @param w A D x q matrix containing a predictor model matrix of assumed form

@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{waic_diff}
 \alias{waic_diff}
-\title{Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.}
+\title{Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models}
 \usage{
 waic_diff(l_pred1, l_pred2)
 }
@@ -16,7 +16,7 @@ A vector of (1) the difference in WAIC (on the deviance scale)
 between models and (2) the standard error of the difference in WAIC.
 }
 \description{
-Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models.
+Compute difference (WAIC1 - WAIC2) in WAIC and its SE for two models
 }
 \examples{
 data(teacher_rate)

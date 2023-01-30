@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
+//' Sample from multivariate Gaussian N(\eqn{\mu}, \eqn{\Sigma})
 //'
 //' @name rmvnorm_cpp
 //' @param n The number of samples to draw.

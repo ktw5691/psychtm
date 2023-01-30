@@ -2,7 +2,7 @@
 
 #include "rdirichlet_cpp.h"
 
-//' @title Sample \eqn{\theta_d} from full conditional distribution
+//' Sample \eqn{\theta_d} from full conditional distribution
 //'
 //' @name draw_thetad
 //' @param z_count A K x 1 vector of counts of topic draw in document d.

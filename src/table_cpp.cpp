@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Get the top number of observations
+//' Get the top number of observations
 //'
 //' @name table_cpp
 //' @param v A row vector of values to be tabulated.

@@ -9,7 +9,7 @@
 #include <progress_bar.hpp>
 
 
-//' @title Collapsed Gibbs sampler for logistic regression
+//' Collapsed Gibbs sampler for logistic regression
 //'
 //' @name gibbs_logistic_cpp
 //' @param m The number of iterations to run the Gibbs sampler.

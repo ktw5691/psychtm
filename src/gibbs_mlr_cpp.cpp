@@ -9,7 +9,7 @@
 #include <progress.hpp>
 #include <progress_bar.hpp>
 
-//' @title Collapsed Gibbs sampler for multiple linear regression
+//' Collapsed Gibbs sampler for multiple linear regression
 //'
 //' @name gibbs_mlr_cpp
 //' @param m The number of iterations to run the Gibbs sampler.

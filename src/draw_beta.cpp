@@ -2,7 +2,7 @@
 
 #include "draw_betak.h"
 
-//' @title Sample \eqn{B} from full conditional distribution
+//' Sample \eqn{B} from full conditional distribution
 //'
 //' @name draw_beta
 //' @param wz_co A K x V matrix of counts of word-topic co-occurrences

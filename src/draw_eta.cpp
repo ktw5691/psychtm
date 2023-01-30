@@ -3,7 +3,7 @@
 #include "get_logpost.h"
 #include "rmvnorm_cpp.h"
 
-//' @title Draw eta from full conditional posterior for SLDA/SLDAX/MLR models
+//' Draw eta from full conditional posterior for SLDA/SLDAX/MLR models
 //'
 //' @name draw_eta_norm
 //' @param w A D x q matrix containing a predictor model matrix of assumed form
@@ -29,7 +29,7 @@ arma::colvec draw_eta_norm(const arma::mat& w, const arma::vec& y,
   return rmvnorm_cpp(1, eta1, sigma1).t();
 }
 
-//' @title Draw eta from full conditional posterior for logistic SLDA/SLDAX/regression
+//' Draw eta from full conditional posterior for logistic SLDA/SLDAX/regression
 //'   using Metropolis-Hastings (MH) algorithm
 //'
 //' @name draw_eta_logit

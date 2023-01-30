@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Estimate \eqn{\theta_d}
+//' Estimate \eqn{\theta_d}
 //'
 //' @name est_thetad
 //' @param z_count A K x 1 vector of counts of topic draw in document d.

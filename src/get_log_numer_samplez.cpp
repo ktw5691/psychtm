@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Compute log-numerator vector for sampling zdn from full conditional distribution for LDA
+//' Compute log-numerator vector for sampling zdn from full conditional distribution for LDA
 //'
 //' @name get_log_numer_samplez
 //' @param V The number of terms in the corpus vocabulary.

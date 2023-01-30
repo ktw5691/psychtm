@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 
-//' @title Log-likelihood for logistic regression for observation d
+//' Log-likelihood for logistic regression for observation d
 //'
 //' @name get_ll_logit_yd
 //' @param yd An integer 0/1 outcome to be predicted.
@@ -16,7 +16,7 @@ double get_ll_logit_yd(bool yd, double muhatd) {
   return ll_temp;
 }
 
-//' @title Log-likelihood for logistic regression
+//' Log-likelihood for logistic regression
 //'
 //' @name get_ll_logit
 //' @param y A D x 1 vector of 0/1 outcomes to be predicted.
@@ -41,7 +41,7 @@ double get_ll_logit(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' @title Log-likelihood for MLR
+//' Log-likelihood for MLR
 //'
 //' @name get_ll_mlr
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -64,7 +64,7 @@ double get_ll_mlr(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' @title Log-likelihood for LDA model
+//' Log-likelihood for LDA model
 //'
 //' @name get_ll_lda
 //' @param zdocs A D x max(\eqn{N_d}) matrix of topic indicators for all documents.
@@ -95,7 +95,7 @@ double get_ll_lda(const arma::umat& zdocs, const arma::umat& docs,
   return ll_temp;
 }
 
-//' @title Log-likelihood for SLDA/SLDAX model
+//' Log-likelihood for SLDA/SLDAX model
 //'
 //' @name get_ll_slda_norm
 //' @param y A D x 1 vector of outcomes to be predicted.
@@ -125,7 +125,7 @@ double get_ll_slda_norm(const arma::colvec& y, const arma::mat& w,
   return ll_temp;
 }
 
-//' @title Log-likelihood for logistic SLDA/SLDAX model
+//' Log-likelihood for logistic SLDA/SLDAX model
 //'
 //' @name get_ll_slda_logit
 //' @param y A D x 1 vector of outcomes to be predicted.
