@@ -4,27 +4,30 @@
 # psychtm: A package for text mining in psychological research
 
 <!-- badges: start -->
-[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+
+[![Project Status: Active – The project has reached a stable, usable
+state and is being actively
+developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
-[![CRAN status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm)
-[![Codecov test coverage](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm?branch=main)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm)
+[![Codecov test
+coverage](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm?branch=main)
 [![](https://cranlogs.r-pkg.org/badges/grand-total/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
 [![](https://cranlogs.r-pkg.org/badges/last-month/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
 [![](https://cranlogs.r-pkg.org/badges/last-week/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
 <!-- badges: end -->
 
-<!-- [![CRAN status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm) -->
-
 The goal of `psychtm` is to make text mining models and methods
 accessible for social science researchers, particularly within
 psychology. This package allows users to
 
--   Estimate the SLDAX topic model and popular models subsumed by SLDAX,
-    including SLDA, LDA, and regression models;
+- Estimate the SLDAX topic model and popular models subsumed by SLDAX,
+  including SLDA, LDA, and regression models;
 
--   Obtain posterior inferences;
+- Obtain posterior inferences;
 
--   Assess model fit using coherence and exclusivity metrics.
+- Assess model fit using coherence and exclusivity metrics.
 
 ## Installation
 
@@ -36,7 +39,7 @@ install.packages("psychtm")
 
 Alternatively, you can install the most current development version:
 
--   If necessary, first install the `devtools` R package,
+- If necessary, first install the `devtools` R package,
 
 ``` r
 install.packages("devtools")
@@ -65,6 +68,8 @@ the estimated SLDAX model.
 library(psychtm)
 library(lda) # Required if using `prep_docs()`
 
+set.seed(42) # For reproducibility
+
 data(teacher_rate)  # Synthetic student ratings of instructors
 docs_vocab <- prep_docs(teacher_rate, "doc")
 vocab_len <- length(docs_vocab$vocab)
@@ -73,6 +78,8 @@ fit_sldax <- gibbs_sldax(rating ~ I(grade - 1),
                          docs = docs_vocab$documents,
                          V = vocab_len,
                          K = 2,
+                         burn = 100L,
+                         m = 600L,
                          model = "sldax")
 eta_post <- post_regression(fit_sldax)
 ```
@@ -80,31 +87,31 @@ eta_post <- post_regression(fit_sldax)
 ``` r
 summary(eta_post)
 #> 
-#> Iterations = 1:100
+#> Iterations = 101:600
 #> Thinning interval = 1 
 #> Number of chains = 1 
-#> Sample size per chain = 100 
+#> Sample size per chain = 500 
 #> 
 #> 1. Empirical mean and standard deviation for each variable,
 #>    plus standard error of the mean:
 #> 
 #>                 Mean       SD  Naive SE Time-series SE
-#> I(grade - 1) -0.2656 0.007307 0.0007307      0.0007307
-#> topic1        4.6165 0.122216 0.0122216      0.0804883
-#> topic2        4.8189 0.034301 0.0034301      0.0034301
-#> effect_t1    -0.2024 0.134106 0.0134106      0.0884898
-#> effect_t2     0.2024 0.134106 0.0134106      0.0884898
-#> sigma2        1.1422 0.028296 0.0028296      0.0028296
+#> I(grade - 1) -0.2640 0.007956 0.0003558      0.0003558
+#> topic1        4.8323 0.029389 0.0013143      0.0015705
+#> topic2        4.1385 0.167145 0.0074749      0.0256058
+#> effect_t1     0.6938 0.180692 0.0080808      0.0258165
+#> effect_t2    -0.6938 0.180692 0.0080808      0.0258165
+#> sigma2        1.1347 0.027863 0.0012461      0.0011197
 #> 
 #> 2. Quantiles for each variable:
 #> 
-#>                  2.5%     25%     50%     75%    97.5%
-#> I(grade - 1) -0.27849 -0.2711 -0.2659 -0.2601 -0.25175
-#> topic1        4.34365  4.5709  4.6584  4.6945  4.76228
-#> topic2        4.75032  4.7994  4.8181  4.8420  4.87593
-#> effect_t1    -0.51412 -0.2639 -0.1828 -0.1086 -0.01216
-#> effect_t2     0.01216  0.1086  0.1828  0.2639  0.51412
-#> sigma2        1.08793  1.1245  1.1445  1.1599  1.20649
+#>                 2.5%     25%     50%     75%   97.5%
+#> I(grade - 1) -0.2790 -0.2690 -0.2642 -0.2584 -0.2489
+#> topic1        4.7740  4.8134  4.8328  4.8525  4.8876
+#> topic2        3.8256  4.0248  4.1407  4.2423  4.4778
+#> effect_t1     0.3242  0.5785  0.6910  0.8139  1.0387
+#> effect_t2    -1.0387 -0.8139 -0.6910 -0.5785 -0.3242
+#> sigma2        1.0798  1.1179  1.1337  1.1508  1.1899
 ```
 
 For a more detailed example of the key functionality of this package,
@@ -116,31 +123,32 @@ browseVignettes("psychtm")
 
 ## How to Cite the Package
 
-Wilcox, K. T., Jacobucci, R., Zhang, Z., Ammerman, B. A. (2021).
+Wilcox, K. T., Jacobucci, R., Zhang, Z., Ammerman, B. A. (2023).
 Supervised latent Dirichlet allocation with covariates: A Bayesian
-structural and measurement model of text and covariates. *PsyArXiv*.
-<https://doi.org/10.31234/osf.io/62tc3>
+structural and measurement model of text and covariates. *Psychological
+Methods*. Advance online publication.
+<https://doi.org/10.1037/met0000541>
 
 ## Common Troubleshooting
 
 Ensure that appropriate `C++` compilers are installed on your computer:
 
--   Mac users will have to download
-    [Xcode](https://apps.apple.com/ca/app/xcode/id497799835?mt=12) and
-    its related Command Line Tools (found within Xcode’s Preference Pane
-    under Downloads/Components).
+- Mac users will have to download
+  [Xcode](https://apps.apple.com/ca/app/xcode/id497799835?mt=12) and its
+  related Command Line Tools (found within Xcode’s Preference Pane under
+  Downloads/Components).
 
--   Windows users may need to install
-    [Rtools](https://CRAN.R-project.org/bin/windows/Rtools/). For easier
-    command line use, be sure to select the option to install Rtools to
-    their path.
+- Windows users may need to install
+  [Rtools](https://CRAN.R-project.org/bin/windows/Rtools/). For easier
+  command line use, be sure to select the option to install Rtools to
+  their path.
 
--   Most Linux distributions should already have up-to-date compilers.
+- Most Linux distributions should already have up-to-date compilers.
 
 ## Limitations
 
--   This package uses a Gibbs sampling algorithm that can be
-    memory-intensive for a large corpus.
+- This package uses a Gibbs sampling algorithm that can be
+  memory-intensive for a large corpus.
 
 ## Getting Help
 

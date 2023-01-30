@@ -19,15 +19,16 @@ set.seed(1)
 <!-- badges: start -->
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![R-CMD-check](https://github.com/ktw5691/psychtm/workflows/R-CMD-check/badge.svg)](https://github.com/ktw5691/psychtm/actions)
-![CRAN status](https://www.r-pkg.org/badges/version/psychtm)
+[![CRAN status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm)
 [![Codecov test coverage](https://codecov.io/gh/ktw5691/psychtm/branch/main/graph/badge.svg)](https://app.codecov.io/gh/ktw5691/psychtm?branch=main)
+[![](https://cranlogs.r-pkg.org/badges/grand-total/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
+[![](https://cranlogs.r-pkg.org/badges/last-month/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
+[![](https://cranlogs.r-pkg.org/badges/last-week/psychtm?color=blue)](https://CRAN.R-project.org/package=psychtm)
 <!-- badges: end -->
-
-<!-- [![CRAN status](https://www.r-pkg.org/badges/version/psychtm)](https://CRAN.R-project.org/package=psychtm) -->
 
 The goal of `psychtm` is to make text mining models and methods accessible for social science researchers, particularly within psychology. This package allows users to
 
--   Estimate the SLDAX topic model and popular models subsumed by SLDAX, including SLDA, LDA, and regression models;
+-   Estimate the supervised latent Dirichlet allocation with covariates (SLDAX) topic model and popular models subsumed by SLDAX, including latent Dirichlet allocation (LDA), supervised LDA (SLDA) and regression models;
 
 -   Obtain posterior inferences;
 
@@ -69,6 +70,8 @@ This is a basic example which shows you how to (1) prepare text documents stored
 library(psychtm)
 library(lda) # Required if using `prep_docs()`
 
+set.seed(42) # For reproducibility
+
 data(teacher_rate)  # Synthetic student ratings of instructors
 docs_vocab <- prep_docs(teacher_rate, "doc")
 vocab_len <- length(docs_vocab$vocab)
@@ -77,6 +80,8 @@ fit_sldax <- gibbs_sldax(rating ~ I(grade - 1),
                          docs = docs_vocab$documents,
                          V = vocab_len,
                          K = 2,
+                         burn = 100L,
+                         m = 600L,
                          model = "sldax")
 eta_post <- post_regression(fit_sldax)
 ```
@@ -93,7 +98,7 @@ browseVignettes("psychtm")
 
 ## How to Cite the Package
 
-Wilcox, K. T., Jacobucci, R., Zhang, Z., Ammerman, B. A. (2021). Supervised latent Dirichlet allocation with covariates: A Bayesian structural and measurement model of text and covariates. *PsyArXiv*. <https://doi.org/10.31234/osf.io/62tc3>
+Wilcox, K. T., Jacobucci, R., Zhang, Z., Ammerman, B. A. (2023). Supervised latent Dirichlet allocation with covariates: A Bayesian structural and measurement model of text and covariates. *Psychological Methods*. Advance online publication. <https://doi.org/10.1037/met0000541>
 
 ## Common Troubleshooting
 
