@@ -10,14 +10,15 @@ bibentry(
                           family = "Zhang"),
                    person(given = "Brooke",
                           family = "Ammerman")),
-  journal      = "PsyArXiv",
-  year         = "2021",
-  doi          = "10.31234/osf.io/62tc3",
+  journal      = "Psychological Methods",
+  year         = "2023",
+  doi          = "10.1037/met0000541",
 
-  header       = "To cite psychtm in publications use:",
+  header       = "To cite psychtm in publications, use:",
   textVersion  =
   paste("Wilcox, K. T., Jacobucci, R., Zhang, Z., & Ammerman, B. A. (2021).",
         "Supervised latent Dirichlet allocation with covariates: A Bayesian structural and measurement model of text and covariates.",
-        "PsyArXiv.",
-        "https://doi.org/10.31234/osf.io/62tc3")
+        "Psychological Methods.",
+        "Advance online publication",
+        "https://doi.org/10.1037/met0000541")
 )
